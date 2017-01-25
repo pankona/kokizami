@@ -1,8 +1,14 @@
 package command
 
-import "github.com/codegangsta/cli"
+import (
+	"log"
+
+	"github.com/codegangsta/cli"
+)
 
 func CmdAdd(c *cli.Context) {
-	// Write your code here
-
+	for i, v := range c.Args() {
+		log.Println("i =", i)
+		log.Println("v =", v)
+	}
 }
