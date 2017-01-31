@@ -5,9 +5,12 @@ import (
 	"os"
 
 	"github.com/codegangsta/cli"
+	"github.com/pankona/todo"
 )
 
 func main() {
+	todo.Initialize()
+
 	app := cli.NewApp()
 	app.Name = Name
 	app.Version = Version

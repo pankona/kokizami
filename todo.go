@@ -26,7 +26,7 @@ func (t *ToDo) IsDone() bool {
 	return t.done == 1
 }
 
-func init() {
+func Initialize() {
 	db, err := openDB()
 	if err != nil {
 		panic("failed to open database")
