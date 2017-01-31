@@ -7,7 +7,7 @@ import (
 	"os"
 	"strconv"
 
-	// go-sqlite3 only imported here
+	// go-sqlite3 is only imported here
 	_ "github.com/mattn/go-sqlite3"
 )
 
