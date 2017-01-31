@@ -94,18 +94,21 @@ func List() ([]*ToDo, error) {
 }
 
 func execList(db *sql.DB) ([]*ToDo, error) {
-	q := "SELECT id, desc FROM todo"
+	q := "SELECT id, desc, created_at FROM todo"
 	rows, err := db.Query(q)
 	if err != nil {
-		return nil, errors.New("failed to create table")
+		return nil, errors.New("failed to select rows")
 	}
 
 	var id int
 	var desc string
+	var createdAt string
 	for rows.Next() {
-		rows.Scan(&id, &desc)
-		log.Println(id, desc)
+		err = rows.Scan(&id, &desc, &createdAt)
+		if err != nil {
+			panic(err.Error())
+		}
+		log.Println(id, desc, createdAt)
 	}
-
 	return nil, nil
 }
