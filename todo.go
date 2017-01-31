@@ -23,6 +23,12 @@ func (t *ToDo) Error() string {
 	return strconv.Itoa(t.id) + " " + t.desc + " " + t.createdAt
 }
 
+// IsDone returns ToDo's state.
+// if ToDo is marked as done, return true, otherwise false.
+func (t *ToDo) IsDone() bool {
+	return t.done == 1
+}
+
 func init() {
 	// TODO: support multi platform
 	homeDir := os.Getenv("HOME")
@@ -118,6 +124,7 @@ func execList(db *sql.DB) ([]*ToDo, error) {
 		return nil, errors.New("failed to select rows")
 	}
 
+	todos := make([]*ToDo, 0, 0)
 	var id int
 	var desc string
 	var done int
@@ -127,9 +134,15 @@ func execList(db *sql.DB) ([]*ToDo, error) {
 		if err != nil {
 			panic(err.Error())
 		}
-		log.Println(id, desc, done, createdAt)
+		todos = append(todos,
+			&ToDo{
+				id:        id,
+				desc:      desc,
+				done:      done,
+				createdAt: createdAt,
+			})
 	}
-	return nil, nil
+	return todos, nil
 }
 
 // Done will mark specified ToDo item as "done"

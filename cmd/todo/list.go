@@ -14,5 +14,11 @@ func CmdList(c *cli.Context) {
 		log.Println(err)
 		return
 	}
-	log.Println(l)
+
+	for _, v := range l {
+		if v.IsDone() {
+			continue
+		}
+		log.Println(v)
+	}
 }
