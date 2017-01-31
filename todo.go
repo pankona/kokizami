@@ -20,39 +20,18 @@ func NewToDo(desc string) *ToDo {
 	return &ToDo{desc: desc}
 }
 
-// Add adds a specified ToDo item to DB
-func Add(t *ToDo) error {
-	log.Println("Add. t =", t.desc)
-	// TODO: store desc to DB
-
+func init() {
 	// TODO: support multi platform
 	homeDir := os.Getenv("HOME")
-
-	// TODO: error check
-	_, err := os.Create(homeDir + "/.todo.db")
-	if err != nil {
-		return errors.New("failed to create db file")
-	}
-
 	db, err := sql.Open("sqlite3", homeDir+"/.todo.db")
 	if err != nil {
-		return errors.New("failed to open database")
+		panic("failed to open database")
 	}
+	defer db.Close()
 
-	err = execCreateTable(db)
-	if err != nil {
-		return errors.New("failed to create table")
-	}
-
-	err = execAddToDo(db, t)
-	if err != nil {
-		return errors.New("failed to add ToDo")
-	}
-
-	return nil
+	_ = execCreateTable(db)
 }
 
-// TODO: this should be done at initialization
 func execCreateTable(db *sql.DB) error {
 	q := "CREATE TABLE todo ("
 	q += " id INTEGER PRIMARY KEY AUTOINCREMENT"
@@ -66,6 +45,24 @@ func execCreateTable(db *sql.DB) error {
 	return nil
 }
 
+// Add adds a specified ToDo item to DB
+func Add(t *ToDo) error {
+	// TODO: support multi platform
+	homeDir := os.Getenv("HOME")
+	db, err := sql.Open("sqlite3", homeDir+"/.todo.db")
+	if err != nil {
+		panic("failed to open database")
+	}
+	defer db.Close()
+
+	err = execAddToDo(db, t)
+	if err != nil {
+		return errors.New("failed to add ToDo")
+	}
+
+	return nil
+}
+
 func execAddToDo(db *sql.DB, t *ToDo) error {
 	q := "INSERT INTO todo "
 	q += " (desc)"
@@ -76,4 +73,39 @@ func execAddToDo(db *sql.DB, t *ToDo) error {
 		return errors.New("failed to create table")
 	}
 	return nil
+}
+
+// List returns list of ToDo
+func List() ([]*ToDo, error) {
+	// TODO: support multi platform
+	homeDir := os.Getenv("HOME")
+	db, err := sql.Open("sqlite3", homeDir+"/.todo.db")
+	if err != nil {
+		panic("failed to open database")
+	}
+	defer db.Close()
+
+	l, err := execList(db)
+	if err != nil {
+		return nil, errors.New("failed to select database")
+	}
+
+	return l, nil
+}
+
+func execList(db *sql.DB) ([]*ToDo, error) {
+	q := "SELECT id, desc FROM todo"
+	rows, err := db.Query(q)
+	if err != nil {
+		return nil, errors.New("failed to create table")
+	}
+
+	var id int
+	var desc string
+	for rows.Next() {
+		rows.Scan(&id, &desc)
+		log.Println(id, desc)
+	}
+
+	return nil, nil
 }
