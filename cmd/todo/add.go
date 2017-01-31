@@ -12,11 +12,11 @@ func CmdAdd(c *cli.Context) {
 	for i, v := range c.Args() {
 		switch i {
 		case 0:
-			t := todo.NewToDo(v)
-			err := todo.Add(t)
+			t, err := todo.Add(v)
 			if err != nil {
 				log.Println(err)
 			}
+			log.Println(t)
 		}
 	}
 

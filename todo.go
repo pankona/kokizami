@@ -13,7 +13,14 @@ import (
 
 // ToDo represents a struct of ToDo item
 type ToDo struct {
-	desc string
+	id        int
+	desc      string
+	done      int
+	createdAt string
+}
+
+func (t *ToDo) Error() string {
+	return strconv.Itoa(t.id) + " " + t.desc + " " + t.createdAt
 }
 
 func init() {
@@ -42,13 +49,8 @@ func execCreateTable(db *sql.DB) error {
 	return nil
 }
 
-// NewToDo allocates a ToDo item
-func NewToDo(desc string) *ToDo {
-	return &ToDo{desc: desc}
-}
-
 // Add adds a specified ToDo item to DB
-func Add(t *ToDo) error {
+func Add(desc string) (*ToDo, error) {
 	// TODO: support multi platform
 	homeDir := os.Getenv("HOME")
 	db, err := sql.Open("sqlite3", homeDir+"/.todo.db")
@@ -57,24 +59,38 @@ func Add(t *ToDo) error {
 	}
 	defer db.Close()
 
-	err = execAddToDo(db, t)
+	t, err := execAdd(db, desc)
 	if err != nil {
-		return errors.New("failed to add ToDo")
+		return nil, errors.New("failed to add ToDo")
 	}
 
-	return nil
+	return t, nil
 }
 
-func execAddToDo(db *sql.DB, t *ToDo) error {
+func execAdd(db *sql.DB, desc string) (*ToDo, error) {
 	q := "INSERT INTO todo "
 	q += " (desc)"
 	q += " VALUES"
-	q += " ('" + t.desc + "')"
-	_, err := db.Exec(q)
+	q += " ('" + desc + "')"
+	result, err := db.Exec(q)
 	if err != nil {
-		return errors.New("failed to create table")
+		return nil, errors.New("failed to create table")
 	}
-	return nil
+
+	id, err := result.LastInsertId()
+	if err != nil {
+		return nil, errors.New("failed to determine last inserted item")
+	}
+
+	t := &ToDo{}
+	err = db.QueryRow("SELECT id, desc, done, created_at FROM todo WHERE id=?", id).Scan(&t.id, &t.desc, &t.done, &t.createdAt)
+	switch {
+	case err == sql.ErrNoRows:
+		log.Println("No user with that ID.")
+	case err != nil:
+		log.Fatal(err)
+	}
+	return t, nil
 }
 
 // List returns list of ToDo
