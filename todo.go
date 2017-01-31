@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log"
 	"os"
+	"strconv"
 
 	// go-sqlite3 only imported here
 	_ "github.com/mattn/go-sqlite3"
@@ -13,11 +14,6 @@ import (
 // ToDo represents a struct of ToDo item
 type ToDo struct {
 	desc string
-}
-
-// NewToDo allocates a ToDo item
-func NewToDo(desc string) *ToDo {
-	return &ToDo{desc: desc}
 }
 
 func init() {
@@ -36,6 +32,7 @@ func execCreateTable(db *sql.DB) error {
 	q := "CREATE TABLE todo ("
 	q += " id INTEGER PRIMARY KEY AUTOINCREMENT"
 	q += ", desc VARCHAR(255) NOT NULL"
+	q += ", done INTEGER DEFAULT 0"
 	q += ", created_at TIMESTAMP DEFAULT (DATETIME('now','localtime'))"
 	q += ")"
 	_, err := db.Exec(q)
@@ -43,6 +40,11 @@ func execCreateTable(db *sql.DB) error {
 		return errors.New("failed to create table")
 	}
 	return nil
+}
+
+// NewToDo allocates a ToDo item
+func NewToDo(desc string) *ToDo {
+	return &ToDo{desc: desc}
 }
 
 // Add adds a specified ToDo item to DB
@@ -94,7 +96,7 @@ func List() ([]*ToDo, error) {
 }
 
 func execList(db *sql.DB) ([]*ToDo, error) {
-	q := "SELECT id, desc, created_at FROM todo"
+	q := "SELECT id, desc, done, created_at FROM todo"
 	rows, err := db.Query(q)
 	if err != nil {
 		return nil, errors.New("failed to select rows")
@@ -102,13 +104,41 @@ func execList(db *sql.DB) ([]*ToDo, error) {
 
 	var id int
 	var desc string
+	var done int
 	var createdAt string
 	for rows.Next() {
-		err = rows.Scan(&id, &desc, &createdAt)
+		err = rows.Scan(&id, &desc, &done, &createdAt)
 		if err != nil {
 			panic(err.Error())
 		}
-		log.Println(id, desc, createdAt)
+		log.Println(id, desc, done, createdAt)
 	}
 	return nil, nil
+}
+
+// Done will mark specified ToDo item as "done"
+func Done(id int) error {
+	// TODO: support multi platform
+	homeDir := os.Getenv("HOME")
+	db, err := sql.Open("sqlite3", homeDir+"/.todo.db")
+	if err != nil {
+		panic("failed to open database")
+	}
+	defer db.Close()
+
+	err = execDone(db, id)
+	if err != nil {
+		return errors.New("failed to select database")
+	}
+
+	return nil
+}
+
+func execDone(db *sql.DB, id int) error {
+	q := "UPDATE todo SET done = 1 WHERE id = " + strconv.Itoa(id)
+	_, err := db.Exec(q)
+	if err != nil {
+		return errors.New("failed to select rows")
+	}
+	return nil
 }

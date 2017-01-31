@@ -1,3 +1,4 @@
 *.test
 /vendor
-todo
+cmd/todo/todo
+*.swp
