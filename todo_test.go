@@ -8,6 +8,7 @@ type DBMock struct {
 	mockClose       func()
 	mockCreateTable func() error
 	mockAdd         func(desc string) (*ToDo, error)
+	mockList        func() ([]*ToDo, error)
 }
 
 func (db *DBMock) openDB() error {
@@ -24,6 +25,10 @@ func (db *DBMock) createTable() error {
 
 func (db *DBMock) add(desc string) (*ToDo, error) {
 	return db.mockAdd(desc)
+}
+
+func (db *DBMock) list() ([]*ToDo, error) {
+	return db.mockList()
 }
 
 func TestAdd(t *testing.T) {
@@ -51,5 +56,46 @@ func TestAdd(t *testing.T) {
 	}
 	if todo.desc != "test" {
 		t.Error("Add returned unexpected value")
+	}
+}
+
+func TestList(t *testing.T) {
+	dbmock := &DBMock{
+		mockOpenDB: func() error {
+			return nil
+		},
+		mockClose: func() {
+		},
+		mockCreateTable: func() error {
+			return nil
+		},
+		mockAdd: func(desc string) (*ToDo, error) {
+			return nil, nil
+		},
+		mockList: func() ([]*ToDo, error) {
+			t := make([]*ToDo, 0, 0)
+			t = append(t, &ToDo{desc: "test0"})
+			t = append(t, &ToDo{desc: "test1"})
+			t = append(t, &ToDo{desc: "test2"})
+			return t, nil
+		},
+	}
+	SetDB(dbmock)
+	Initialize()
+	todos, err := List()
+	if err != nil {
+		t.Error("List returned error")
+	}
+	if todos == nil {
+		t.Error("List returned nil")
+	}
+	if todos[0].desc != "test0" {
+		t.Error("List returned unexpected value")
+	}
+	if todos[1].desc != "test1" {
+		t.Error("List returned unexpected value")
+	}
+	if todos[2].desc != "test2" {
+		t.Error("List returned unexpected value")
 	}
 }
