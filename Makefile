@@ -10,5 +10,8 @@ test: build
 build:
 	@make -C $(CURDIR)/cmd/todo
 
+install:
+	@make install -C $(CURDIR)/cmd/todo
+
 show:
 	@go tool cover -html=coverage.out
