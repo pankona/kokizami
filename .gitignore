@@ -2,3 +2,4 @@
 /vendor
 cmd/todo/todo
 *.swp
+coverage.out
