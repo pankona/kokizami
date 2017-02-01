@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	todo.Initialize()
+	todo.Initialize(nil)
 
 	app := cli.NewApp()
 	app.Name = Name

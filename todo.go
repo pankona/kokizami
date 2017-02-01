@@ -2,7 +2,6 @@ package todo
 
 import (
 	"errors"
-	"log"
 	"strconv"
 
 	// go-sqlite3 is only imported here
@@ -29,32 +28,27 @@ func (t *ToDo) IsDone() bool {
 
 var dbinterface DBInterface
 
-// SetDB overwrites DB by specified DBInterface instance
-func SetDB(dbi DBInterface) {
-	dbinterface = dbi
-}
-
 // Initialize initializes ToDo library.
 // this function will create DB file and prepare tables.
-func Initialize() {
+func Initialize(dbi DBInterface) error {
+	dbinterface = dbi
 	if dbinterface == nil {
 		dbinterface = newDB()
-	} else {
-		log.Println("don't use default DB")
 	}
 	err := dbinterface.openDB()
 	if err != nil {
-		panic("failed to open database")
+		return errors.New("failed to open database")
 	}
 	defer dbinterface.close()
 	_ = dbinterface.createTable()
+	return nil
 }
 
 // Add adds a specified ToDo item to DB
 func Add(desc string) (*ToDo, error) {
 	err := dbinterface.openDB()
 	if err != nil {
-		panic("failed to open database")
+		return nil, errors.New("failed to open database")
 	}
 	defer dbinterface.close()
 
@@ -70,7 +64,7 @@ func Add(desc string) (*ToDo, error) {
 func List() ([]*ToDo, error) {
 	err := dbinterface.openDB()
 	if err != nil {
-		panic("failed to open database")
+		return nil, errors.New("failed to open database")
 	}
 	defer dbinterface.close()
 
@@ -86,7 +80,7 @@ func List() ([]*ToDo, error) {
 func Done(id int) error {
 	err := dbinterface.openDB()
 	if err != nil {
-		panic("failed to open database")
+		return errors.New("failed to open database")
 	}
 	defer dbinterface.close()
 
