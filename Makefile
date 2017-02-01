@@ -1,10 +1,14 @@
 
 
-.PHONY: test
-test:
-	go test -coverprofile=coverage.out
+.PHONY: all test build show
 
+all: test
 
-.PHONY: show
+test: build
+	@go test -coverprofile=coverage.out
+
+build:
+	@make -C $(CURDIR)/cmd/todo
+
 show:
-	go tool cover -html=coverage.out
+	@go tool cover -html=coverage.out
