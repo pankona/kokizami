@@ -26,26 +26,36 @@ func (t *ToDo) IsDone() bool {
 	return t.done == 1
 }
 
+var dbinterface DBInterface
+
+// SetDB overwrites DB by specified DBInterface instance
+func SetDB(dbi DBInterface) {
+	dbinterface = dbi
+}
+
 // Initialize initializes ToDo library.
 // this function will create DB file and prepare tables.
 func Initialize() {
-	db, err := openDB()
+	if dbinterface == nil {
+		dbinterface = newDB()
+	}
+	err := dbinterface.openDB()
 	if err != nil {
 		panic("failed to open database")
 	}
-	defer db.close()
-	_ = db.createTable()
+	defer dbinterface.close()
+	_ = dbinterface.createTable()
 }
 
 // Add adds a specified ToDo item to DB
 func Add(desc string) (*ToDo, error) {
-	db, err := openDB()
+	err := dbinterface.openDB()
 	if err != nil {
 		panic("failed to open database")
 	}
-	defer db.close()
+	defer dbinterface.close()
 
-	t, err := db.add(desc)
+	t, err := dbinterface.add(desc)
 	if err != nil {
 		return nil, errors.New("failed to add ToDo")
 	}
@@ -55,13 +65,13 @@ func Add(desc string) (*ToDo, error) {
 
 // List returns list of ToDo
 func List() ([]*ToDo, error) {
-	db, err := openDB()
+	err := dbinterface.openDB()
 	if err != nil {
 		panic("failed to open database")
 	}
-	defer db.close()
+	defer dbinterface.close()
 
-	l, err := db.list()
+	l, err := dbinterface.list()
 	if err != nil {
 		return nil, errors.New("failed to select database")
 	}
@@ -71,13 +81,13 @@ func List() ([]*ToDo, error) {
 
 // Done will mark specified ToDo as "done"
 func Done(id int) error {
-	db, err := openDB()
+	err := dbinterface.openDB()
 	if err != nil {
 		panic("failed to open database")
 	}
-	defer db.close()
+	defer dbinterface.close()
 
-	err = db.done(id)
+	err = dbinterface.done(id)
 	if err != nil {
 		return errors.New("failed to select database")
 	}

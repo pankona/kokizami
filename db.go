@@ -11,30 +11,36 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+// DBInterface represents interface of DB
+type DBInterface interface {
+	openDB() error
+	close()
+	createTable() error
+	add(desc string) (*ToDo, error)
+	list() ([]*ToDo, error)
+	done(id int) error
+}
+
 // DB represents DB instance
 type DB struct {
+	DBInterface
 	conn *sql.DB
 }
 
-// DBI represents interface of DB
-type DBI interface {
-	openDB() (*DB, error)
-	close()
-	createTable()
-	add()
-	list()
-	done()
+func newDB() *DB {
+	return &DB{}
 }
 
-func openDB() (*DB, error) {
+func (db *DB) openDB() error {
 	// TODO: support multi platform
 	homeDir := os.Getenv("HOME")
-	db, err := sql.Open("sqlite3", homeDir+"/.todo.db")
+	conn, err := sql.Open("sqlite3", homeDir+"/.todo.db")
 	if err != nil {
 		log.Println("failed to open DB")
-		return nil, errors.New("failed to open DB")
+		return errors.New("failed to open DB")
 	}
-	return &DB{conn: db}, nil
+	db.conn = conn
+	return nil
 }
 
 func (db *DB) close() {

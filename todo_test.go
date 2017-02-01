@@ -4,7 +4,6 @@ import "testing"
 
 func TestAdd(t *testing.T) {
 	Initialize()
-
 	todo, err := Add("test")
 	if err != nil {
 		t.Error("Add returned error")
