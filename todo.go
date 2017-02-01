@@ -2,6 +2,7 @@ package todo
 
 import (
 	"errors"
+	"log"
 	"strconv"
 
 	// go-sqlite3 is only imported here
@@ -38,6 +39,8 @@ func SetDB(dbi DBInterface) {
 func Initialize() {
 	if dbinterface == nil {
 		dbinterface = newDB()
+	} else {
+		log.Println("don't use default DB")
 	}
 	err := dbinterface.openDB()
 	if err != nil {
