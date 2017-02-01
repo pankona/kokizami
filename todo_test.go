@@ -4,25 +4,43 @@ import "testing"
 
 type DBMock struct {
 	DBInterface
+	mockOpenDB      func() error
+	mockClose       func()
+	mockCreateTable func() error
+	mockAdd         func(desc string) (*ToDo, error)
 }
 
 func (db *DBMock) openDB() error {
-	return nil
+	return db.mockOpenDB()
 }
 
 func (db *DBMock) close() {
+	db.mockClose()
 }
 
 func (db *DBMock) createTable() error {
-	return nil
+	return db.mockCreateTable()
 }
 
 func (db *DBMock) add(desc string) (*ToDo, error) {
-	return &ToDo{desc: desc}, nil
+	return db.mockAdd(desc)
 }
 
 func TestAdd(t *testing.T) {
-	SetDB(&DBMock{})
+	dbmock := &DBMock{
+		mockOpenDB: func() error {
+			return nil
+		},
+		mockClose: func() {
+		},
+		mockCreateTable: func() error {
+			return nil
+		},
+		mockAdd: func(desc string) (*ToDo, error) {
+			return &ToDo{desc: "test"}, nil
+		},
+	}
+	SetDB(dbmock)
 	Initialize()
 	todo, err := Add("test")
 	if err != nil {
