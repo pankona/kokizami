@@ -16,6 +16,16 @@ type DB struct {
 	conn *sql.DB
 }
 
+// DBI represents interface of DB
+type DBI interface {
+	openDB() (*DB, error)
+	close()
+	createTable()
+	add()
+	list()
+	done()
+}
+
 func openDB() (*DB, error) {
 	// TODO: support multi platform
 	homeDir := os.Getenv("HOME")

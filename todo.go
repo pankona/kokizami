@@ -26,6 +26,8 @@ func (t *ToDo) IsDone() bool {
 	return t.done == 1
 }
 
+// Initialize initializes ToDo library.
+// this function will create DB file and prepare tables.
 func Initialize() {
 	db, err := openDB()
 	if err != nil {
