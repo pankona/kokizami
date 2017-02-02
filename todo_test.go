@@ -11,6 +11,7 @@ type DBMock struct {
 	mockClose       func()
 	mockCreateTable func() error
 	mockAdd         func(desc string) (*ToDo, error)
+	mockEdit        func(id int, desc string) (*ToDo, error)
 	mockList        func() ([]*ToDo, error)
 	mockDone        func(id int) error
 }
@@ -29,6 +30,10 @@ func (db *DBMock) createTable() error {
 
 func (db *DBMock) add(desc string) (*ToDo, error) {
 	return db.mockAdd(desc)
+}
+
+func (db *DBMock) edit(id int, desc string) (*ToDo, error) {
+	return db.mockEdit(id, desc)
 }
 
 func (db *DBMock) list() ([]*ToDo, error) {
@@ -52,6 +57,9 @@ func genDefaultDBMock() *DBMock {
 		},
 		mockAdd: func(desc string) (*ToDo, error) {
 			return &ToDo{desc: "test"}, nil
+		},
+		mockEdit: func(id int, desc string) (*ToDo, error) {
+			return &ToDo{desc: "edited"}, nil
 		},
 		mockList: func() ([]*ToDo, error) {
 			t := make([]*ToDo, 0, 0)
@@ -137,6 +145,64 @@ func TestAddError(t *testing.T) {
 		t.Error("Initialize failed")
 	}
 	todo, err = Add("test")
+	if todo != nil {
+		t.Error("todo is not nil but this is not expected")
+	}
+	if err == nil {
+		t.Error("error is nil but this is not expected")
+	}
+}
+
+func TestEditNormal(t *testing.T) {
+	dbmock := genDefaultDBMock()
+
+	err := Initialize(dbmock)
+	if err != nil {
+		t.Error("Initialize failed")
+	}
+	todo, err := Edit(0, "edited")
+	if err != nil {
+		t.Error("Add returned error")
+	}
+	if todo == nil {
+		t.Error("Add returned nil")
+	}
+	if todo.desc != "edited" {
+		t.Error("edit returned unexpected value")
+	}
+}
+
+func TestEditError(t *testing.T) {
+	dbmock := genDefaultDBMock()
+
+	// openDB goes failure
+	dbmock.mockOpenDB = func() error {
+		return errors.New("error")
+	}
+	err := Initialize(dbmock)
+	if err == nil {
+		t.Error("Initialize succeeded but this is not expected")
+	}
+	todo, err := Edit(0, "edited")
+	if todo != nil {
+		t.Error("todo is not nil but this is not expected")
+	}
+	if err == nil {
+		t.Error("error is not nil but this is not expected")
+	}
+
+	// openDB goes success but Add goes failure
+	dbmock.mockOpenDB = func() error {
+		return nil
+	}
+	dbmock.mockEdit = func(id int, desc string) (*ToDo, error) {
+		return nil, errors.New("error")
+	}
+	err = Initialize(dbmock)
+	if err != nil {
+		t.Error("Initialize failed")
+	}
+	todo, err = Edit(0, "edited")
 	if todo != nil {
 		t.Error("todo is not nil but this is not expected")
 	}
