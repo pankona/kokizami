@@ -1,7 +1,6 @@
 package todo
 
 import (
-	"errors"
 	"strconv"
 
 	// go-sqlite3 is only imported here
@@ -35,11 +34,13 @@ func Initialize(dbi DBInterface) error {
 	if dbinterface == nil {
 		dbinterface = newDB()
 	}
+
 	err := dbinterface.openDB()
 	if err != nil {
-		return errors.New("failed to open database")
+		return err
 	}
 	defer dbinterface.close()
+
 	_ = dbinterface.createTable()
 	return nil
 }
@@ -48,15 +49,29 @@ func Initialize(dbi DBInterface) error {
 func Add(desc string) (*ToDo, error) {
 	err := dbinterface.openDB()
 	if err != nil {
-		return nil, errors.New("failed to open database")
+		return nil, err
 	}
 	defer dbinterface.close()
 
 	t, err := dbinterface.add(desc)
 	if err != nil {
-		return nil, errors.New("failed to add ToDo")
+		return nil, err
 	}
+	return t, nil
+}
 
+// Edit edits a specified ToDo item
+func Edit(id int, desc string) (*ToDo, error) {
+	err := dbinterface.openDB()
+	if err != nil {
+		return nil, err
+	}
+	defer dbinterface.close()
+
+	t, err := dbinterface.edit(id, desc)
+	if err != nil {
+		return nil, err
+	}
 	return t, nil
 }
 
@@ -64,15 +79,14 @@ func Add(desc string) (*ToDo, error) {
 func List() ([]*ToDo, error) {
 	err := dbinterface.openDB()
 	if err != nil {
-		return nil, errors.New("failed to open database")
+		return nil, err
 	}
 	defer dbinterface.close()
 
 	l, err := dbinterface.list()
 	if err != nil {
-		return nil, errors.New("failed to select database")
+		return nil, err
 	}
-
 	return l, nil
 }
 
@@ -80,14 +94,13 @@ func List() ([]*ToDo, error) {
 func Done(id int) error {
 	err := dbinterface.openDB()
 	if err != nil {
-		return errors.New("failed to open database")
+		return err
 	}
 	defer dbinterface.close()
 
 	err = dbinterface.done(id)
 	if err != nil {
-		return errors.New("failed to select database")
+		return err
 	}
-
 	return nil
 }

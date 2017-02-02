@@ -2,8 +2,6 @@ package todo
 
 import (
 	"database/sql"
-	"errors"
-	"log"
 	"os"
 	"strconv"
 
@@ -17,6 +15,7 @@ type DBInterface interface {
 	close()
 	createTable() error
 	add(desc string) (*ToDo, error)
+	edit(id int, desc string) (*ToDo, error)
 	list() ([]*ToDo, error)
 	done(id int) error
 }
@@ -36,8 +35,7 @@ func (db *DB) openDB() error {
 	homeDir := os.Getenv("HOME")
 	conn, err := sql.Open("sqlite3", homeDir+"/.todo.db")
 	if err != nil {
-		log.Println("failed to open DB")
-		return errors.New("failed to open DB")
+		return err
 	}
 	db.conn = conn
 	return nil
@@ -57,7 +55,7 @@ func (db *DB) createTable() error {
 
 	_, err := db.conn.Exec(q)
 	if err != nil {
-		return errors.New("failed to create table")
+		return err
 	}
 	return nil
 }
@@ -70,21 +68,33 @@ func (db *DB) add(desc string) (*ToDo, error) {
 
 	result, err := db.conn.Exec(q)
 	if err != nil {
-		return nil, errors.New("failed to create table")
+		return nil, err
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		return nil, errors.New("failed to determine last inserted item")
+		return nil, err
 	}
 
 	t := &ToDo{}
 	err = db.conn.QueryRow("SELECT id, desc, done, created_at FROM todo WHERE id=?", id).Scan(&t.id, &t.desc, &t.done, &t.createdAt)
-	switch {
-	case err == sql.ErrNoRows:
-		log.Println("No user with that ID.")
-	case err != nil:
-		log.Fatal(err)
+	if err != nil {
+		return nil, err
+	}
+	return t, nil
+}
+
+func (db *DB) edit(id int, desc string) (*ToDo, error) {
+	q := "UPDATE todo SET desc = '" + desc + "' WHERE id = " + strconv.Itoa(id)
+	_, err := db.conn.Exec(q)
+	if err != nil {
+		return nil, err
+	}
+
+	t := &ToDo{}
+	err = db.conn.QueryRow("SELECT id, desc, done, created_at FROM todo WHERE id=?", id).Scan(&t.id, &t.desc, &t.done, &t.createdAt)
+	if err != nil {
+		return nil, err
 	}
 	return t, nil
 }
@@ -94,7 +104,7 @@ func (db *DB) list() ([]*ToDo, error) {
 
 	rows, err := db.conn.Query(q)
 	if err != nil {
-		return nil, errors.New("failed to select rows")
+		return nil, err
 	}
 
 	todos := make([]*ToDo, 0, 0)
@@ -120,10 +130,9 @@ func (db *DB) list() ([]*ToDo, error) {
 
 func (db *DB) done(id int) error {
 	q := "UPDATE todo SET done = 1 WHERE id = " + strconv.Itoa(id)
-
 	_, err := db.conn.Exec(q)
 	if err != nil {
-		return errors.New("failed to select rows")
+		return err
 	}
 	return nil
 }

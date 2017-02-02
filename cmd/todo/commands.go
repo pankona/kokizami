@@ -19,6 +19,12 @@ var Commands = []cli.Command{
 		Flags:  []cli.Flag{},
 	},
 	{
+		Name:   "edit",
+		Usage:  "edit task",
+		Action: CmdEdit,
+		Flags:  []cli.Flag{},
+	},
+	{
 		Name:   "list",
 		Usage:  "show list of tasks",
 		Action: CmdList,
