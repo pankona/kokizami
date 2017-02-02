@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"os"
 
 	"github.com/codegangsta/cli"
@@ -18,10 +17,7 @@ func main() {
 	app.Email = "yosuke.akatsuka@gmail.com"
 	app.Usage = "awesome todo manager"
 	app.Flags = GlobalFlags
-	app.Action = func(c *cli.Context) error {
-		log.Println("action here!")
-		return cli.NewExitError("action failed", 3)
-	}
+	app.Action = CmdList // show list if no argument
 	app.Commands = Commands
 	app.CommandNotFound = CommandNotFound
 	app.Run(os.Args)
