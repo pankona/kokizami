@@ -3,3 +3,4 @@
 cmd/todo/todo
 *.swp
 coverage.out
+.idea
