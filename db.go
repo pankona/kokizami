@@ -17,7 +17,7 @@ type DBInterface interface {
 	start(desc string) (*ToDo, error)
 	edit(id int, desc string) (*ToDo, error)
 	list() ([]*ToDo, error)
-	done(id int) error
+	stop(id int) error
 }
 
 // DB represents DB instance
@@ -49,8 +49,8 @@ func (db *DB) createTable() error {
 	q := "CREATE TABLE todo ("
 	q += " id INTEGER PRIMARY KEY AUTOINCREMENT"
 	q += ", desc VARCHAR(255) NOT NULL"
-	q += ", done INTEGER DEFAULT 0"
-	q += ", created_at TIMESTAMP DEFAULT (DATETIME('now','localtime'))"
+	q += ", started_at TIMESTAMP DEFAULT (DATETIME('now','localtime'))"
+	q += ", stopped_at TIMESTAMP DEFAULT hoge"
 	q += ")"
 
 	_, err := db.conn.Exec(q)
@@ -61,10 +61,8 @@ func (db *DB) createTable() error {
 }
 
 func (db *DB) start(desc string) (*ToDo, error) {
-	q := "INSERT INTO todo "
-	q += " (desc)"
-	q += " VALUES"
-	q += " ('" + desc + "')"
+	q := "INSERT INTO todo (desc) " +
+		"VALUES ('" + desc + "')"
 
 	result, err := db.conn.Exec(q)
 	if err != nil {
@@ -76,8 +74,10 @@ func (db *DB) start(desc string) (*ToDo, error) {
 		return nil, err
 	}
 
+	q = "SELECT id, desc, started_at, stopped_at " +
+		"FROM todo WHERE id=?"
 	t := &ToDo{}
-	err = db.conn.QueryRow("SELECT id, desc, done, created_at FROM todo WHERE id=?", id).Scan(&t.id, &t.desc, &t.done, &t.createdAt)
+	err = db.conn.QueryRow(q, id).Scan(&t.id, &t.desc, &t.startedAt, &t.stoppedAt)
 	if err != nil {
 		return nil, err
 	}
@@ -85,14 +85,18 @@ func (db *DB) start(desc string) (*ToDo, error) {
 }
 
 func (db *DB) edit(id int, desc string) (*ToDo, error) {
-	q := "UPDATE todo SET desc = '" + desc + "' WHERE id = " + strconv.Itoa(id)
+	q := "UPDATE todo " +
+		"SET desc = '" + desc + "' " +
+		"WHERE id = " + strconv.Itoa(id)
 	_, err := db.conn.Exec(q)
 	if err != nil {
 		return nil, err
 	}
 
+	q = "SELECT id, desc, started_at, stopped_at " +
+		"FROM todo WHERE id=?"
 	t := &ToDo{}
-	err = db.conn.QueryRow("SELECT id, desc, done, created_at FROM todo WHERE id=?", id).Scan(&t.id, &t.desc, &t.done, &t.createdAt)
+	err = db.conn.QueryRow(q, id).Scan(&t.id, &t.desc, &t.startedAt, &t.stoppedAt)
 	if err != nil {
 		return nil, err
 	}
@@ -100,7 +104,8 @@ func (db *DB) edit(id int, desc string) (*ToDo, error) {
 }
 
 func (db *DB) list() ([]*ToDo, error) {
-	q := "SELECT id, desc, done, created_at FROM todo"
+	q := "SELECT id, desc, started_at, stopped_at " +
+		"FROM todo"
 
 	rows, err := db.conn.Query(q)
 	if err != nil {
@@ -110,10 +115,10 @@ func (db *DB) list() ([]*ToDo, error) {
 	todos := make([]*ToDo, 0, 0)
 	var id int
 	var desc string
-	var done int
-	var createdAt string
+	var startedAt string
+	var stoppedAt string
 	for rows.Next() {
-		err = rows.Scan(&id, &desc, &done, &createdAt)
+		err = rows.Scan(&id, &desc, &startedAt, &stoppedAt)
 		if err != nil {
 			panic(err.Error())
 		}
@@ -121,15 +126,17 @@ func (db *DB) list() ([]*ToDo, error) {
 			&ToDo{
 				id:        id,
 				desc:      desc,
-				done:      done,
-				createdAt: createdAt,
+				startedAt: startedAt,
+				stoppedAt: stoppedAt,
 			})
 	}
 	return todos, nil
 }
 
-func (db *DB) done(id int) error {
-	q := "UPDATE todo SET done = 1 WHERE id = " + strconv.Itoa(id)
+func (db *DB) stop(id int) error {
+	q := "UPDATE todo " +
+		"SET stopped_at = (DATETIME('now','localtime')) " +
+		"WHERE id = " + strconv.Itoa(id)
 	_, err := db.conn.Exec(q)
 	if err != nil {
 		return err

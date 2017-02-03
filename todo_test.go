@@ -13,7 +13,7 @@ type DBMock struct {
 	mockStart       func(desc string) (*ToDo, error)
 	mockEdit        func(id int, desc string) (*ToDo, error)
 	mockList        func() ([]*ToDo, error)
-	mockDone        func(id int) error
+	mockStop        func(id int) error
 }
 
 func (db *DBMock) openDB() error {
@@ -40,8 +40,8 @@ func (db *DBMock) list() ([]*ToDo, error) {
 	return db.mockList()
 }
 
-func (db *DBMock) done(id int) error {
-	return db.mockDone(id)
+func (db *DBMock) stop(id int) error {
+	return db.mockStop(id)
 }
 
 // default mock implementation
@@ -68,7 +68,7 @@ func genDefaultDBMock() *DBMock {
 			t = append(t, &ToDo{desc: "test2"})
 			return t, nil
 		},
-		mockDone: func(id int) error {
+		mockStop: func(id int) error {
 			return nil
 		},
 	}
@@ -269,17 +269,17 @@ func TestListError(t *testing.T) {
 	}
 }
 
-func TestDoneNormal(t *testing.T) {
+func TestStopNormal(t *testing.T) {
 	dbmock := genDefaultDBMock()
 
 	Initialize(dbmock)
-	err := Done(0)
+	err := Stop(0)
 	if err != nil {
-		t.Error("Done returned error")
+		t.Error("Stop returned error")
 	}
 }
 
-func TestDoneError(t *testing.T) {
+func TestStopError(t *testing.T) {
 	dbmock := genDefaultDBMock()
 
 	// openDB goes failure
@@ -287,23 +287,23 @@ func TestDoneError(t *testing.T) {
 		return errors.New("error")
 	}
 	Initialize(dbmock)
-	err := Done(0)
+	err := Stop(0)
 	if err == nil {
 		t.Error("err is nil but this is not expected")
 	}
 
-	// openDB goes success but Done goes failure
+	// openDB goes success but stop goes failure
 	dbmock.mockOpenDB = func() error {
 		return nil
 	}
-	dbmock.mockDone = func(id int) error {
+	dbmock.mockStop = func(id int) error {
 		return errors.New("error")
 	}
 	err = Initialize(dbmock)
 	if err != nil {
 		t.Error("Initialize failed")
 	}
-	err = Done(0)
+	err = Stop(0)
 	if err == nil {
 		t.Error("err is nil but this is not expected")
 	}

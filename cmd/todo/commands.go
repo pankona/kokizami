@@ -34,9 +34,9 @@ var Commands = []cli.Command{
 		Flags:  []cli.Flag{},
 	},
 	{
-		Name:   "done",
-		Usage:  "mark specified task as done",
-		Action: CmdDone,
+		Name:   "stop",
+		Usage:  "stop task",
+		Action: CmdStop,
 		Flags:  []cli.Flag{},
 	},
 }
@@ -91,15 +91,12 @@ func CmdList(c *cli.Context) {
 	}
 
 	for _, v := range l {
-		if v.IsDone() {
-			continue
-		}
 		log.Println(v)
 	}
 }
 
-// CmdDone marks specified ToDo as done
-func CmdDone(c *cli.Context) {
+// CmdStop update specified task's stopped_at
+func CmdStop(c *cli.Context) {
 	for i, v := range c.Args() {
 		switch i {
 		case 0:
@@ -108,7 +105,7 @@ func CmdDone(c *cli.Context) {
 				log.Println(err)
 				return
 			}
-			err = todo.Done(id)
+			err = todo.Stop(id)
 			if err != nil {
 				log.Println(err)
 			}

@@ -11,18 +11,12 @@ import (
 type ToDo struct {
 	id        int
 	desc      string
-	done      int
-	createdAt string
+	startedAt string
+	stoppedAt string
 }
 
 func (t *ToDo) Error() string {
-	return strconv.Itoa(t.id) + " " + t.desc + " " + t.createdAt
-}
-
-// IsDone returns ToDo's state.
-// if ToDo is marked as done, return true, otherwise false.
-func (t *ToDo) IsDone() bool {
-	return t.done == 1
+	return strconv.Itoa(t.id) + " " + t.desc + " " + t.startedAt + " " + t.stoppedAt
 }
 
 var dbinterface DBInterface
@@ -90,15 +84,15 @@ func List() ([]*ToDo, error) {
 	return l, nil
 }
 
-// Done will mark specified ToDo as "done"
-func Done(id int) error {
+// Stop updates specified task's stopped_at
+func Stop(id int) error {
 	err := dbinterface.openDB()
 	if err != nil {
 		return err
 	}
 	defer dbinterface.close()
 
-	err = dbinterface.done(id)
+	err = dbinterface.stop(id)
 	if err != nil {
 		return err
 	}
