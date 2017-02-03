@@ -39,6 +39,12 @@ var Commands = []cli.Command{
 		Action: CmdStop,
 		Flags:  []cli.Flag{},
 	},
+	{
+		Name:   "delete",
+		Usage:  "delete task",
+		Action: CmdDelete,
+		Flags:  []cli.Flag{},
+	},
 }
 
 // CommandNotFound is called when specified subcommand is not found
@@ -115,5 +121,26 @@ func CmdStop(c *cli.Context) {
 				log.Println(err)
 			}
 		}
+	}
+}
+
+// CmdDelete deletes specified task
+// todo delete [id]
+func CmdDelete(c *cli.Context) {
+	args := c.Args()
+	if len(args) != 1 {
+		log.Println("delete needs one arguments [id]")
+		return
+	}
+
+	id, err := strconv.Atoi(args[0])
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	err = todo.Delete(id)
+	if err != nil {
+		log.Println(err)
 	}
 }

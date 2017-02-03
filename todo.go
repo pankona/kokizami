@@ -98,3 +98,18 @@ func Stop(id int) error {
 	}
 	return nil
 }
+
+// Delete delets specified task
+func Delete(id int) error {
+	err := dbinterface.openDB()
+	if err != nil {
+		return err
+	}
+	defer dbinterface.close()
+
+	err = dbinterface.delete(id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
