@@ -92,6 +92,7 @@ func CmdList(c *cli.Context) {
 
 	if len(l) == 0 {
 		log.Println("list is empty")
+		return
 	}
 
 	for _, v := range l {
