@@ -16,9 +16,9 @@ var GlobalFlags = []cli.Flag{}
 // Commands represents list of subcommands
 var Commands = []cli.Command{
 	{
-		Name:   "add",
-		Usage:  "add new task",
-		Action: CmdAdd,
+		Name:   "start",
+		Usage:  "start new task",
+		Action: CmdStart,
 		Flags:  []cli.Flag{},
 	},
 	{
@@ -47,12 +47,12 @@ func CommandNotFound(c *cli.Context, command string) {
 	os.Exit(2)
 }
 
-// CmdAdd adds a new todo
-func CmdAdd(c *cli.Context) {
+// CmdStart starts a new task
+func CmdStart(c *cli.Context) {
 	for i, v := range c.Args() {
 		switch i {
 		case 0:
-			t, err := todo.Add(v)
+			t, err := todo.Start(v)
 			if err != nil {
 				log.Println(err)
 			}
@@ -61,7 +61,7 @@ func CmdAdd(c *cli.Context) {
 	}
 }
 
-// CmdEdit adds a new todo
+// CmdEdit edits a specified task
 func CmdEdit(c *cli.Context) {
 	args := c.Args()
 	if len(args) != 2 {

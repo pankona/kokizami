@@ -10,7 +10,7 @@ type DBMock struct {
 	mockOpenDB      func() error
 	mockClose       func()
 	mockCreateTable func() error
-	mockAdd         func(desc string) (*ToDo, error)
+	mockStart       func(desc string) (*ToDo, error)
 	mockEdit        func(id int, desc string) (*ToDo, error)
 	mockList        func() ([]*ToDo, error)
 	mockDone        func(id int) error
@@ -28,8 +28,8 @@ func (db *DBMock) createTable() error {
 	return db.mockCreateTable()
 }
 
-func (db *DBMock) add(desc string) (*ToDo, error) {
-	return db.mockAdd(desc)
+func (db *DBMock) start(desc string) (*ToDo, error) {
+	return db.mockStart(desc)
 }
 
 func (db *DBMock) edit(id int, desc string) (*ToDo, error) {
@@ -55,7 +55,7 @@ func genDefaultDBMock() *DBMock {
 		mockCreateTable: func() error {
 			return nil
 		},
-		mockAdd: func(desc string) (*ToDo, error) {
+		mockStart: func(desc string) (*ToDo, error) {
 			return &ToDo{desc: "test"}, nil
 		},
 		mockEdit: func(id int, desc string) (*ToDo, error) {
@@ -95,26 +95,26 @@ func TestInitializeError(t *testing.T) {
 	}
 }
 
-func TestAddNormal(t *testing.T) {
+func TestStartNormal(t *testing.T) {
 	dbmock := genDefaultDBMock()
 
 	err := Initialize(dbmock)
 	if err != nil {
 		t.Error("Initialize failed")
 	}
-	todo, err := Add("test")
+	todo, err := Start("test")
 	if err != nil {
-		t.Error("Add returned error")
+		t.Error("Start returned error")
 	}
 	if todo == nil {
-		t.Error("Add returned nil")
+		t.Error("Start returned nil")
 	}
 	if todo.desc != "test" {
-		t.Error("Add returned unexpected value")
+		t.Error("Start returned unexpected value")
 	}
 }
 
-func TestAddError(t *testing.T) {
+func TestStartError(t *testing.T) {
 	dbmock := genDefaultDBMock()
 
 	// openDB goes failure
@@ -125,7 +125,7 @@ func TestAddError(t *testing.T) {
 	if err == nil {
 		t.Error("Initialize succeeded but this is not expected")
 	}
-	todo, err := Add("test")
+	todo, err := Start("test")
 	if todo != nil {
 		t.Error("todo is not nil but this is not expected")
 	}
@@ -133,18 +133,18 @@ func TestAddError(t *testing.T) {
 		t.Error("error is not nil but this is not expected")
 	}
 
-	// openDB goes success but Add goes failure
+	// openDB goes success but Start goes failure
 	dbmock.mockOpenDB = func() error {
 		return nil
 	}
-	dbmock.mockAdd = func(desc string) (*ToDo, error) {
+	dbmock.mockStart = func(desc string) (*ToDo, error) {
 		return nil, errors.New("error")
 	}
 	err = Initialize(dbmock)
 	if err != nil {
 		t.Error("Initialize failed")
 	}
-	todo, err = Add("test")
+	todo, err = Start("test")
 	if todo != nil {
 		t.Error("todo is not nil but this is not expected")
 	}
@@ -162,10 +162,10 @@ func TestEditNormal(t *testing.T) {
 	}
 	todo, err := Edit(0, "edited")
 	if err != nil {
-		t.Error("Add returned error")
+		t.Error("Edit returned error")
 	}
 	if todo == nil {
-		t.Error("Add returned nil")
+		t.Error("Edit returned nil")
 	}
 	if todo.desc != "edited" {
 		t.Error("edit returned unexpected value")
@@ -191,7 +191,7 @@ func TestEditError(t *testing.T) {
 		t.Error("error is not nil but this is not expected")
 	}
 
-	// openDB goes success but Add goes failure
+	// openDB goes success but Edit goes failure
 	dbmock.mockOpenDB = func() error {
 		return nil
 	}

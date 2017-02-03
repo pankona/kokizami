@@ -14,7 +14,7 @@ type DBInterface interface {
 	openDB() error
 	close()
 	createTable() error
-	add(desc string) (*ToDo, error)
+	start(desc string) (*ToDo, error)
 	edit(id int, desc string) (*ToDo, error)
 	list() ([]*ToDo, error)
 	done(id int) error
@@ -60,7 +60,7 @@ func (db *DB) createTable() error {
 	return nil
 }
 
-func (db *DB) add(desc string) (*ToDo, error) {
+func (db *DB) start(desc string) (*ToDo, error) {
 	q := "INSERT INTO todo "
 	q += " (desc)"
 	q += " VALUES"

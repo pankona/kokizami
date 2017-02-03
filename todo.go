@@ -45,15 +45,15 @@ func Initialize(dbi DBInterface) error {
 	return nil
 }
 
-// Add adds a specified ToDo item to DB
-func Add(desc string) (*ToDo, error) {
+// Start starts a specified ToDo item to DB
+func Start(desc string) (*ToDo, error) {
 	err := dbinterface.openDB()
 	if err != nil {
 		return nil, err
 	}
 	defer dbinterface.close()
 
-	t, err := dbinterface.add(desc)
+	t, err := dbinterface.start(desc)
 	if err != nil {
 		return nil, err
 	}
