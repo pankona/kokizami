@@ -54,6 +54,7 @@ func CommandNotFound(c *cli.Context, command string) {
 }
 
 // CmdStart starts a new task
+// todo start [new desc]
 func CmdStart(c *cli.Context) {
 	for i, v := range c.Args() {
 		switch i {
@@ -68,6 +69,7 @@ func CmdStart(c *cli.Context) {
 }
 
 // CmdEdit edits a specified task
+// todo edit [id] [new desc]
 func CmdEdit(c *cli.Context) {
 	args := c.Args()
 	if len(args) != 2 {
@@ -89,6 +91,7 @@ func CmdEdit(c *cli.Context) {
 }
 
 // CmdList shows ToDo list
+// todo list
 func CmdList(c *cli.Context) {
 	l, err := todo.List()
 	if err != nil {
@@ -107,6 +110,7 @@ func CmdList(c *cli.Context) {
 }
 
 // CmdStop update specified task's stopped_at
+// todo stop [id]
 func CmdStop(c *cli.Context) {
 	for i, v := range c.Args() {
 		switch i {
