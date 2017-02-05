@@ -56,16 +56,19 @@ func CommandNotFound(c *cli.Context, command string) {
 // CmdStart starts a new task
 // todo start [new desc]
 func CmdStart(c *cli.Context) {
-	for i, v := range c.Args() {
-		switch i {
-		case 0:
-			t, err := todo.Start(v)
-			if err != nil {
-				log.Println(err)
-			}
-			log.Println(t)
-		}
+	args := c.Args()
+	if len(args) != 1 {
+		log.Println("stop needs one arguments [id]")
+		return
 	}
+
+	desc := args[1]
+	t, err := todo.Start(desc)
+	if err != nil {
+		log.Println(err)
+	}
+
+	log.Println(t)
 }
 
 // CmdEdit edits a specified task
@@ -112,19 +115,21 @@ func CmdList(c *cli.Context) {
 // CmdStop update specified task's stopped_at
 // todo stop [id]
 func CmdStop(c *cli.Context) {
-	for i, v := range c.Args() {
-		switch i {
-		case 0:
-			id, err := strconv.Atoi(v)
-			if err != nil {
-				log.Println(err)
-				return
-			}
-			err = todo.Stop(id)
-			if err != nil {
-				log.Println(err)
-			}
-		}
+	args := c.Args()
+	if len(args) != 1 {
+		log.Println("stop needs one arguments [id]")
+		return
+	}
+
+	id, err := strconv.Atoi(args[0])
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	err = todo.Stop(id)
+	if err != nil {
+		log.Println(err)
 	}
 }
 
