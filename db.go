@@ -62,9 +62,16 @@ func (db *DB) createTable() error {
 }
 
 func (db *DB) start(desc string) (*ToDo, error) {
-	q := "INSERT INTO todo (desc) " +
-		"VALUES ('" + desc + "')"
+	q := "UPDATE todo " +
+		"SET stopped_at = (DATETIME('now','localtime')) " +
+		"WHERE stopped_at == \"\""
+	_, err := db.conn.Exec(q)
+	if err != nil {
+		return nil, err
+	}
 
+	q = "INSERT INTO todo (desc) " +
+		"VALUES ('" + desc + "')"
 	result, err := db.conn.Exec(q)
 	if err != nil {
 		return nil, err
@@ -107,7 +114,6 @@ func (db *DB) edit(id int, desc string) (*ToDo, error) {
 func (db *DB) list() ([]*ToDo, error) {
 	q := "SELECT id, desc, started_at, stopped_at " +
 		"FROM todo"
-
 	rows, err := db.conn.Query(q)
 	if err != nil {
 		return nil, err
