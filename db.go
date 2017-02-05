@@ -51,7 +51,7 @@ func (db *DB) createTable() error {
 	q += " id INTEGER PRIMARY KEY AUTOINCREMENT"
 	q += ", desc VARCHAR(255) NOT NULL"
 	q += ", started_at TIMESTAMP DEFAULT (DATETIME('now','localtime'))"
-	q += ", stopped_at TIMESTAMP DEFAULT hoge"
+	q += ", stopped_at TIMESTAMP DEFAULT \"\""
 	q += ")"
 
 	_, err := db.conn.Exec(q)
