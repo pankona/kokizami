@@ -62,7 +62,7 @@ func CmdStart(c *cli.Context) {
 		return
 	}
 
-	desc := args[1]
+	desc := args[0]
 	t, err := todo.Start(desc)
 	if err != nil {
 		log.Println(err)
