@@ -15,7 +15,7 @@ type DBInterface interface {
 	close()
 	createTable() error
 	start(desc string) (*ToDo, error)
-	edit(id int, desc string) (*ToDo, error)
+	edit(id int, field, newValue string) (*ToDo, error)
 	list() ([]*ToDo, error)
 	stop(id int) error
 	stopall() error
@@ -93,9 +93,9 @@ func (db *DB) start(desc string) (*ToDo, error) {
 	return t, nil
 }
 
-func (db *DB) edit(id int, desc string) (*ToDo, error) {
+func (db *DB) edit(id int, field, newValue string) (*ToDo, error) {
 	q := "UPDATE todo " +
-		"SET desc = '" + desc + "' " +
+		"SET " + field + " = '" + newValue + "' " +
 		"WHERE id = " + strconv.Itoa(id)
 	_, err := db.conn.Exec(q)
 	if err != nil {

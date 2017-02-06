@@ -11,7 +11,7 @@ type DBMock struct {
 	mockClose       func()
 	mockCreateTable func() error
 	mockStart       func(desc string) (*ToDo, error)
-	mockEdit        func(id int, desc string) (*ToDo, error)
+	mockEdit        func(id int, field, newValue string) (*ToDo, error)
 	mockList        func() ([]*ToDo, error)
 	mockStop        func(id int) error
 	mockDelete      func(id int) error
@@ -33,8 +33,8 @@ func (db *DBMock) start(desc string) (*ToDo, error) {
 	return db.mockStart(desc)
 }
 
-func (db *DBMock) edit(id int, desc string) (*ToDo, error) {
-	return db.mockEdit(id, desc)
+func (db *DBMock) edit(id int, field, newValue string) (*ToDo, error) {
+	return db.mockEdit(id, field, newValue)
 }
 
 func (db *DBMock) list() ([]*ToDo, error) {
@@ -63,7 +63,7 @@ func genDefaultDBMock() *DBMock {
 		mockStart: func(desc string) (*ToDo, error) {
 			return &ToDo{desc: "test"}, nil
 		},
-		mockEdit: func(id int, desc string) (*ToDo, error) {
+		mockEdit: func(id int, field, newValue string) (*ToDo, error) {
 			return &ToDo{desc: "edited"}, nil
 		},
 		mockList: func() ([]*ToDo, error) {
@@ -168,7 +168,7 @@ func TestEditNormal(t *testing.T) {
 	if err != nil {
 		t.Error("Initialize failed")
 	}
-	todo, err := Edit(0, "edited")
+	todo, err := Edit(0, "desc", "edited")
 	if err != nil {
 		t.Error("Edit returned error")
 	}
@@ -191,7 +191,7 @@ func TestEditError(t *testing.T) {
 	if err == nil {
 		t.Error("Initialize succeeded but this is not expected")
 	}
-	todo, err := Edit(0, "edited")
+	todo, err := Edit(0, "desc", "edited")
 	if todo != nil {
 		t.Error("todo is not nil but this is not expected")
 	}
@@ -203,14 +203,14 @@ func TestEditError(t *testing.T) {
 	dbmock.mockOpenDB = func() error {
 		return nil
 	}
-	dbmock.mockEdit = func(id int, desc string) (*ToDo, error) {
+	dbmock.mockEdit = func(id int, field, newValue string) (*ToDo, error) {
 		return nil, errors.New("error")
 	}
 	err = Initialize(dbmock)
 	if err != nil {
 		t.Error("Initialize failed")
 	}
-	todo, err = Edit(0, "edited")
+	todo, err = Edit(0, "desc", "edited")
 	if todo != nil {
 		t.Error("todo is not nil but this is not expected")
 	}

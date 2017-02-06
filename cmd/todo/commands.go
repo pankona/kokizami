@@ -72,11 +72,13 @@ func CmdStart(c *cli.Context) {
 }
 
 // CmdEdit edits a specified task
-// todo edit [id] [new desc]
+// todo edit desc       [id] [new desc]
+// todo edit started_at [id] [new started_at]
+// todo edit stopped_at [id] [new stopped_at]
 func CmdEdit(c *cli.Context) {
 	args := c.Args()
-	if len(args) != 2 {
-		log.Println("edit needs two arguments (id, desc)")
+	if len(args) != 3 {
+		log.Println("edit needs three arguments (id, [desc|started_at|stopped_at], [new value])")
 		return
 	}
 
@@ -85,8 +87,10 @@ func CmdEdit(c *cli.Context) {
 		log.Println(err)
 		return
 	}
-	desc := args[1]
-	t, err := todo.Edit(id, desc)
+	field := args[1]
+	newValue := args[2]
+
+	t, err := todo.Edit(id, field, newValue)
 	if err != nil {
 		log.Println(err)
 	}
@@ -137,7 +141,6 @@ func CmdStop(c *cli.Context) {
 		log.Println("stop needs at most one arguments [id]")
 		return
 	}
-
 }
 
 // CmdDelete deletes specified task

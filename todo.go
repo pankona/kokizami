@@ -55,14 +55,14 @@ func Start(desc string) (*ToDo, error) {
 }
 
 // Edit edits a specified ToDo item
-func Edit(id int, desc string) (*ToDo, error) {
+func Edit(id int, field, newValue string) (*ToDo, error) {
 	err := dbinterface.openDB()
 	if err != nil {
 		return nil, err
 	}
 	defer dbinterface.close()
 
-	t, err := dbinterface.edit(id, desc)
+	t, err := dbinterface.edit(id, field, newValue)
 	if err != nil {
 		return nil, err
 	}
@@ -99,7 +99,7 @@ func Stop(id int) error {
 	return nil
 }
 
-// Stop updates specified task's stopped_at
+// StopAll updates specified task's stopped_at
 func StopAll() error {
 	err := dbinterface.openDB()
 	if err != nil {
