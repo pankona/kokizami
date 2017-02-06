@@ -16,7 +16,7 @@ type ToDo struct {
 }
 
 func (t *ToDo) Error() string {
-	return strconv.Itoa(t.id) + " " + t.desc + " " + t.startedAt + " " + t.stoppedAt
+	return strconv.Itoa(t.id) + "\t\"" + t.desc + "\"\t" + t.startedAt + "\t" + t.stoppedAt
 }
 
 var dbinterface DBInterface
@@ -48,6 +48,21 @@ func Start(desc string) (*ToDo, error) {
 	defer dbinterface.close()
 
 	t, err := dbinterface.start(desc)
+	if err != nil {
+		return nil, err
+	}
+	return t, nil
+}
+
+// Get returns a ToDo item by specified id
+func Get(id int) (*ToDo, error) {
+	err := dbinterface.openDB()
+	if err != nil {
+		return nil, err
+	}
+	defer dbinterface.close()
+
+	t, err := dbinterface.get(id)
 	if err != nil {
 		return nil, err
 	}

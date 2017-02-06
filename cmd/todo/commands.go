@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"strconv"
+	"strings"
 
 	"github.com/codegangsta/cli"
 	"github.com/pankona/todo"
@@ -80,30 +81,69 @@ func CmdStart(c *cli.Context) {
 func CmdEdit(c *cli.Context) {
 	args := c.Args()
 
-	fp, err := ioutil.TempFile("", "tmp_")
-	if err != nil {
-		log.Println(err)
+	switch len(args) {
+	case 1:
+		id, err := strconv.Atoi(args[0])
+		if err != nil {
+			log.Println(err)
+			return
+		}
+
+		fp, err := ioutil.TempFile("", "tmp_")
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		defer os.Remove(fp.Name())
+
+		filepath := fp.Name()
+
+		t, err := todo.Get(id)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+
+		ss := strings.Split(t.Error(), string('\t'))
+		if len(ss) != 4 {
+			log.Println("invalid record.", t)
+			return
+		}
+
+		_, err = fp.WriteString(ss[1] + "\t" + ss[2] + "\t" + ss[3])
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		fp.Close()
+
+		// TODO: fixme
+		cmd := exec.Command("vim", filepath)
+		cmd.Stdin = os.Stdin
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		cmd.Run()
+
+		bytes, err := ioutil.ReadFile(filepath)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+
+		ss = strings.Split(string(bytes), string('\t'))
+
+		log.Println(ss[0])
+		log.Println(ss[1])
+		log.Println(ss[2])
+
+		if len(ss) != 3 {
+			log.Println("invalid arguments (needs desc, started_at, stopped_at)")
+			return
+		}
+		log.Println(string(bytes))
+		// TODO: edit
 		return
 	}
-	fp.Close()
-	defer os.Remove(fp.Name())
-
-	filepath := fp.Name()
-
-	// TODO: fixme
-	cmd := exec.Command("vim", filepath)
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	cmd.Run()
-
-	bytes, err := ioutil.ReadFile(filepath)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-
-	log.Println(string(bytes))
 
 	if len(args) != 3 {
 		log.Println("edit needs three arguments (id, [desc|started_at|stopped_at], [new value])")

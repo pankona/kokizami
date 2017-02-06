@@ -15,6 +15,7 @@ type DBInterface interface {
 	close()
 	createTable() error
 	start(desc string) (*ToDo, error)
+	get(id int) (*ToDo, error)
 	edit(id int, field, newValue string) (*ToDo, error)
 	list() ([]*ToDo, error)
 	stop(id int) error
@@ -87,6 +88,17 @@ func (db *DB) start(desc string) (*ToDo, error) {
 		"FROM todo WHERE id=?"
 	t := &ToDo{}
 	err = db.conn.QueryRow(q, id).Scan(&t.id, &t.desc, &t.startedAt, &t.stoppedAt)
+	if err != nil {
+		return nil, err
+	}
+	return t, nil
+}
+
+func (db *DB) get(id int) (*ToDo, error) {
+	q := "SELECT id, desc, started_at, stopped_at " +
+		"FROM todo WHERE id=?"
+	t := &ToDo{}
+	err := db.conn.QueryRow(q, id).Scan(&t.id, &t.desc, &t.startedAt, &t.stoppedAt)
 	if err != nil {
 		return nil, err
 	}
