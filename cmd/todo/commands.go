@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -79,12 +80,30 @@ func CmdStart(c *cli.Context) {
 func CmdEdit(c *cli.Context) {
 	args := c.Args()
 
+	fp, err := ioutil.TempFile("", "tmp_")
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	fp.Close()
+	defer os.Remove(fp.Name())
+
+	filepath := fp.Name()
+
 	// TODO: fixme
-	cmd := exec.Command("vim", "/tmp/tmpfile")
+	cmd := exec.Command("vim", filepath)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Run()
+
+	bytes, err := ioutil.ReadFile(filepath)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	log.Println(string(bytes))
 
 	if len(args) != 3 {
 		log.Println("edit needs three arguments (id, [desc|started_at|stopped_at], [new value])")
