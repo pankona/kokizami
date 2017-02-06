@@ -113,7 +113,8 @@ func CmdList(c *cli.Context) {
 }
 
 // CmdStop update specified task's stopped_at
-// todo stop [id]
+// todo stop      ... stop all tasks they don't have stopped_at
+// todo stop [id] ... stop a task by specified id
 func CmdStop(c *cli.Context) {
 	args := c.Args()
 	switch len(args) {
