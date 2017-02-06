@@ -16,7 +16,7 @@ type ToDo struct {
 }
 
 func (t *ToDo) Error() string {
-	return strconv.Itoa(t.id) + "\t\"" + t.desc + "\"\t" + t.startedAt + "\t" + t.stoppedAt
+	return strconv.Itoa(t.id) + "\t" + t.desc + "\t" + t.startedAt + "\t" + t.stoppedAt
 }
 
 var dbinterface DBInterface

@@ -110,7 +110,7 @@ func CmdEdit(c *cli.Context) {
 			return
 		}
 
-		_, err = fp.WriteString(ss[1] + "\t" + ss[2] + "\t" + ss[3])
+		_, err = fp.WriteString("" + ss[1] + "\t" + ss[2] + "\t" + ss[3])
 		if err != nil {
 			log.Println(err)
 			return
@@ -132,16 +132,27 @@ func CmdEdit(c *cli.Context) {
 
 		ss = strings.Split(string(bytes), string('\t'))
 
-		log.Println(ss[0])
-		log.Println(ss[1])
-		log.Println(ss[2])
-
 		if len(ss) != 3 {
 			log.Println("invalid arguments (needs desc, started_at, stopped_at)")
 			return
 		}
-		log.Println(string(bytes))
-		// TODO: edit
+		// TODO: fixme
+		t, err = todo.Edit(id, "desc", ss[0])
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		t, err = todo.Edit(id, "started_at", ss[1])
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		t, err = todo.Edit(id, "stopped_at", ss[2])
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		log.Println(t)
 		return
 	}
 
