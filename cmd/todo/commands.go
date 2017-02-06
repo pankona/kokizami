@@ -116,21 +116,27 @@ func CmdList(c *cli.Context) {
 // todo stop [id]
 func CmdStop(c *cli.Context) {
 	args := c.Args()
-	if len(args) != 1 {
-		log.Println("stop needs one arguments [id]")
+	switch len(args) {
+	case 0:
+		err := todo.StopAll()
+		if err != nil {
+			log.Println(err)
+		}
+	case 1:
+		id, err := strconv.Atoi(args[0])
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		err = todo.Stop(id)
+		if err != nil {
+			log.Println(err)
+		}
+	default:
+		log.Println("stop needs at most one arguments [id]")
 		return
 	}
 
-	id, err := strconv.Atoi(args[0])
-	if err != nil {
-		log.Println(err)
-		return
-	}
-
-	err = todo.Stop(id)
-	if err != nil {
-		log.Println(err)
-	}
 }
 
 // CmdDelete deletes specified task

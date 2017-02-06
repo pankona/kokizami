@@ -18,6 +18,7 @@ type DBInterface interface {
 	edit(id int, desc string) (*ToDo, error)
 	list() ([]*ToDo, error)
 	stop(id int) error
+	stopall() error
 	delete(id int) error
 }
 
@@ -144,6 +145,16 @@ func (db *DB) stop(id int) error {
 	q := "UPDATE todo " +
 		"SET stopped_at = (DATETIME('now','localtime')) " +
 		"WHERE id = " + strconv.Itoa(id)
+	_, err := db.conn.Exec(q)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (db *DB) stopall() error {
+	q := "UPDATE todo " +
+		"SET stopped_at = (DATETIME('now','localtime'))"
 	_, err := db.conn.Exec(q)
 	if err != nil {
 		return err

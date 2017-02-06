@@ -99,6 +99,21 @@ func Stop(id int) error {
 	return nil
 }
 
+// Stop updates specified task's stopped_at
+func StopAll() error {
+	err := dbinterface.openDB()
+	if err != nil {
+		return err
+	}
+	defer dbinterface.close()
+
+	err = dbinterface.stopall()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 // Delete delets specified task
 func Delete(id int) error {
 	err := dbinterface.openDB()
