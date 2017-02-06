@@ -154,7 +154,8 @@ func (db *DB) stop(id int) error {
 
 func (db *DB) stopall() error {
 	q := "UPDATE todo " +
-		"SET stopped_at = (DATETIME('now','localtime'))"
+		"SET stopped_at = (DATETIME('now','localtime')) " +
+		"WHERE stopped_at = \"\""
 	_, err := db.conn.Exec(q)
 	if err != nil {
 		return err
