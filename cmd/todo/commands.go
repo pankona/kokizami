@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
 	"strconv"
 
 	"github.com/codegangsta/cli"
@@ -77,6 +78,14 @@ func CmdStart(c *cli.Context) {
 // todo edit stopped_at [id] [new stopped_at]
 func CmdEdit(c *cli.Context) {
 	args := c.Args()
+
+	// TODO: fixme
+	cmd := exec.Command("vim", "/tmp/tmpfile")
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	cmd.Run()
+
 	if len(args) != 3 {
 		log.Println("edit needs three arguments (id, [desc|started_at|stopped_at], [new value])")
 		return
