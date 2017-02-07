@@ -25,6 +25,12 @@ var Commands = []cli.Command{
 		Flags:  []cli.Flag{},
 	},
 	{
+		Name:   "restart",
+		Usage:  "restart old task",
+		Action: CmdRestart,
+		Flags:  []cli.Flag{},
+	},
+	{
 		Name:   "edit",
 		Usage:  "edit task",
 		Action: CmdEdit,
@@ -61,12 +67,39 @@ func CommandNotFound(c *cli.Context, command string) {
 func CmdStart(c *cli.Context) {
 	args := c.Args()
 	if len(args) != 1 {
-		log.Println("stop needs one arguments [id]")
+		log.Println("start needs one arguments [desc]")
 		return
 	}
 
 	desc := args[0]
 	t, err := todo.Start(desc)
+	if err != nil {
+		log.Println(err)
+	}
+
+	log.Println(t)
+}
+
+// CmdRestart starts a task from old task list
+// todo restart [id]
+func CmdRestart(c *cli.Context) {
+	args := c.Args()
+	if len(args) != 1 {
+		log.Println("restart needs one arguments [id]")
+		return
+	}
+
+	id, err := strconv.Atoi(args[0])
+	if err != nil {
+		log.Println(err)
+	}
+
+	t, err := todo.Get(id)
+	if err != nil {
+		log.Println(err)
+	}
+
+	t, err = todo.Start(t.Desc())
 	if err != nil {
 		log.Println(err)
 	}

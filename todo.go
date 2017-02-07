@@ -19,6 +19,11 @@ func (t *ToDo) Error() string {
 	return strconv.Itoa(t.id) + "\t" + t.desc + "\t" + t.startedAt + "\t" + t.stoppedAt
 }
 
+// Desc returns ToDo's description
+func (t *ToDo) Desc() string {
+	return t.desc
+}
+
 var dbinterface DBInterface
 
 // Initialize initializes ToDo library.
