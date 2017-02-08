@@ -137,7 +137,7 @@ func CmdEdit(c *cli.Context) {
 			return
 		}
 
-		ss := strings.Split(t.Error(), string('\t'))
+		ss := strings.Split(t.Error(), string("\t"))
 		if len(ss) != 4 {
 			log.Println("invalid record.", t)
 			return
@@ -163,12 +163,9 @@ func CmdEdit(c *cli.Context) {
 			return
 		}
 
-		// remove LF at end of string
-		bytes = bytes[:len(bytes)-1]
-
 		ss = strings.Split(string(bytes), string("\n"))
-		if len(ss) != 3 {
-			log.Println("invalid arguments (needs desc, started_at, stopped_at)")
+		if len(ss) < 3 {
+			log.Println("invalid arguments. needs (desc, started_at, stopped_at)")
 			return
 		}
 		// TODO: fixme. should be done by one transaction
