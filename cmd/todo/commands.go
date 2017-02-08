@@ -150,8 +150,11 @@ func CmdEdit(c *cli.Context) {
 		}
 		fp.Close()
 
-		// TODO: fixme
-		cmd := exec.Command("vim", filepath)
+		editor := os.Getenv("EDITOR")
+		if editor == "" {
+			editor = "vim"
+		}
+		cmd := exec.Command(editor, filepath)
 		cmd.Stdin = os.Stdin
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
