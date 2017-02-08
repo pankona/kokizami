@@ -2,6 +2,7 @@ package todo
 
 import (
 	"strconv"
+	"time"
 
 	// go-sqlite3 is only imported here
 	_ "github.com/mattn/go-sqlite3"
@@ -11,12 +12,13 @@ import (
 type ToDo struct {
 	id        int
 	desc      string
-	startedAt string
-	stoppedAt string
+	startedAt time.Time
+	stoppedAt time.Time
 }
 
 func (t *ToDo) Error() string {
-	return strconv.Itoa(t.id) + "\t" + t.desc + "\t" + t.startedAt + "\t" + t.stoppedAt
+	//log.Println(time.Parse("2006-01-02 15:04:05 MST", t.startedAt))
+	return strconv.Itoa(t.id) + "\t" + t.desc + "\t" + t.startedAt.String() + "\t" + t.stoppedAt.String()
 }
 
 // Desc returns ToDo's description

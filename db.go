@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"os"
 	"strconv"
+	"time"
 
 	// go-sqlite3 is only imported here
 	_ "github.com/mattn/go-sqlite3"
@@ -84,6 +85,7 @@ func (db *DB) start(desc string) (*ToDo, error) {
 		return nil, err
 	}
 
+	// FIXME: this should not be done here
 	q = "SELECT id, desc, started_at, stopped_at " +
 		"FROM todo WHERE id=?"
 	t := &ToDo{}
@@ -135,8 +137,8 @@ func (db *DB) list() ([]*ToDo, error) {
 	todos := make([]*ToDo, 0, 0)
 	var id int
 	var desc string
-	var startedAt string
-	var stoppedAt string
+	var startedAt time.Time
+	var stoppedAt time.Time
 	for rows.Next() {
 		err = rows.Scan(&id, &desc, &startedAt, &stoppedAt)
 		if err != nil {
