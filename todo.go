@@ -17,8 +17,10 @@ type ToDo struct {
 }
 
 func (t *ToDo) Error() string {
-	//log.Println(time.Parse("2006-01-02 15:04:05 MST", t.startedAt))
-	return strconv.Itoa(t.id) + "\t" + t.desc + "\t" + t.startedAt.String() + "\t" + t.stoppedAt.String()
+	return strconv.Itoa(t.id) + "\t" +
+		t.desc + "\t" +
+		t.startedAt.Format("2006-01-02 15:04:05") + "\t" +
+		t.stoppedAt.Format("2006-01-02 15:04:05")
 }
 
 // Desc returns ToDo's description

@@ -143,7 +143,7 @@ func CmdEdit(c *cli.Context) {
 			return
 		}
 
-		_, err = fp.WriteString("" + ss[1] + "\t" + ss[2] + "\t" + ss[3])
+		_, err = fp.WriteString(ss[1] + "\n" + ss[2] + "\n" + ss[3])
 		if err != nil {
 			log.Println(err)
 			return
@@ -163,13 +163,15 @@ func CmdEdit(c *cli.Context) {
 			return
 		}
 
-		ss = strings.Split(string(bytes), string('\t'))
+		// remove LF at end of string
+		bytes = bytes[:len(bytes)-1]
 
+		ss = strings.Split(string(bytes), string("\n"))
 		if len(ss) != 3 {
 			log.Println("invalid arguments (needs desc, started_at, stopped_at)")
 			return
 		}
-		// TODO: fixme
+		// TODO: fixme. should be done by one transaction
 		t, err = todo.Edit(id, "desc", ss[0])
 		if err != nil {
 			log.Println(err)
