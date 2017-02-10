@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	todo.Initialize(nil)
+	todo.Initialize(nil, os.Getenv("HOME")+"/.todo.db")
 
 	app := cli.NewApp()
 	app.Name = Name

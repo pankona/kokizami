@@ -47,10 +47,11 @@ var dbinterface DBInterface
 
 // Initialize initializes ToDo library.
 // this function will create DB file and prepare tables.
-func Initialize(dbi DBInterface) error {
+func Initialize(dbi DBInterface, dbpath string) error {
 	dbinterface = dbi
 	if dbinterface == nil {
-		dbinterface = newDB()
+		// TODO: support multi platform
+		dbinterface = newDB(dbpath)
 	}
 
 	err := dbinterface.openDB()

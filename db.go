@@ -2,7 +2,6 @@ package todo
 
 import (
 	"database/sql"
-	"os"
 	"strconv"
 	"time"
 
@@ -27,17 +26,16 @@ type DBInterface interface {
 // DB represents DB instance
 type DB struct {
 	DBInterface
-	conn *sql.DB
+	conn   *sql.DB
+	dbpath string
 }
 
-func newDB() *DB {
-	return &DB{}
+func newDB(dbpath string) *DB {
+	return &DB{dbpath: dbpath}
 }
 
 func (db *DB) openDB() error {
-	// TODO: support multi platform
-	homeDir := os.Getenv("HOME")
-	conn, err := sql.Open("sqlite3", homeDir+"/.todo.db")
+	conn, err := sql.Open("sqlite3", db.dbpath)
 	if err != nil {
 		return err
 	}
