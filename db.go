@@ -54,7 +54,7 @@ func (db *DB) createTable() error {
 	q += " id INTEGER PRIMARY KEY AUTOINCREMENT"
 	q += ", desc VARCHAR(255) NOT NULL"
 	q += ", started_at TIMESTAMP DEFAULT (DATETIME('now','localtime'))"
-	q += ", stopped_at TIMESTAMP DEFAULT \"\""
+	q += ", stopped_at TIMESTAMP DEFAULT (DATETIME('1970-01-01'))"
 	q += ")"
 
 	_, err := db.conn.Exec(q)
@@ -65,9 +65,10 @@ func (db *DB) createTable() error {
 }
 
 func (db *DB) start(desc string) (*ToDo, error) {
+	// FIXME: this should not be done here
 	q := "UPDATE todo " +
 		"SET stopped_at = (DATETIME('now','localtime')) " +
-		"WHERE stopped_at == \"\""
+		"WHERE stopped_at = (DATETIME('1970-01-01'))"
 	_, err := db.conn.Exec(q)
 	if err != nil {
 		return nil, err
@@ -85,9 +86,8 @@ func (db *DB) start(desc string) (*ToDo, error) {
 		return nil, err
 	}
 
-	// FIXME: this should not be done here
 	q = "SELECT id, desc, started_at, stopped_at " +
-		"FROM todo WHERE id=?"
+		"FROM todo WHERE id = ?"
 	t := &ToDo{}
 	err = db.conn.QueryRow(q, id).Scan(&t.id, &t.desc, &t.startedAt, &t.stoppedAt)
 	if err != nil {
@@ -98,7 +98,7 @@ func (db *DB) start(desc string) (*ToDo, error) {
 
 func (db *DB) get(id int) (*ToDo, error) {
 	q := "SELECT id, desc, started_at, stopped_at " +
-		"FROM todo WHERE id=?"
+		"FROM todo WHERE id = ?"
 	t := &ToDo{}
 	err := db.conn.QueryRow(q, id).Scan(&t.id, &t.desc, &t.startedAt, &t.stoppedAt)
 	if err != nil {
@@ -117,7 +117,7 @@ func (db *DB) edit(id int, field, newValue string) (*ToDo, error) {
 	}
 
 	q = "SELECT id, desc, started_at, stopped_at " +
-		"FROM todo WHERE id=?"
+		"FROM todo WHERE id = ?"
 	t := &ToDo{}
 	err = db.conn.QueryRow(q, id).Scan(&t.id, &t.desc, &t.startedAt, &t.stoppedAt)
 	if err != nil {
@@ -129,6 +129,7 @@ func (db *DB) edit(id int, field, newValue string) (*ToDo, error) {
 func (db *DB) list() ([]*ToDo, error) {
 	q := "SELECT id, desc, started_at, stopped_at " +
 		"FROM todo"
+
 	rows, err := db.conn.Query(q)
 	if err != nil {
 		return nil, err
@@ -169,7 +170,7 @@ func (db *DB) stop(id int) error {
 func (db *DB) stopall() error {
 	q := "UPDATE todo " +
 		"SET stopped_at = (DATETIME('now','localtime')) " +
-		"WHERE stopped_at = \"\""
+		"WHERE stopped_at = (DATETIME('1970-01-01'))"
 	_, err := db.conn.Exec(q)
 	if err != nil {
 		return err

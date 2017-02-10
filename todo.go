@@ -23,9 +23,24 @@ func (t *ToDo) Error() string {
 		t.stoppedAt.Format("2006-01-02 15:04:05")
 }
 
+// ID returns ToDo's id
+func (t *ToDo) ID() int {
+	return t.id
+}
+
 // Desc returns ToDo's description
 func (t *ToDo) Desc() string {
 	return t.desc
+}
+
+// StartedAt returns ToDo's startedAt
+func (t *ToDo) StartedAt() string {
+	return t.startedAt.Format("2006-01-02 15:04:05")
+}
+
+// StoppedAt returns ToDo's stoppedAt
+func (t *ToDo) StoppedAt() string {
+	return t.stoppedAt.Format("2006-01-02 15:04:05")
 }
 
 var dbinterface DBInterface
