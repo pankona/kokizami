@@ -199,10 +199,93 @@ func TestNormalWithDB(t *testing.T) {
 	if err != nil {
 		t.Error("Stop returned error")
 	}
+	if todo.id != 1 {
+		t.Error("Stop returned unexpected ToDo")
+	}
+	if todo.desc != "edited" {
+		t.Error("Stop returned unexpected ToDo")
+	}
+	if todo.startedAt.Format("2006-01-02 15:04:05") != "2010-01-02 03:04:05" {
+		t.Error("Stop returned unexpected ToDo")
+	}
 	if todo.stoppedAt.Format("2006-01-02 15:04:05") == "1970-01-01 00:00:00" {
 		t.Error("Stop returned unexpected ToDo")
 	}
 
+	todo, err = Get(1)
+	if err != nil {
+		t.Error("Stop returned error")
+	}
+	if todo.id != 1 {
+		t.Error("Stop returned unexpected ToDo")
+	}
+	if todo.desc != "edited" {
+		t.Error("Stop returned unexpected ToDo")
+	}
+	if todo.startedAt.Format("2006-01-02 15:04:05") != "2010-01-02 03:04:05" {
+		t.Error("Stop returned unexpected ToDo")
+	}
+	if todo.stoppedAt.Format("2006-01-02 15:04:05") == "1970-01-01 00:00:00" {
+		t.Error("Stop returned unexpected ToDo")
+	}
+
+	err = Delete(1)
+	if err != nil {
+		t.Error("Delete returned error")
+	}
+	l, err = List()
+	if err != nil {
+		t.Error("Delete returned error")
+	}
+	if len(l) != 0 {
+		t.Error("List returned unexpected result")
+	}
+
+	todo, err = Start("test")
+	if err != nil {
+		t.Error("Delete returned error")
+	}
+
+	err = StopAll()
+	if err != nil {
+		t.Error("Delete returned error")
+	}
+	todo, err = Edit(2, "started_at", "2010-01-02 03:04:05")
+	if err != nil {
+		t.Error("Get returned error")
+	}
+	if todo.id != 2 {
+		t.Error("Get returned unexpected ToDo")
+	}
+	if todo.desc != "test" {
+		t.Error("Get returned unexpected ToDo")
+	}
+	if todo.startedAt.Format("2006-01-02 15:04:05") != "2010-01-02 03:04:05" {
+		t.Error("Get returned unexpected ToDo")
+	}
+	if todo.stoppedAt.Format("2006-01-02 15:04:05") == "1970-01-01 00:00:00" {
+		t.Error("Get returned unexpected ToDo")
+	}
+
+	todo, err = Edit(2, "stopped_at", "2011-01-02 03:04:05")
+	if err != nil {
+		t.Error("Get returned error")
+	}
+	if todo.ID() != 2 {
+		t.Error("ID returned unexpected value")
+	}
+	if todo.Desc() != "test" {
+		t.Error("Desc returned unexpected value")
+	}
+	if todo.StartedAt() != "2010-01-02 03:04:05" {
+		t.Error("StartedAt returned unexpected value")
+	}
+	if todo.StoppedAt() != "2011-01-02 03:04:05" {
+		t.Error("StoppedAt returned unexpected value")
+	}
+	if todo.Error() != "2\ttest\t2010-01-02 03:04:05\t2011-01-02 03:04:05" {
+		t.Error("Error returned unexpected value")
+	}
 }
 
 func TestStartError(t *testing.T) {
