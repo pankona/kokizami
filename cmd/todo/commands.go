@@ -66,18 +66,54 @@ func CommandNotFound(c *cli.Context, command string) {
 // todo start [new desc]
 func CmdStart(c *cli.Context) {
 	args := c.Args()
-	if len(args) != 1 {
+	if len(args) == 0 {
+		fp, err := ioutil.TempFile("", "tmp_")
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		defer os.Remove(fp.Name())
+
+		filepath := fp.Name()
+		fp.Close()
+
+		editor := os.Getenv("EDITOR")
+		if editor == "" {
+			editor = "vim"
+		}
+		cmd := exec.Command(editor, filepath)
+		cmd.Stdin = os.Stdin
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		cmd.Run()
+
+		bytes, err := ioutil.ReadFile(filepath)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+
+		ss := strings.Split(string(bytes), string("\n"))
+		if len(ss) < 1 {
+			log.Println("invalid arguments. needs (desc, started_at, stopped_at)")
+			return
+		}
+		t, err := todo.Start(ss[0])
+		if err != nil {
+			log.Println(err)
+		}
+		log.Println(t)
+	} else if len(args) == 1 {
+		desc := args[0]
+		t, err := todo.Start(desc)
+		if err != nil {
+			log.Println(err)
+		}
+		log.Println(t)
+	} else {
 		log.Println("start needs one arguments [desc]")
 		return
 	}
-
-	desc := args[0]
-	t, err := todo.Start(desc)
-	if err != nil {
-		log.Println(err)
-	}
-
-	log.Println(t)
 }
 
 // CmdRestart starts a task from old task list
@@ -108,16 +144,21 @@ func CmdRestart(c *cli.Context) {
 }
 
 // CmdEdit edits a specified task
-// todo edit desc       [id] [new desc]
-// todo edit started_at [id] [new started_at]
-// todo edit stopped_at [id] [new stopped_at]
+// todo edit [id]
+// todo edit [id] desc       [new desc]
+// todo edit [id] started_at [new started_at]
+// todo edit [id] stopped_at [new stopped_at]
 func CmdEdit(c *cli.Context) {
 	args := c.Args()
-
-	switch len(args) {
-	case 1:
+	if len(args) == 1 {
 		// FIXME: very long method. make them shorten...
 		id, err := strconv.Atoi(args[0])
+		if err != nil {
+			log.Println(err)
+			return
+		}
+
+		t, err := todo.Get(id)
 		if err != nil {
 			log.Println(err)
 			return
@@ -132,19 +173,9 @@ func CmdEdit(c *cli.Context) {
 
 		filepath := fp.Name()
 
-		t, err := todo.Get(id)
-		if err != nil {
-			log.Println(err)
-			return
-		}
-
-		ss := strings.Split(t.Error(), string("\t"))
-		if len(ss) != 4 {
-			log.Println("invalid record.", t)
-			return
-		}
-
-		_, err = fp.WriteString(ss[1] + "\n" + ss[2] + "\n" + ss[3])
+		_, err = fp.WriteString(t.Desc() + "\n" +
+			t.StartedAt() + "\n" +
+			t.StoppedAt())
 		if err != nil {
 			log.Println(err)
 			return
@@ -167,7 +198,7 @@ func CmdEdit(c *cli.Context) {
 			return
 		}
 
-		ss = strings.Split(string(bytes), string("\n"))
+		ss := strings.Split(string(bytes), string("\n"))
 		if len(ss) < 3 {
 			log.Println("invalid arguments. needs (desc, started_at, stopped_at)")
 			return
@@ -190,26 +221,25 @@ func CmdEdit(c *cli.Context) {
 		}
 		log.Println(t)
 		return
-	}
+	} else if len(args) == 3 {
+		id, err := strconv.Atoi(args[0])
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		field := args[1]
+		newValue := args[2]
 
-	if len(args) != 3 {
-		log.Println("edit needs three arguments (id, [desc|started_at|stopped_at], [new value])")
+		t, err := todo.Edit(id, field, newValue)
+		if err != nil {
+			log.Println(err)
+		}
+		log.Println(t)
+	} else {
+		log.Println("edit needs three arguments " +
+			"(id, [desc|started_at|stopped_at], [new value])")
 		return
 	}
-
-	id, err := strconv.Atoi(args[0])
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	field := args[1]
-	newValue := args[2]
-
-	t, err := todo.Edit(id, field, newValue)
-	if err != nil {
-		log.Println(err)
-	}
-	log.Println(t)
 }
 
 // CmdList shows ToDo list
