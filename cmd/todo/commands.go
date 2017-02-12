@@ -116,6 +116,7 @@ func CmdEdit(c *cli.Context) {
 
 	switch len(args) {
 	case 1:
+		// FIXME: very long method. make them shorten...
 		id, err := strconv.Atoi(args[0])
 		if err != nil {
 			log.Println(err)
