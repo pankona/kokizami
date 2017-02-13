@@ -8,7 +8,8 @@ import (
 )
 
 func main() {
-	todo.Initialize(nil, os.Getenv("HOME")+"/.todo.db")
+	// TODO: support multi platform
+	todo.Initialize(os.Getenv("HOME") + "/.todo.db")
 
 	app := cli.NewApp()
 	app.Name = Name
