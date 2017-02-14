@@ -10,7 +10,6 @@ import (
 	"strings"
 
 	"github.com/codegangsta/cli"
-	"github.com/pankona/todo"
 )
 
 // GlobalFlags can be used globally
@@ -63,7 +62,7 @@ func CommandNotFound(c *cli.Context, command string) {
 }
 
 // CmdStart starts a new task
-// todo start [new desc]
+// kokizami start [new desc]
 func CmdStart(c *cli.Context) {
 	args := c.Args()
 	if len(args) == 0 {
@@ -98,14 +97,14 @@ func CmdStart(c *cli.Context) {
 			log.Println("invalid arguments. needs (desc, started_at, stopped_at)")
 			return
 		}
-		t, err := todo.Start(ss[0])
+		t, err := kokizami.Start(ss[0])
 		if err != nil {
 			log.Println(err)
 		}
 		log.Println(t)
 	} else if len(args) == 1 {
 		desc := args[0]
-		t, err := todo.Start(desc)
+		t, err := kokizami.Start(desc)
 		if err != nil {
 			log.Println(err)
 		}
@@ -117,7 +116,7 @@ func CmdStart(c *cli.Context) {
 }
 
 // CmdRestart starts a task from old task list
-// todo restart [id]
+// kokizami restart [id]
 func CmdRestart(c *cli.Context) {
 	args := c.Args()
 	if len(args) != 1 {
@@ -130,12 +129,12 @@ func CmdRestart(c *cli.Context) {
 		log.Println(err)
 	}
 
-	t, err := todo.Get(id)
+	t, err := kokizami.Get(id)
 	if err != nil {
 		log.Println(err)
 	}
 
-	t, err = todo.Start(t.Desc())
+	t, err = kokizami.Start(t.Desc())
 	if err != nil {
 		log.Println(err)
 	}
@@ -144,10 +143,10 @@ func CmdRestart(c *cli.Context) {
 }
 
 // CmdEdit edits a specified task
-// todo edit [id]
-// todo edit [id] desc       [new desc]
-// todo edit [id] started_at [new started_at]
-// todo edit [id] stopped_at [new stopped_at]
+// kokizami edit [id]
+// kokizami edit [id] desc       [new desc]
+// kokizami edit [id] started_at [new started_at]
+// kokizami edit [id] stopped_at [new stopped_at]
 func CmdEdit(c *cli.Context) {
 	args := c.Args()
 	if len(args) == 1 {
@@ -158,7 +157,7 @@ func CmdEdit(c *cli.Context) {
 			return
 		}
 
-		t, err := todo.Get(id)
+		t, err := kokizami.Get(id)
 		if err != nil {
 			log.Println(err)
 			return
@@ -203,18 +202,18 @@ func CmdEdit(c *cli.Context) {
 			log.Println("invalid arguments. needs (desc, started_at, stopped_at)")
 			return
 		}
-		// TODO: fixme. should be done by one transaction
-		t, err = todo.Edit(id, "desc", ss[0])
+		// kokizami: fixme. should be done by one transaction
+		t, err = kokizami.Edit(id, "desc", ss[0])
 		if err != nil {
 			log.Println(err)
 			return
 		}
-		t, err = todo.Edit(id, "started_at", ss[1])
+		t, err = kokizami.Edit(id, "started_at", ss[1])
 		if err != nil {
 			log.Println(err)
 			return
 		}
-		t, err = todo.Edit(id, "stopped_at", ss[2])
+		t, err = kokizami.Edit(id, "stopped_at", ss[2])
 		if err != nil {
 			log.Println(err)
 			return
@@ -230,7 +229,7 @@ func CmdEdit(c *cli.Context) {
 		field := args[1]
 		newValue := args[2]
 
-		t, err := todo.Edit(id, field, newValue)
+		t, err := kokizami.Edit(id, field, newValue)
 		if err != nil {
 			log.Println(err)
 		}
@@ -242,10 +241,10 @@ func CmdEdit(c *cli.Context) {
 	}
 }
 
-// CmdList shows ToDo list
-// todo list
+// CmdList shows kokizami list
+// kokizami list
 func CmdList(c *cli.Context) {
-	l, err := todo.List()
+	l, err := kokizami.List()
 	if err != nil {
 		log.Println(err)
 		return
@@ -262,13 +261,13 @@ func CmdList(c *cli.Context) {
 }
 
 // CmdStop update specified task's stopped_at
-// todo stop      ... stop all tasks they don't have stopped_at
-// todo stop [id] ... stop a task by specified id
+// kokizami stop      ... stop all tasks they don't have stopped_at
+// kokizami stop [id] ... stop a task by specified id
 func CmdStop(c *cli.Context) {
 	args := c.Args()
 	switch len(args) {
 	case 0:
-		err := todo.StopAll()
+		err := kokizami.StopAll()
 		if err != nil {
 			log.Println(err)
 		}
@@ -278,7 +277,7 @@ func CmdStop(c *cli.Context) {
 			log.Println(err)
 			return
 		}
-		err = todo.Stop(id)
+		err = kokizami.Stop(id)
 		if err != nil {
 			log.Println(err)
 		}
@@ -289,7 +288,7 @@ func CmdStop(c *cli.Context) {
 }
 
 // CmdDelete deletes specified task
-// todo delete [id]
+// kokizami delete [id]
 func CmdDelete(c *cli.Context) {
 	args := c.Args()
 	if len(args) != 1 {
@@ -303,7 +302,7 @@ func CmdDelete(c *cli.Context) {
 		return
 	}
 
-	err = todo.Delete(id)
+	err = kokizami.Delete(id)
 	if err != nil {
 		log.Println(err)
 	}

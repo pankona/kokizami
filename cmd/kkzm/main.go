@@ -4,19 +4,18 @@ import (
 	"os"
 
 	"github.com/codegangsta/cli"
-	"github.com/pankona/todo"
 )
 
 func main() {
 	// TODO: support multi platform
-	todo.Initialize(os.Getenv("HOME") + "/.todo.db")
+	kokizami.Initialize(os.Getenv("HOME") + "/.kokizami.db")
 
 	app := cli.NewApp()
 	app.Name = Name
 	app.Version = Version
 	app.Author = "pankona"
 	app.Email = "yosuke.akatsuka@gmail.com"
-	app.Usage = "awesome todo manager"
+	app.Usage = "awesome task timer and tracker"
 	app.Flags = GlobalFlags
 	app.Action = CmdList // show list if no argument
 	app.Commands = Commands
