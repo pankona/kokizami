@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/codegangsta/cli"
+	"github.com/pankona/kokizami"
 )
 
 // GlobalFlags can be used globally

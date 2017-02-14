@@ -1,4 +1,4 @@
-package todo
+package kokizami
 
 import (
 	"strconv"
@@ -8,8 +8,8 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-// ToDo represents a struct of ToDo item
-type ToDo struct {
+// Kizami represents a struct of task item
+type Kizami struct {
 	id        int
 	desc      string
 	startedAt time.Time
@@ -17,37 +17,37 @@ type ToDo struct {
 	elapsed   time.Time
 }
 
-func (t *ToDo) String() string {
-	return strconv.Itoa(t.id) + "\t" +
-		t.desc + "\t" +
-		t.startedAt.Format("2006-01-02 15:04:05") + "\t" +
-		t.stoppedAt.Format("2006-01-02 15:04:05") + "\t" +
-		t.Elapsed()
+func (k *Kizami) String() string {
+	return strconv.Itoa(k.id) + "\t" +
+		k.desc + "\t" +
+		k.startedAt.Format("2006-01-02 15:04:05") + "\t" +
+		k.stoppedAt.Format("2006-01-02 15:04:05") + "\t" +
+		k.Elapsed()
 }
 
-// ID returns ToDo's id
-func (t *ToDo) ID() int {
-	return t.id
+// ID returns Kizami's id
+func (k *Kizami) ID() int {
+	return k.id
 }
 
-// Desc returns ToDo's description
-func (t *ToDo) Desc() string {
-	return t.desc
+// Desc returns Kizami's description
+func (k *Kizami) Desc() string {
+	return k.desc
 }
 
-// StartedAt returns ToDo's startedAt
-func (t *ToDo) StartedAt() string {
-	return t.startedAt.Format("2006-01-02 15:04:05")
+// StartedAt returns Kizami's startedAt
+func (k *Kizami) StartedAt() string {
+	return k.startedAt.Format("2006-01-02 15:04:05")
 }
 
-// StoppedAt returns ToDo's stoppedAt
-func (t *ToDo) StoppedAt() string {
-	return t.stoppedAt.Format("2006-01-02 15:04:05")
+// StoppedAt returns Kizami's stoppedAt
+func (k *Kizami) StoppedAt() string {
+	return k.stoppedAt.Format("2006-01-02 15:04:05")
 }
 
-// Elapsed returns ToDo's elapsed time
-func (t *ToDo) Elapsed() string {
-	elapsed := t.stoppedAt.Sub(t.startedAt)
+// Elapsed returns Kizami's elapsed time
+func (k *Kizami) Elapsed() string {
+	elapsed := k.stoppedAt.Sub(k.startedAt)
 	if elapsed < 0 {
 		elapsed = 0
 	}
@@ -56,7 +56,7 @@ func (t *ToDo) Elapsed() string {
 
 var dbinterface DBInterface
 
-// Initialize initializes ToDo library.
+// Initialize initializes Kizami library.
 // this function will create DB file and prepare tables.
 func Initialize(dbpath string) error {
 	return initialize(nil, dbpath)
@@ -78,8 +78,8 @@ func initialize(dbi DBInterface, dbpath string) error {
 	return nil
 }
 
-// Start starts a specified ToDo item to DB
-func Start(desc string) (*ToDo, error) {
+// Start starts a specified Kizami to DB
+func Start(desc string) (*Kizami, error) {
 	err := dbinterface.openDB()
 	if err != nil {
 		return nil, err
@@ -93,8 +93,8 @@ func Start(desc string) (*ToDo, error) {
 	return t, nil
 }
 
-// Get returns a ToDo item by specified id
-func Get(id int) (*ToDo, error) {
+// Get returns a Kizami by specified id
+func Get(id int) (*Kizami, error) {
 	err := dbinterface.openDB()
 	if err != nil {
 		return nil, err
@@ -108,8 +108,8 @@ func Get(id int) (*ToDo, error) {
 	return t, nil
 }
 
-// Edit edits a specified ToDo item
-func Edit(id int, field, newValue string) (*ToDo, error) {
+// Edit edits a specified Kizami item
+func Edit(id int, field, newValue string) (*Kizami, error) {
 	err := dbinterface.openDB()
 	if err != nil {
 		return nil, err
@@ -123,8 +123,8 @@ func Edit(id int, field, newValue string) (*ToDo, error) {
 	return t, nil
 }
 
-// List returns list of ToDo
-func List() ([]*ToDo, error) {
+// List returns list of Kizami
+func List() ([]*Kizami, error) {
 	err := dbinterface.openDB()
 	if err != nil {
 		return nil, err

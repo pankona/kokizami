@@ -1,4 +1,4 @@
-package todo
+package kokizami
 
 import (
 	"errors"
@@ -12,9 +12,9 @@ type DBMock struct {
 	mockOpenDB      func() error
 	mockClose       func()
 	mockCreateTable func() error
-	mockStart       func(desc string) (*ToDo, error)
-	mockEdit        func(id int, field, newValue string) (*ToDo, error)
-	mockList        func() ([]*ToDo, error)
+	mockStart       func(desc string) (*Kizami, error)
+	mockEdit        func(id int, field, newValue string) (*Kizami, error)
+	mockList        func() ([]*Kizami, error)
 	mockStop        func(id int) error
 	mockDelete      func(id int) error
 }
@@ -31,15 +31,15 @@ func (db *DBMock) createTable() error {
 	return db.mockCreateTable()
 }
 
-func (db *DBMock) start(desc string) (*ToDo, error) {
+func (db *DBMock) start(desc string) (*Kizami, error) {
 	return db.mockStart(desc)
 }
 
-func (db *DBMock) edit(id int, field, newValue string) (*ToDo, error) {
+func (db *DBMock) edit(id int, field, newValue string) (*Kizami, error) {
 	return db.mockEdit(id, field, newValue)
 }
 
-func (db *DBMock) list() ([]*ToDo, error) {
+func (db *DBMock) list() ([]*Kizami, error) {
 	return db.mockList()
 }
 
@@ -62,17 +62,17 @@ func genDefaultDBMock() *DBMock {
 		mockCreateTable: func() error {
 			return nil
 		},
-		mockStart: func(desc string) (*ToDo, error) {
-			return &ToDo{desc: "test"}, nil
+		mockStart: func(desc string) (*Kizami, error) {
+			return &Kizami{desc: "test"}, nil
 		},
-		mockEdit: func(id int, field, newValue string) (*ToDo, error) {
-			return &ToDo{desc: "edited"}, nil
+		mockEdit: func(id int, field, newValue string) (*Kizami, error) {
+			return &Kizami{desc: "edited"}, nil
 		},
-		mockList: func() ([]*ToDo, error) {
-			t := make([]*ToDo, 0, 0)
-			t = append(t, &ToDo{desc: "test0"})
-			t = append(t, &ToDo{desc: "test1"})
-			t = append(t, &ToDo{desc: "test2"})
+		mockList: func() ([]*Kizami, error) {
+			t := make([]*Kizami, 0, 0)
+			t = append(t, &Kizami{desc: "test0"})
+			t = append(t, &Kizami{desc: "test1"})
+			t = append(t, &Kizami{desc: "test2"})
 			return t, nil
 		},
 		mockStop: func(id int) error {
@@ -112,14 +112,14 @@ func TestStartNormal(t *testing.T) {
 	if err != nil {
 		t.Error("Initialize failed")
 	}
-	todo, err := Start("test")
+	k, err := Start("test")
 	if err != nil {
 		t.Error("Start returned error")
 	}
-	if todo == nil {
+	if k == nil {
 		t.Error("Start returned nil")
 	}
-	if todo.desc != "test" {
+	if k.desc != "test" {
 		t.Error("Start returned unexpected value")
 	}
 }
@@ -132,15 +132,15 @@ func TestNormalWithDB(t *testing.T) {
 	defer os.Remove(fp.Name())
 
 	err = initialize(nil, fp.Name())
-	todo, err := Start("test")
+	k, err := Start("test")
 	if err != nil {
 		t.Error("Start returned error")
 	}
-	if todo.id != 1 {
-		t.Error("Start returned unexpected ToDo instance")
+	if k.id != 1 {
+		t.Error("Start returned unexpected Kizami instance")
 	}
-	if todo.desc != "test" {
-		t.Error("Start returned unexpected ToDo instance")
+	if k.desc != "test" {
+		t.Error("Start returned unexpected Kizami instance")
 	}
 	l, err := List()
 	if err != nil {
@@ -150,83 +150,83 @@ func TestNormalWithDB(t *testing.T) {
 		t.Error("unexpected list length")
 	}
 
-	todo, err = Edit(1, "desc", "edited")
+	k, err = Edit(1, "desc", "edited")
 	if err != nil {
 		t.Error("Edit returned error")
 	}
-	if todo.id != 1 {
-		t.Error("Edit returned unexpected ToDo")
+	if k.id != 1 {
+		t.Error("Edit returned unexpected Kizami")
 	}
-	if todo.desc != "edited" {
-		t.Error("Edit returned unexpected ToDo")
+	if k.desc != "edited" {
+		t.Error("Edit returned unexpected Kizami")
 	}
 
-	todo, err = Edit(1, "started_at", "2010-01-02 03:04:05")
+	k, err = Edit(1, "started_at", "2010-01-02 03:04:05")
 	if err != nil {
 		t.Error("Edit returned error")
 	}
-	if todo.id != 1 {
-		t.Error("Edit returned unexpected ToDo")
+	if k.id != 1 {
+		t.Error("Edit returned unexpected Kizami")
 	}
-	if todo.desc != "edited" {
-		t.Error("Edit returned unexpected ToDo")
+	if k.desc != "edited" {
+		t.Error("Edit returned unexpected Kizami")
 	}
-	if todo.startedAt.Format("2006-01-02 15:04:05") != "2010-01-02 03:04:05" {
-		t.Error("Edit returned unexpected ToDo")
+	if k.startedAt.Format("2006-01-02 15:04:05") != "2010-01-02 03:04:05" {
+		t.Error("Edit returned unexpected Kizami")
 	}
-	if todo.stoppedAt.Format("2006-01-02 15:04:05") != "1970-01-01 00:00:00" {
-		t.Error("Edit returned unexpected ToDo")
+	if k.stoppedAt.Format("2006-01-02 15:04:05") != "1970-01-01 00:00:00" {
+		t.Error("Edit returned unexpected Kizami")
 	}
 
-	todo, err = Edit(1, "stopped_at", "2011-01-02 03:04:05")
+	k, err = Edit(1, "stopped_at", "2011-01-02 03:04:05")
 	if err != nil {
 		t.Error("Edit returned error")
 	}
-	if todo.id != 1 {
-		t.Error("Edit returned unexpected ToDo")
+	if k.id != 1 {
+		t.Error("Edit returned unexpected Kizami")
 	}
-	if todo.desc != "edited" {
-		t.Error("Edit returned unexpected ToDo")
+	if k.desc != "edited" {
+		t.Error("Edit returned unexpected Kizami")
 	}
-	if todo.startedAt.Format("2006-01-02 15:04:05") != "2010-01-02 03:04:05" {
-		t.Error("Edit returned unexpected ToDo")
+	if k.startedAt.Format("2006-01-02 15:04:05") != "2010-01-02 03:04:05" {
+		t.Error("Edit returned unexpected Kizami")
 	}
-	if todo.stoppedAt.Format("2006-01-02 15:04:05") != "2011-01-02 03:04:05" {
-		t.Error("Edit returned unexpected ToDo")
+	if k.stoppedAt.Format("2006-01-02 15:04:05") != "2011-01-02 03:04:05" {
+		t.Error("Edit returned unexpected Kizami")
 	}
 
 	err = Stop(1)
 	if err != nil {
 		t.Error("Stop returned error")
 	}
-	if todo.id != 1 {
-		t.Error("Stop returned unexpected ToDo")
+	if k.id != 1 {
+		t.Error("Stop returned unexpected Kizami")
 	}
-	if todo.desc != "edited" {
-		t.Error("Stop returned unexpected ToDo")
+	if k.desc != "edited" {
+		t.Error("Stop returned unexpected Kizami")
 	}
-	if todo.startedAt.Format("2006-01-02 15:04:05") != "2010-01-02 03:04:05" {
-		t.Error("Stop returned unexpected ToDo")
+	if k.startedAt.Format("2006-01-02 15:04:05") != "2010-01-02 03:04:05" {
+		t.Error("Stop returned unexpected Kizami")
 	}
-	if todo.stoppedAt.Format("2006-01-02 15:04:05") == "1970-01-01 00:00:00" {
-		t.Error("Stop returned unexpected ToDo")
+	if k.stoppedAt.Format("2006-01-02 15:04:05") == "1970-01-01 00:00:00" {
+		t.Error("Stop returned unexpected Kizami")
 	}
 
-	todo, err = Get(1)
+	k, err = Get(1)
 	if err != nil {
 		t.Error("Stop returned error")
 	}
-	if todo.id != 1 {
-		t.Error("Stop returned unexpected ToDo")
+	if k.id != 1 {
+		t.Error("Stop returned unexpected Kizami")
 	}
-	if todo.desc != "edited" {
-		t.Error("Stop returned unexpected ToDo")
+	if k.desc != "edited" {
+		t.Error("Stop returned unexpected Kizami")
 	}
-	if todo.startedAt.Format("2006-01-02 15:04:05") != "2010-01-02 03:04:05" {
-		t.Error("Stop returned unexpected ToDo")
+	if k.startedAt.Format("2006-01-02 15:04:05") != "2010-01-02 03:04:05" {
+		t.Error("Stop returned unexpected Kizami")
 	}
-	if todo.stoppedAt.Format("2006-01-02 15:04:05") == "1970-01-01 00:00:00" {
-		t.Error("Stop returned unexpected ToDo")
+	if k.stoppedAt.Format("2006-01-02 15:04:05") == "1970-01-01 00:00:00" {
+		t.Error("Stop returned unexpected Kizami")
 	}
 
 	err = Delete(1)
@@ -241,7 +241,7 @@ func TestNormalWithDB(t *testing.T) {
 		t.Error("List returned unexpected result")
 	}
 
-	todo, err = Start("test")
+	k, err = Start("test")
 	if err != nil {
 		t.Error("Delete returned error")
 	}
@@ -250,41 +250,41 @@ func TestNormalWithDB(t *testing.T) {
 	if err != nil {
 		t.Error("Delete returned error")
 	}
-	todo, err = Edit(2, "started_at", "2010-01-02 03:04:05")
+	k, err = Edit(2, "started_at", "2010-01-02 03:04:05")
 	if err != nil {
 		t.Error("Get returned error")
 	}
-	if todo.id != 2 {
-		t.Error("Get returned unexpected ToDo")
+	if k.id != 2 {
+		t.Error("Get returned unexpected Kizami")
 	}
-	if todo.desc != "test" {
-		t.Error("Get returned unexpected ToDo")
+	if k.desc != "test" {
+		t.Error("Get returned unexpected Kizami")
 	}
-	if todo.startedAt.Format("2006-01-02 15:04:05") != "2010-01-02 03:04:05" {
-		t.Error("Get returned unexpected ToDo")
+	if k.startedAt.Format("2006-01-02 15:04:05") != "2010-01-02 03:04:05" {
+		t.Error("Get returned unexpected Kizami")
 	}
-	if todo.stoppedAt.Format("2006-01-02 15:04:05") == "1970-01-01 00:00:00" {
-		t.Error("Get returned unexpected ToDo")
+	if k.stoppedAt.Format("2006-01-02 15:04:05") == "1970-01-01 00:00:00" {
+		t.Error("Get returned unexpected Kizami")
 	}
 
-	todo, err = Edit(2, "stopped_at", "2010-01-02 04:04:05")
+	k, err = Edit(2, "stopped_at", "2010-01-02 04:04:05")
 	if err != nil {
 		t.Error("Get returned error")
 	}
-	if todo.ID() != 2 {
+	if k.ID() != 2 {
 		t.Error("ID returned unexpected value")
 	}
-	if todo.Desc() != "test" {
+	if k.Desc() != "test" {
 		t.Error("Desc returned unexpected value")
 	}
-	if todo.StartedAt() != "2010-01-02 03:04:05" {
+	if k.StartedAt() != "2010-01-02 03:04:05" {
 		t.Error("StartedAt returned unexpected value")
 	}
-	if todo.StoppedAt() != "2010-01-02 04:04:05" {
+	if k.StoppedAt() != "2010-01-02 04:04:05" {
 		t.Error("StoppedAt returned unexpected value")
 	}
-	if todo.String() != "2\ttest\t2010-01-02 03:04:05\t2010-01-02 04:04:05\t1h0m0s" {
-		t.Error("Error returned unexpected value. actual =", todo.String())
+	if k.String() != "2\ttest\t2010-01-02 03:04:05\t2010-01-02 04:04:05\t1h0m0s" {
+		t.Error("Error returned unexpected value. actual =", k.String())
 	}
 }
 
@@ -299,9 +299,9 @@ func TestStartError(t *testing.T) {
 	if err == nil {
 		t.Error("Initialize succeeded but this is not expected")
 	}
-	todo, err := Start("test")
-	if todo != nil {
-		t.Error("todo is not nil but this is not expected")
+	k, err := Start("test")
+	if k != nil {
+		t.Error("k is not nil but this is not expected")
 	}
 	if err == nil {
 		t.Error("error is not nil but this is not expected")
@@ -311,16 +311,16 @@ func TestStartError(t *testing.T) {
 	dbmock.mockOpenDB = func() error {
 		return nil
 	}
-	dbmock.mockStart = func(desc string) (*ToDo, error) {
+	dbmock.mockStart = func(desc string) (*Kizami, error) {
 		return nil, errors.New("error")
 	}
 	err = initialize(dbmock, "")
 	if err != nil {
 		t.Error("Initialize failed")
 	}
-	todo, err = Start("test")
-	if todo != nil {
-		t.Error("todo is not nil but this is not expected")
+	k, err = Start("test")
+	if k != nil {
+		t.Error("k is not nil but this is not expected")
 	}
 	if err == nil {
 		t.Error("error is nil but this is not expected")
@@ -334,14 +334,14 @@ func TestEditNormal(t *testing.T) {
 	if err != nil {
 		t.Error("Initialize failed")
 	}
-	todo, err := Edit(0, "desc", "edited")
+	k, err := Edit(0, "desc", "edited")
 	if err != nil {
 		t.Error("Edit returned error")
 	}
-	if todo == nil {
+	if k == nil {
 		t.Error("Edit returned nil")
 	}
-	if todo.desc != "edited" {
+	if k.desc != "edited" {
 		t.Error("edit returned unexpected value")
 	}
 }
@@ -357,9 +357,9 @@ func TestEditError(t *testing.T) {
 	if err == nil {
 		t.Error("Initialize succeeded but this is not expected")
 	}
-	todo, err := Edit(0, "desc", "edited")
-	if todo != nil {
-		t.Error("todo is not nil but this is not expected")
+	k, err := Edit(0, "desc", "edited")
+	if k != nil {
+		t.Error("k is not nil but this is not expected")
 	}
 	if err == nil {
 		t.Error("error is not nil but this is not expected")
@@ -369,16 +369,16 @@ func TestEditError(t *testing.T) {
 	dbmock.mockOpenDB = func() error {
 		return nil
 	}
-	dbmock.mockEdit = func(id int, field, newValue string) (*ToDo, error) {
+	dbmock.mockEdit = func(id int, field, newValue string) (*Kizami, error) {
 		return nil, errors.New("error")
 	}
 	err = initialize(dbmock, "")
 	if err != nil {
 		t.Error("Initialize failed")
 	}
-	todo, err = Edit(0, "desc", "edited")
-	if todo != nil {
-		t.Error("todo is not nil but this is not expected")
+	k, err = Edit(0, "desc", "edited")
+	if k != nil {
+		t.Error("k is not nil but this is not expected")
 	}
 	if err == nil {
 		t.Error("error is nil but this is not expected")
@@ -392,20 +392,20 @@ func TestListNormal(t *testing.T) {
 	if err != nil {
 		t.Error("initialize failed")
 	}
-	todos, err := List()
+	ks, err := List()
 	if err != nil {
 		t.Error("List returned error")
 	}
-	if todos == nil {
+	if ks == nil {
 		t.Error("List returned nil")
 	}
-	if todos[0].desc != "test0" {
+	if ks[0].desc != "test0" {
 		t.Error("List returned unexpected value")
 	}
-	if todos[1].desc != "test1" {
+	if ks[1].desc != "test1" {
 		t.Error("List returned unexpected value")
 	}
-	if todos[2].desc != "test2" {
+	if ks[2].desc != "test2" {
 		t.Error("List returned unexpected value")
 	}
 }
@@ -418,9 +418,9 @@ func TestListError(t *testing.T) {
 		return errors.New("error")
 	}
 	initialize(dbmock, "")
-	todos, err := List()
-	if todos != nil {
-		t.Error("list of ToDo is not nil but this is not expected")
+	ks, err := List()
+	if ks != nil {
+		t.Error("list of Kizami is not nil but this is not expected")
 	}
 	if err == nil {
 		t.Error("err is nil but this is not expected")
@@ -430,16 +430,16 @@ func TestListError(t *testing.T) {
 	dbmock.mockOpenDB = func() error {
 		return nil
 	}
-	dbmock.mockList = func() ([]*ToDo, error) {
+	dbmock.mockList = func() ([]*Kizami, error) {
 		return nil, errors.New("error")
 	}
 	err = initialize(dbmock, "")
 	if err != nil {
 		t.Error("Initialize failed")
 	}
-	todos, err = List()
-	if todos != nil {
-		t.Error("list of ToDo is not nil but this is not expected")
+	ks, err = List()
+	if ks != nil {
+		t.Error("list of Kizami is not nil but this is not expected")
 	}
 	if err == nil {
 		t.Error("err is nil but this is not expected")

@@ -1,4 +1,4 @@
-package todo
+package kokizami
 
 import (
 	"database/sql"
@@ -14,10 +14,10 @@ type DBInterface interface {
 	openDB() error
 	close()
 	createTable() error
-	start(desc string) (*ToDo, error)
-	get(id int) (*ToDo, error)
-	edit(id int, field, newValue string) (*ToDo, error)
-	list() ([]*ToDo, error)
+	start(desc string) (*Kizami, error)
+	get(id int) (*Kizami, error)
+	edit(id int, field, newValue string) (*Kizami, error)
+	list() ([]*Kizami, error)
 	stop(id int) error
 	stopall() error
 	delete(id int) error
@@ -62,7 +62,7 @@ func (db *DB) createTable() error {
 	return nil
 }
 
-func (db *DB) start(desc string) (*ToDo, error) {
+func (db *DB) start(desc string) (*Kizami, error) {
 	// FIXME: this should not be done here
 	q := "UPDATE todo " +
 		"SET stopped_at = (DATETIME('now','localtime')) " +
@@ -86,7 +86,7 @@ func (db *DB) start(desc string) (*ToDo, error) {
 
 	q = "SELECT id, desc, started_at, stopped_at " +
 		"FROM todo WHERE id = ?"
-	t := &ToDo{}
+	t := &Kizami{}
 	err = db.conn.QueryRow(q, id).Scan(&t.id, &t.desc, &t.startedAt, &t.stoppedAt)
 	if err != nil {
 		return nil, err
@@ -94,10 +94,10 @@ func (db *DB) start(desc string) (*ToDo, error) {
 	return t, nil
 }
 
-func (db *DB) get(id int) (*ToDo, error) {
+func (db *DB) get(id int) (*Kizami, error) {
 	q := "SELECT id, desc, started_at, stopped_at " +
 		"FROM todo WHERE id = ?"
-	t := &ToDo{}
+	t := &Kizami{}
 	err := db.conn.QueryRow(q, id).Scan(&t.id, &t.desc, &t.startedAt, &t.stoppedAt)
 	if err != nil {
 		return nil, err
@@ -105,7 +105,7 @@ func (db *DB) get(id int) (*ToDo, error) {
 	return t, nil
 }
 
-func (db *DB) edit(id int, field, newValue string) (*ToDo, error) {
+func (db *DB) edit(id int, field, newValue string) (*Kizami, error) {
 	q := "UPDATE todo " +
 		"SET " + field + " = '" + newValue + "' " +
 		"WHERE id = " + strconv.Itoa(id)
@@ -116,7 +116,7 @@ func (db *DB) edit(id int, field, newValue string) (*ToDo, error) {
 
 	q = "SELECT id, desc, started_at, stopped_at " +
 		"FROM todo WHERE id = ?"
-	t := &ToDo{}
+	t := &Kizami{}
 	err = db.conn.QueryRow(q, id).Scan(&t.id, &t.desc, &t.startedAt, &t.stoppedAt)
 	if err != nil {
 		return nil, err
@@ -124,7 +124,7 @@ func (db *DB) edit(id int, field, newValue string) (*ToDo, error) {
 	return t, nil
 }
 
-func (db *DB) list() ([]*ToDo, error) {
+func (db *DB) list() ([]*Kizami, error) {
 	q := "SELECT id, desc, started_at, stopped_at " +
 		"FROM todo"
 
@@ -133,7 +133,7 @@ func (db *DB) list() ([]*ToDo, error) {
 		return nil, err
 	}
 
-	todos := make([]*ToDo, 0, 0)
+	todos := make([]*Kizami, 0, 0)
 	var id int
 	var desc string
 	var startedAt time.Time
@@ -144,7 +144,7 @@ func (db *DB) list() ([]*ToDo, error) {
 			panic(err.Error())
 		}
 		todos = append(todos,
-			&ToDo{
+			&Kizami{
 				id:        id,
 				desc:      desc,
 				startedAt: startedAt,
