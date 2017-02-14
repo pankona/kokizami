@@ -17,7 +17,7 @@ type ToDo struct {
 	elapsed   time.Time
 }
 
-func (t *ToDo) Error() string {
+func (t *ToDo) String() string {
 	return strconv.Itoa(t.id) + "\t" +
 		t.desc + "\t" +
 		t.startedAt.Format("2006-01-02 15:04:05") + "\t" +

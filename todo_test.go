@@ -283,8 +283,8 @@ func TestNormalWithDB(t *testing.T) {
 	if todo.StoppedAt() != "2010-01-02 04:04:05" {
 		t.Error("StoppedAt returned unexpected value")
 	}
-	if todo.Error() != "2\ttest\t2010-01-02 03:04:05\t2010-01-02 04:04:05\t1h0m0s" {
-		t.Error("Error returned unexpected value. actual =", todo.Error())
+	if todo.String() != "2\ttest\t2010-01-02 03:04:05\t2010-01-02 04:04:05\t1h0m0s" {
+		t.Error("Error returned unexpected value. actual =", todo.String())
 	}
 }
 
