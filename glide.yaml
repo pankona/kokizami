@@ -1,4 +1,4 @@
-package: github.com/pankona/todo
+package: github.com/pankona/kokizami
 import:
 - package: github.com/codegangsta/cli
   version: ^1.19.1
