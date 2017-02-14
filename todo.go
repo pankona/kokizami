@@ -14,13 +14,15 @@ type ToDo struct {
 	desc      string
 	startedAt time.Time
 	stoppedAt time.Time
+	elapsed   time.Time
 }
 
 func (t *ToDo) Error() string {
 	return strconv.Itoa(t.id) + "\t" +
 		t.desc + "\t" +
 		t.startedAt.Format("2006-01-02 15:04:05") + "\t" +
-		t.stoppedAt.Format("2006-01-02 15:04:05")
+		t.stoppedAt.Format("2006-01-02 15:04:05") + "\t" +
+		t.Elapsed()
 }
 
 // ID returns ToDo's id
@@ -41,6 +43,15 @@ func (t *ToDo) StartedAt() string {
 // StoppedAt returns ToDo's stoppedAt
 func (t *ToDo) StoppedAt() string {
 	return t.stoppedAt.Format("2006-01-02 15:04:05")
+}
+
+// Elapsed returns ToDo's elapsed time
+func (t *ToDo) Elapsed() string {
+	elapsed := t.stoppedAt.Sub(t.startedAt)
+	if elapsed < 0 {
+		elapsed = 0
+	}
+	return elapsed.String()
 }
 
 var dbinterface DBInterface

@@ -267,7 +267,7 @@ func TestNormalWithDB(t *testing.T) {
 		t.Error("Get returned unexpected ToDo")
 	}
 
-	todo, err = Edit(2, "stopped_at", "2011-01-02 03:04:05")
+	todo, err = Edit(2, "stopped_at", "2010-01-02 04:04:05")
 	if err != nil {
 		t.Error("Get returned error")
 	}
@@ -280,11 +280,11 @@ func TestNormalWithDB(t *testing.T) {
 	if todo.StartedAt() != "2010-01-02 03:04:05" {
 		t.Error("StartedAt returned unexpected value")
 	}
-	if todo.StoppedAt() != "2011-01-02 03:04:05" {
+	if todo.StoppedAt() != "2010-01-02 04:04:05" {
 		t.Error("StoppedAt returned unexpected value")
 	}
-	if todo.Error() != "2\ttest\t2010-01-02 03:04:05\t2011-01-02 03:04:05" {
-		t.Error("Error returned unexpected value")
+	if todo.Error() != "2\ttest\t2010-01-02 03:04:05\t2010-01-02 04:04:05\t1h0m0s" {
+		t.Error("Error returned unexpected value. actual =", todo.Error())
 	}
 }
 
