@@ -4,7 +4,7 @@
 all: build
 
 build:
-	@go build
+	@go build -v -i
 
 install:
-	@go install
+	@go install -v
