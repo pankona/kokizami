@@ -1,6 +1,6 @@
 *.test
 /vendor
-cmd/todo/todo
+cmd/kkzm/kkzm
 *.swp
 coverage.out
 .idea
