@@ -174,8 +174,8 @@ func CmdEdit(c *cli.Context) {
 		filepath := fp.Name()
 
 		_, err = fp.WriteString(t.Desc() + "\n" +
-			t.StartedAt() + "\n" +
-			t.StoppedAt())
+			t.StartedAt().Format("2006-01-02 15:04:05") + "\n" +
+			t.StoppedAt().Format("2006-01-02 15:04:05"))
 		if err != nil {
 			log.Println(err)
 			return

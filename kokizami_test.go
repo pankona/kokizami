@@ -277,10 +277,10 @@ func TestNormalWithDB(t *testing.T) {
 	if k.Desc() != "test" {
 		t.Error("Desc returned unexpected value")
 	}
-	if k.StartedAt() != "2010-01-02 03:04:05" {
+	if k.StartedAt().Format("2006-01-02 15:04:05") != "2010-01-02 03:04:05" {
 		t.Error("StartedAt returned unexpected value")
 	}
-	if k.StoppedAt() != "2010-01-02 04:04:05" {
+	if k.StoppedAt().Format("2006-01-02 15:04:05") != "2010-01-02 04:04:05" {
 		t.Error("StoppedAt returned unexpected value")
 	}
 	if k.String() != "2\ttest\t2010-01-02 03:04:05\t2010-01-02 04:04:05\t1h0m0s" {
