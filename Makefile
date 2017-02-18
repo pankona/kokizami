@@ -20,7 +20,7 @@ ifeq ($(shell command -v glide 2> /dev/null),)
 	go get -u github.com/Masterminds/glide
 endif
 
-install:
+install: test
 	@make install -C $(CURDIR)/cmd/kkzm
 
 show:
