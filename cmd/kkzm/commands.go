@@ -108,18 +108,18 @@ func CmdStart(c *cli.Context) {
 			log.Println("invalid arguments. needs (desc, started_at, stopped_at)")
 			return
 		}
-		t, err := kokizami.Start(ss[0])
+		k, err := kokizami.Start(ss[0])
 		if err != nil {
 			log.Println(err)
 		}
-		log.Println(t)
+		fmt.Println(toString(k))
 	} else if len(args) == 1 {
 		desc := args[0]
-		t, err := kokizami.Start(desc)
+		k, err := kokizami.Start(desc)
 		if err != nil {
 			log.Println(err)
 		}
-		log.Println(t)
+		fmt.Println(toString(k))
 	} else {
 		log.Println("start needs one arguments [desc]")
 		return
@@ -140,17 +140,16 @@ func CmdRestart(c *cli.Context) {
 		log.Println(err)
 	}
 
-	t, err := kokizami.Get(id)
+	k, err := kokizami.Get(id)
 	if err != nil {
 		log.Println(err)
 	}
 
-	t, err = kokizami.Start(t.Desc())
+	k, err = kokizami.Start(k.Desc())
 	if err != nil {
 		log.Println(err)
 	}
-
-	log.Println(t)
+	fmt.Println(toString(k))
 }
 
 // CmdEdit edits a specified task
@@ -168,7 +167,7 @@ func CmdEdit(c *cli.Context) {
 			return
 		}
 
-		t, err := kokizami.Get(id)
+		k, err := kokizami.Get(id)
 		if err != nil {
 			log.Println(err)
 			return
@@ -183,9 +182,9 @@ func CmdEdit(c *cli.Context) {
 
 		filepath := fp.Name()
 
-		_, err = fp.WriteString(t.Desc() + "\n" +
-			t.StartedAt().Format("2006-01-02 15:04:05") + "\n" +
-			t.StoppedAt().Format("2006-01-02 15:04:05"))
+		_, err = fp.WriteString(k.Desc() + "\n" +
+			k.StartedAt().Format("2006-01-02 15:04:05") + "\n" +
+			k.StoppedAt().Format("2006-01-02 15:04:05"))
 		if err != nil {
 			log.Println(err)
 			return
@@ -214,22 +213,22 @@ func CmdEdit(c *cli.Context) {
 			return
 		}
 		// kokizami: fixme. should be done by one transaction
-		t, err = kokizami.Edit(id, "desc", ss[0])
+		k, err = kokizami.Edit(id, "desc", ss[0])
 		if err != nil {
 			log.Println(err)
 			return
 		}
-		t, err = kokizami.Edit(id, "started_at", ss[1])
+		k, err = kokizami.Edit(id, "started_at", ss[1])
 		if err != nil {
 			log.Println(err)
 			return
 		}
-		t, err = kokizami.Edit(id, "stopped_at", ss[2])
+		k, err = kokizami.Edit(id, "stopped_at", ss[2])
 		if err != nil {
 			log.Println(err)
 			return
 		}
-		log.Println(t)
+		fmt.Println(toString(k))
 		return
 	} else if len(args) == 3 {
 		id, err := strconv.Atoi(args[0])
@@ -240,11 +239,11 @@ func CmdEdit(c *cli.Context) {
 		field := args[1]
 		newValue := args[2]
 
-		t, err := kokizami.Edit(id, field, newValue)
+		k, err := kokizami.Edit(id, field, newValue)
 		if err != nil {
 			log.Println(err)
 		}
-		log.Println(t)
+		fmt.Println(k)
 	} else {
 		log.Println("edit needs three arguments " +
 			"(id, [desc|started_at|stopped_at], [new value])")
