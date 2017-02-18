@@ -82,9 +82,7 @@ func round(d, r time.Duration) time.Duration {
 	return d
 }
 
-// String return string representation of Kizami
 func toString(k *kokizami.Kizami) string {
-
 	return strconv.Itoa(k.ID()) + "\t" +
 		k.Desc() + "\t" +
 		k.StartedAt().In(time.Local).Format("2006-01-02 15:04:05") + "\t" +
