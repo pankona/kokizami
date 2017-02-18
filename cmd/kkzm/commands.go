@@ -201,8 +201,8 @@ func CmdEdit(c *cli.Context) {
 		filepath := fp.Name()
 
 		_, err = fp.WriteString(k.Desc() + "\n" +
-			k.StartedAt().Format("2006-01-02 15:04:05") + "\n" +
-			k.StoppedAt().Format("2006-01-02 15:04:05"))
+			k.StartedAt().In(time.Local).Format("2006-01-02 15:04:05") + "\n" +
+			k.StoppedAt().In(time.Local).Format("2006-01-02 15:04:05"))
 		if err != nil {
 			log.Println(err)
 			return
@@ -236,12 +236,17 @@ func CmdEdit(c *cli.Context) {
 			log.Println(err)
 			return
 		}
-		k, err = kokizami.Edit(id, "started_at", ss[1])
+
+		startedAt, err := time.ParseInLocation("2006-01-02 15:04:05", ss[1], time.Local)
+		startedAtStr := startedAt.UTC().Format("2006-01-02 15:04:05")
+		k, err = kokizami.Edit(id, "started_at", startedAtStr)
 		if err != nil {
 			log.Println(err)
 			return
 		}
-		k, err = kokizami.Edit(id, "stopped_at", ss[2])
+		stoppedAt, err := time.ParseInLocation("2006-01-02 15:04:05", ss[2], time.Local)
+		stoppedAtStr := stoppedAt.UTC().Format("2006-01-02 15:04:05")
+		k, err = kokizami.Edit(id, "stopped_at", stoppedAtStr)
 		if err != nil {
 			log.Println(err)
 			return
