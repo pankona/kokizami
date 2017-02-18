@@ -63,13 +63,33 @@ func CommandNotFound(c *cli.Context, command string) {
 	os.Exit(2)
 }
 
+func round(d, r time.Duration) time.Duration {
+	if r <= 0 {
+		return d
+	}
+	neg := d < 0
+	if neg {
+		d = -d
+	}
+	if m := d % r; m+m < r {
+		d = d - m
+	} else {
+		d = d + r - m
+	}
+	if neg {
+		return -d
+	}
+	return d
+}
+
 // String return string representation of Kizami
 func toString(k *kokizami.Kizami) string {
+
 	return strconv.Itoa(k.ID()) + "\t" +
 		k.Desc() + "\t" +
 		k.StartedAt().In(time.Local).Format("2006-01-02 15:04:05") + "\t" +
 		k.StoppedAt().In(time.Local).Format("2006-01-02 15:04:05") + "\t" +
-		k.Elapsed().String()
+		round(k.Elapsed(), time.Second).String()
 }
 
 // CmdStart starts a new task
