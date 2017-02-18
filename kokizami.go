@@ -17,6 +17,8 @@ type Kizami struct {
 	elapsed   time.Time
 }
 
+// String returns string representation of a Kizami.
+// note that the timestamps is not considered time zone.
 func (k *Kizami) String() string {
 	return strconv.Itoa(k.id) + "\t" +
 		k.desc + "\t" +

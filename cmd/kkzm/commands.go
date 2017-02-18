@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/codegangsta/cli"
 	"github.com/pankona/kokizami"
@@ -242,6 +243,15 @@ func CmdEdit(c *cli.Context) {
 	}
 }
 
+// String return string representation of Kizami
+func toString(k *kokizami.Kizami) string {
+	return strconv.Itoa(k.ID()) + "\t" +
+		k.Desc() + "\t" +
+		k.StartedAt().In(time.Local).Format("2006-01-02 15:04:05") + "\t" +
+		k.StoppedAt().In(time.Local).Format("2006-01-02 15:04:05") + "\t" +
+		k.Elapsed().String()
+}
+
 // CmdList shows kokizami list
 // kokizami list
 func CmdList(c *cli.Context) {
@@ -257,7 +267,7 @@ func CmdList(c *cli.Context) {
 	}
 
 	for _, v := range l {
-		fmt.Println(v)
+		fmt.Println(toString(v))
 	}
 }
 
