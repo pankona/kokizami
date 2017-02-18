@@ -63,6 +63,15 @@ func CommandNotFound(c *cli.Context, command string) {
 	os.Exit(2)
 }
 
+// String return string representation of Kizami
+func toString(k *kokizami.Kizami) string {
+	return strconv.Itoa(k.ID()) + "\t" +
+		k.Desc() + "\t" +
+		k.StartedAt().In(time.Local).Format("2006-01-02 15:04:05") + "\t" +
+		k.StoppedAt().In(time.Local).Format("2006-01-02 15:04:05") + "\t" +
+		k.Elapsed().String()
+}
+
 // CmdStart starts a new task
 // kokizami start [new desc]
 func CmdStart(c *cli.Context) {
@@ -241,15 +250,6 @@ func CmdEdit(c *cli.Context) {
 			"(id, [desc|started_at|stopped_at], [new value])")
 		return
 	}
-}
-
-// String return string representation of Kizami
-func toString(k *kokizami.Kizami) string {
-	return strconv.Itoa(k.ID()) + "\t" +
-		k.Desc() + "\t" +
-		k.StartedAt().In(time.Local).Format("2006-01-02 15:04:05") + "\t" +
-		k.StoppedAt().In(time.Local).Format("2006-01-02 15:04:05") + "\t" +
-		k.Elapsed().String()
 }
 
 // CmdList shows kokizami list
