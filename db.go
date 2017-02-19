@@ -44,7 +44,7 @@ func (db *DB) openDB() error {
 }
 
 func (db *DB) close() {
-	db.conn.Close()
+	_ = db.conn.Close()
 }
 
 func (db *DB) createTable() error {
@@ -56,10 +56,7 @@ func (db *DB) createTable() error {
 	q += ")"
 
 	_, err := db.conn.Exec(q)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 func (db *DB) start(desc string) (*Kizami, error) {
@@ -159,10 +156,7 @@ func (db *DB) stop(id int) error {
 		"SET stopped_at = (DATETIME('now')) " +
 		"WHERE id = " + strconv.Itoa(id)
 	_, err := db.conn.Exec(q)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 func (db *DB) stopall() error {
@@ -170,18 +164,12 @@ func (db *DB) stopall() error {
 		"SET stopped_at = (DATETIME('now')) " +
 		"WHERE stopped_at = (DATETIME('1970-01-01'))"
 	_, err := db.conn.Exec(q)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 func (db *DB) delete(id int) error {
 	q := "DELETE from todo " +
 		"WHERE id = " + strconv.Itoa(id)
 	_, err := db.conn.Exec(q)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }

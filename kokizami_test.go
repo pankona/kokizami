@@ -89,7 +89,7 @@ func TestInitializeNormal(t *testing.T) {
 
 	err := initialize(dbmock, "")
 	if err != nil {
-		t.Error("Initialize failed")
+		t.Error("failed to initialize")
 	}
 }
 
@@ -110,7 +110,7 @@ func TestStartNormal(t *testing.T) {
 
 	err := initialize(dbmock, "")
 	if err != nil {
-		t.Error("Initialize failed")
+		t.Fatal("failed to initialize")
 	}
 	k, err := Start("test")
 	if err != nil {
@@ -129,9 +129,17 @@ func TestNormalWithDB(t *testing.T) {
 	if err != nil {
 		t.Error("failed to create temp file")
 	}
-	defer os.Remove(fp.Name())
+	defer func() {
+		err := os.Remove(fp.Name())
+		if err != nil {
+			t.Error("failed to remove temporary file")
+		}
+	}()
 
 	err = initialize(nil, fp.Name())
+	if err != nil {
+		t.Fatal("failed to initialize")
+	}
 	k, err := Start("test")
 	if err != nil {
 		t.Error("Start returned error")
@@ -316,7 +324,7 @@ func TestStartError(t *testing.T) {
 	}
 	err = initialize(dbmock, "")
 	if err != nil {
-		t.Error("Initialize failed")
+		t.Fatal("failed to initialize")
 	}
 	k, err = Start("test")
 	if k != nil {
@@ -332,7 +340,7 @@ func TestEditNormal(t *testing.T) {
 
 	err := initialize(dbmock, "")
 	if err != nil {
-		t.Error("Initialize failed")
+		t.Fatal("failed to initialize")
 	}
 	k, err := Edit(0, "desc", "edited")
 	if err != nil {
@@ -374,7 +382,7 @@ func TestEditError(t *testing.T) {
 	}
 	err = initialize(dbmock, "")
 	if err != nil {
-		t.Error("Initialize failed")
+		t.Fatal("failed to initialize")
 	}
 	k, err = Edit(0, "desc", "edited")
 	if k != nil {
@@ -417,7 +425,10 @@ func TestListError(t *testing.T) {
 	dbmock.mockOpenDB = func() error {
 		return errors.New("error")
 	}
-	initialize(dbmock, "")
+	err := initialize(dbmock, "")
+	if err == nil {
+		t.Fatal("initialize succeeded but this is not expected")
+	}
 	ks, err := List()
 	if ks != nil {
 		t.Error("list of Kizami is not nil but this is not expected")
@@ -449,8 +460,11 @@ func TestListError(t *testing.T) {
 func TestStopNormal(t *testing.T) {
 	dbmock := genDefaultDBMock()
 
-	initialize(dbmock, "")
-	err := Stop(0)
+	err := initialize(dbmock, "")
+	if err != nil {
+		t.Error("failed to initialize")
+	}
+	err = Stop(0)
 	if err != nil {
 		t.Error("Stop returned error")
 	}
@@ -463,8 +477,11 @@ func TestStopError(t *testing.T) {
 	dbmock.mockOpenDB = func() error {
 		return errors.New("error")
 	}
-	initialize(dbmock, "")
-	err := Stop(0)
+	err := initialize(dbmock, "")
+	if err == nil {
+		t.Fatal("initialize succeeded but this is not expected")
+	}
+	err = Stop(0)
 	if err == nil {
 		t.Error("err is nil but this is not expected")
 	}
@@ -489,8 +506,11 @@ func TestStopError(t *testing.T) {
 func TestDeleteNormal(t *testing.T) {
 	dbmock := genDefaultDBMock()
 
-	initialize(dbmock, "")
-	err := Delete(0)
+	err := initialize(dbmock, "")
+	if err != nil {
+		t.Fatal("failed to initialize")
+	}
+	err = Delete(0)
 	if err != nil {
 		t.Error("Delete returned error")
 	}
@@ -503,8 +523,11 @@ func TestDeleteError(t *testing.T) {
 	dbmock.mockOpenDB = func() error {
 		return errors.New("error")
 	}
-	initialize(dbmock, "")
-	err := Delete(0)
+	err := initialize(dbmock, "")
+	if err == nil {
+		t.Fatal("initialize succeeded but this is not expected")
+	}
+	err = Delete(0)
 	if err == nil {
 		t.Error("err is nil but this is not expected")
 	}

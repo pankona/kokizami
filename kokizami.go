@@ -156,10 +156,7 @@ func Stop(id int) error {
 	defer dbinterface.close()
 
 	err = dbinterface.stop(id)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 // StopAll updates specified task's stopped_at
@@ -171,10 +168,7 @@ func StopAll() error {
 	defer dbinterface.close()
 
 	err = dbinterface.stopall()
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 // Delete delets specified task
@@ -186,8 +180,5 @@ func Delete(id int) error {
 	defer dbinterface.close()
 
 	err = dbinterface.delete(id)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }

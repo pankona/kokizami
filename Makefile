@@ -5,6 +5,7 @@
 all: test
 
 test: build
+	@gosimple
 	@go test -coverprofile=coverage.out
 
 build: deps
