@@ -83,10 +83,18 @@ func round(d, r time.Duration) time.Duration {
 }
 
 func toString(k *kokizami.Kizami) string {
+
+	var stoppedAt string
+	if k.StoppedAt().Unix() == 0 {
+		stoppedAt = "*" + time.Now().In(time.Local).Format("2006-01-02 15:04:05")
+	} else {
+		stoppedAt = k.StoppedAt().In(time.Local).Format("2006-01-02 15:04:05")
+	}
+
 	return strconv.Itoa(k.ID()) + "\t" +
 		k.Desc() + "\t" +
 		k.StartedAt().In(time.Local).Format("2006-01-02 15:04:05") + "\t" +
-		k.StoppedAt().In(time.Local).Format("2006-01-02 15:04:05") + "\t" +
+		stoppedAt + "\t" +
 		round(k.Elapsed(), time.Second).String()
 }
 
