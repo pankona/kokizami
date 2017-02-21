@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"os"
 
 	"github.com/codegangsta/cli"
@@ -9,7 +10,10 @@ import (
 
 func main() {
 	// TODO: support multi platform
-	kokizami.Initialize(os.Getenv("HOME") + "/.kokizami.db")
+	err := kokizami.Initialize(os.Getenv("HOME") + "/.kokizami.db")
+	if err != nil {
+		panic("failed to initialize")
+	}
 
 	app := cli.NewApp()
 	app.Name = Name
@@ -21,5 +25,10 @@ func main() {
 	app.Action = CmdList // show list if no argument
 	app.Commands = Commands
 	app.CommandNotFound = CommandNotFound
-	app.Run(os.Args)
+	err = app.Run(os.Args)
+	if err != nil {
+		log.Println(err)
+		os.Exit(1)
+	}
+	os.Exit(0)
 }

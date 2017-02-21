@@ -108,10 +108,18 @@ func CmdStart(c *cli.Context) {
 			log.Println(err)
 			return
 		}
-		defer os.Remove(fp.Name())
+		defer func() {
+			err := os.Remove(fp.Name())
+			if err != nil {
+				log.Println(err)
+			}
+		}()
 
 		filepath := fp.Name()
-		fp.Close()
+		err = fp.Close()
+		if err != nil {
+			log.Println(err)
+		}
 
 		editor := os.Getenv("EDITOR")
 		if editor == "" {
@@ -121,7 +129,11 @@ func CmdStart(c *cli.Context) {
 		cmd.Stdin = os.Stdin
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
-		cmd.Run()
+		err = cmd.Run()
+		if err != nil {
+			log.Println(err)
+			return
+		}
 
 		bytes, err := ioutil.ReadFile(filepath)
 		if err != nil {
@@ -204,7 +216,13 @@ func CmdEdit(c *cli.Context) {
 			log.Println(err)
 			return
 		}
-		defer os.Remove(fp.Name())
+		defer func() {
+			err = os.Remove(fp.Name())
+			if err != nil {
+				log.Println(err)
+				return
+			}
+		}()
 
 		filepath := fp.Name()
 
@@ -215,7 +233,11 @@ func CmdEdit(c *cli.Context) {
 			log.Println(err)
 			return
 		}
-		fp.Close()
+		err = fp.Close()
+		if err != nil {
+			log.Println(err)
+			return
+		}
 
 		editor := os.Getenv("EDITOR")
 		if editor == "" {
@@ -225,7 +247,11 @@ func CmdEdit(c *cli.Context) {
 		cmd.Stdin = os.Stdin
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
-		cmd.Run()
+		err = cmd.Run()
+		if err != nil {
+			log.Println(err)
+			return
+		}
 
 		bytes, err := ioutil.ReadFile(filepath)
 		if err != nil {
