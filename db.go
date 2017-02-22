@@ -123,7 +123,8 @@ func (db *DB) edit(id int, field, newValue string) (*Kizami, error) {
 
 func (db *DB) list() ([]*Kizami, error) {
 	q := "SELECT id, desc, started_at, stopped_at " +
-		"FROM todo"
+		"FROM todo " +
+		"ORDER BY started_at asc"
 
 	rows, err := db.conn.Query(q)
 	if err != nil {
