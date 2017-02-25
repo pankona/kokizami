@@ -12,9 +12,9 @@ type DBMock struct {
 	mockOpenDB      func() error
 	mockClose       func()
 	mockCreateTable func() error
-	mockStart       func(desc string) (*Kizami, error)
-	mockEdit        func(id int, field, newValue string) (*Kizami, error)
-	mockList        func() ([]*Kizami, error)
+	mockStart       func(desc string) (*kizami, error)
+	mockEdit        func(id int, field, newValue string) (*kizami, error)
+	mockList        func() ([]*kizami, error)
 	mockStop        func(id int) error
 	mockDelete      func(id int) error
 }
@@ -31,15 +31,15 @@ func (db *DBMock) createTable() error {
 	return db.mockCreateTable()
 }
 
-func (db *DBMock) start(desc string) (*Kizami, error) {
+func (db *DBMock) start(desc string) (*kizami, error) {
 	return db.mockStart(desc)
 }
 
-func (db *DBMock) edit(id int, field, newValue string) (*Kizami, error) {
+func (db *DBMock) edit(id int, field, newValue string) (*kizami, error) {
 	return db.mockEdit(id, field, newValue)
 }
 
-func (db *DBMock) list() ([]*Kizami, error) {
+func (db *DBMock) list() ([]*kizami, error) {
 	return db.mockList()
 }
 
@@ -62,17 +62,17 @@ func genDefaultDBMock() *DBMock {
 		mockCreateTable: func() error {
 			return nil
 		},
-		mockStart: func(desc string) (*Kizami, error) {
-			return &Kizami{desc: "test"}, nil
+		mockStart: func(desc string) (*kizami, error) {
+			return &kizami{desc: "test"}, nil
 		},
-		mockEdit: func(id int, field, newValue string) (*Kizami, error) {
-			return &Kizami{desc: "edited"}, nil
+		mockEdit: func(id int, field, newValue string) (*kizami, error) {
+			return &kizami{desc: "edited"}, nil
 		},
-		mockList: func() ([]*Kizami, error) {
-			t := make([]*Kizami, 0, 0)
-			t = append(t, &Kizami{desc: "test0"})
-			t = append(t, &Kizami{desc: "test1"})
-			t = append(t, &Kizami{desc: "test2"})
+		mockList: func() ([]*kizami, error) {
+			t := make([]*kizami, 0, 0)
+			t = append(t, &kizami{desc: "test0"})
+			t = append(t, &kizami{desc: "test1"})
+			t = append(t, &kizami{desc: "test2"})
 			return t, nil
 		},
 		mockStop: func(id int) error {
@@ -145,10 +145,10 @@ func TestNormalWithDB(t *testing.T) {
 		t.Error("Start returned error")
 	}
 	if k.ID() != 1 {
-		t.Error("Start returned unexpected Kizami instance")
+		t.Error("Start returned unexpected kizami instance")
 	}
 	if k.Desc() != "test" {
-		t.Error("Start returned unexpected Kizami instance")
+		t.Error("Start returned unexpected kizami instance")
 	}
 	l, err := List()
 	if err != nil {
@@ -163,10 +163,10 @@ func TestNormalWithDB(t *testing.T) {
 		t.Error("Edit returned error")
 	}
 	if k.ID() != 1 {
-		t.Error("Edit returned unexpected Kizami")
+		t.Error("Edit returned unexpected kizami")
 	}
 	if k.Desc() != "edited" {
-		t.Error("Edit returned unexpected Kizami")
+		t.Error("Edit returned unexpected kizami")
 	}
 
 	k, err = Edit(1, "started_at", "2010-01-02 03:04:05")
@@ -174,16 +174,16 @@ func TestNormalWithDB(t *testing.T) {
 		t.Error("Edit returned error")
 	}
 	if k.ID() != 1 {
-		t.Error("Edit returned unexpected Kizami")
+		t.Error("Edit returned unexpected kizami")
 	}
 	if k.Desc() != "edited" {
-		t.Error("Edit returned unexpected Kizami")
+		t.Error("Edit returned unexpected kizami")
 	}
 	if k.StartedAt().Format("2006-01-02 15:04:05") != "2010-01-02 03:04:05" {
-		t.Error("Edit returned unexpected Kizami")
+		t.Error("Edit returned unexpected kizami")
 	}
 	if k.StoppedAt().Format("2006-01-02 15:04:05") != "1970-01-01 00:00:00" {
-		t.Error("Edit returned unexpected Kizami")
+		t.Error("Edit returned unexpected kizami")
 	}
 
 	k, err = Edit(1, "stopped_at", "2011-01-02 03:04:05")
@@ -191,16 +191,16 @@ func TestNormalWithDB(t *testing.T) {
 		t.Error("Edit returned error")
 	}
 	if k.ID() != 1 {
-		t.Error("Edit returned unexpected Kizami")
+		t.Error("Edit returned unexpected kizami")
 	}
 	if k.Desc() != "edited" {
-		t.Error("Edit returned unexpected Kizami")
+		t.Error("Edit returned unexpected kizami")
 	}
 	if k.StartedAt().Format("2006-01-02 15:04:05") != "2010-01-02 03:04:05" {
-		t.Error("Edit returned unexpected Kizami")
+		t.Error("Edit returned unexpected kizami")
 	}
 	if k.StoppedAt().Format("2006-01-02 15:04:05") != "2011-01-02 03:04:05" {
-		t.Error("Edit returned unexpected Kizami")
+		t.Error("Edit returned unexpected kizami")
 	}
 
 	err = Stop(1)
@@ -208,16 +208,16 @@ func TestNormalWithDB(t *testing.T) {
 		t.Error("Stop returned error")
 	}
 	if k.ID() != 1 {
-		t.Error("Stop returned unexpected Kizami")
+		t.Error("Stop returned unexpected kizami")
 	}
 	if k.Desc() != "edited" {
-		t.Error("Stop returned unexpected Kizami")
+		t.Error("Stop returned unexpected kizami")
 	}
 	if k.StartedAt().Format("2006-01-02 15:04:05") != "2010-01-02 03:04:05" {
-		t.Error("Stop returned unexpected Kizami")
+		t.Error("Stop returned unexpected kizami")
 	}
 	if k.StoppedAt().Format("2006-01-02 15:04:05") == "1970-01-01 00:00:00" {
-		t.Error("Stop returned unexpected Kizami")
+		t.Error("Stop returned unexpected kizami")
 	}
 
 	k, err = Get(1)
@@ -225,16 +225,16 @@ func TestNormalWithDB(t *testing.T) {
 		t.Error("Stop returned error")
 	}
 	if k.ID() != 1 {
-		t.Error("Stop returned unexpected Kizami")
+		t.Error("Stop returned unexpected kizami")
 	}
 	if k.Desc() != "edited" {
-		t.Error("Stop returned unexpected Kizami")
+		t.Error("Stop returned unexpected kizami")
 	}
 	if k.StartedAt().Format("2006-01-02 15:04:05") != "2010-01-02 03:04:05" {
-		t.Error("Stop returned unexpected Kizami")
+		t.Error("Stop returned unexpected kizami")
 	}
 	if k.StoppedAt().Format("2006-01-02 15:04:05") == "1970-01-01 00:00:00" {
-		t.Error("Stop returned unexpected Kizami")
+		t.Error("Stop returned unexpected kizami")
 	}
 
 	err = Delete(1)
@@ -263,16 +263,16 @@ func TestNormalWithDB(t *testing.T) {
 		t.Error("Get returned error")
 	}
 	if k.ID() != 2 {
-		t.Error("Get returned unexpected Kizami")
+		t.Error("Get returned unexpected kizami")
 	}
 	if k.Desc() != "test" {
-		t.Error("Get returned unexpected Kizami")
+		t.Error("Get returned unexpected kizami")
 	}
 	if k.StartedAt().Format("2006-01-02 15:04:05") != "2010-01-02 03:04:05" {
-		t.Error("Get returned unexpected Kizami")
+		t.Error("Get returned unexpected kizami")
 	}
 	if k.StoppedAt().Format("2006-01-02 15:04:05") == "1970-01-01 00:00:00" {
-		t.Error("Get returned unexpected Kizami")
+		t.Error("Get returned unexpected kizami")
 	}
 
 	k, err = Edit(2, "stopped_at", "2010-01-02 04:04:05")
@@ -319,7 +319,7 @@ func TestStartError(t *testing.T) {
 	dbmock.mockOpenDB = func() error {
 		return nil
 	}
-	dbmock.mockStart = func(desc string) (*Kizami, error) {
+	dbmock.mockStart = func(desc string) (*kizami, error) {
 		return nil, errors.New("error")
 	}
 	err = initialize(dbmock, "")
@@ -377,7 +377,7 @@ func TestEditError(t *testing.T) {
 	dbmock.mockOpenDB = func() error {
 		return nil
 	}
-	dbmock.mockEdit = func(id int, field, newValue string) (*Kizami, error) {
+	dbmock.mockEdit = func(id int, field, newValue string) (*kizami, error) {
 		return nil, errors.New("error")
 	}
 	err = initialize(dbmock, "")
@@ -431,7 +431,7 @@ func TestListError(t *testing.T) {
 	}
 	ks, err := List()
 	if ks != nil {
-		t.Error("list of Kizami is not nil but this is not expected")
+		t.Error("list of kizami is not nil but this is not expected")
 	}
 	if err == nil {
 		t.Error("err is nil but this is not expected")
@@ -441,7 +441,7 @@ func TestListError(t *testing.T) {
 	dbmock.mockOpenDB = func() error {
 		return nil
 	}
-	dbmock.mockList = func() ([]*Kizami, error) {
+	dbmock.mockList = func() ([]*kizami, error) {
 		return nil, errors.New("error")
 	}
 	err = initialize(dbmock, "")
@@ -450,7 +450,7 @@ func TestListError(t *testing.T) {
 	}
 	ks, err = List()
 	if ks != nil {
-		t.Error("list of Kizami is not nil but this is not expected")
+		t.Error("list of kizami is not nil but this is not expected")
 	}
 	if err == nil {
 		t.Error("err is nil but this is not expected")
