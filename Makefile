@@ -5,6 +5,7 @@
 all: test
 
 test: build
+	@golint $(`go list | grep -v vendor`)
 	@gosimple
 	@go test -coverprofile=coverage.out
 

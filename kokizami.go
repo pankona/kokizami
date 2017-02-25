@@ -8,6 +8,16 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+// Kizamier represents interface of Kizami
+type Kizamier interface {
+	ID() int
+	Desc() string
+	StartedAt() time.Time
+	StoppedAt() time.Time
+	Elapsed() time.Duration
+	String() string
+}
+
 // Kizami represents a struct of task item
 type Kizami struct {
 	id        int
@@ -88,7 +98,7 @@ func initialize(dbi DBInterface, dbpath string) error {
 }
 
 // Start starts a specified Kizami to DB
-func Start(desc string) (*Kizami, error) {
+func Start(desc string) (Kizamier, error) {
 	err := dbinterface.openDB()
 	if err != nil {
 		return nil, err
@@ -103,7 +113,7 @@ func Start(desc string) (*Kizami, error) {
 }
 
 // Get returns a Kizami by specified id
-func Get(id int) (*Kizami, error) {
+func Get(id int) (Kizamier, error) {
 	err := dbinterface.openDB()
 	if err != nil {
 		return nil, err
@@ -118,7 +128,7 @@ func Get(id int) (*Kizami, error) {
 }
 
 // Edit edits a specified Kizami item
-func Edit(id int, field, newValue string) (*Kizami, error) {
+func Edit(id int, field, newValue string) (Kizamier, error) {
 	err := dbinterface.openDB()
 	if err != nil {
 		return nil, err
@@ -133,7 +143,7 @@ func Edit(id int, field, newValue string) (*Kizami, error) {
 }
 
 // List returns list of Kizami
-func List() ([]*Kizami, error) {
+func List() ([]Kizamier, error) {
 	err := dbinterface.openDB()
 	if err != nil {
 		return nil, err
@@ -144,7 +154,11 @@ func List() ([]*Kizami, error) {
 	if err != nil {
 		return nil, err
 	}
-	return l, nil
+	kizamiers := make([]Kizamier, 0, 0)
+	for _, v := range l {
+		kizamiers = append(kizamiers, v)
+	}
+	return kizamiers, nil
 }
 
 // Stop updates specified task's stopped_at

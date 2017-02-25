@@ -119,7 +119,7 @@ func TestStartNormal(t *testing.T) {
 	if k == nil {
 		t.Error("Start returned nil")
 	}
-	if k.desc != "test" {
+	if k.Desc() != "test" {
 		t.Error("Start returned unexpected value")
 	}
 }
@@ -144,10 +144,10 @@ func TestNormalWithDB(t *testing.T) {
 	if err != nil {
 		t.Error("Start returned error")
 	}
-	if k.id != 1 {
+	if k.ID() != 1 {
 		t.Error("Start returned unexpected Kizami instance")
 	}
-	if k.desc != "test" {
+	if k.Desc() != "test" {
 		t.Error("Start returned unexpected Kizami instance")
 	}
 	l, err := List()
@@ -162,10 +162,10 @@ func TestNormalWithDB(t *testing.T) {
 	if err != nil {
 		t.Error("Edit returned error")
 	}
-	if k.id != 1 {
+	if k.ID() != 1 {
 		t.Error("Edit returned unexpected Kizami")
 	}
-	if k.desc != "edited" {
+	if k.Desc() != "edited" {
 		t.Error("Edit returned unexpected Kizami")
 	}
 
@@ -173,16 +173,16 @@ func TestNormalWithDB(t *testing.T) {
 	if err != nil {
 		t.Error("Edit returned error")
 	}
-	if k.id != 1 {
+	if k.ID() != 1 {
 		t.Error("Edit returned unexpected Kizami")
 	}
-	if k.desc != "edited" {
+	if k.Desc() != "edited" {
 		t.Error("Edit returned unexpected Kizami")
 	}
-	if k.startedAt.Format("2006-01-02 15:04:05") != "2010-01-02 03:04:05" {
+	if k.StartedAt().Format("2006-01-02 15:04:05") != "2010-01-02 03:04:05" {
 		t.Error("Edit returned unexpected Kizami")
 	}
-	if k.stoppedAt.Format("2006-01-02 15:04:05") != "1970-01-01 00:00:00" {
+	if k.StoppedAt().Format("2006-01-02 15:04:05") != "1970-01-01 00:00:00" {
 		t.Error("Edit returned unexpected Kizami")
 	}
 
@@ -190,16 +190,16 @@ func TestNormalWithDB(t *testing.T) {
 	if err != nil {
 		t.Error("Edit returned error")
 	}
-	if k.id != 1 {
+	if k.ID() != 1 {
 		t.Error("Edit returned unexpected Kizami")
 	}
-	if k.desc != "edited" {
+	if k.Desc() != "edited" {
 		t.Error("Edit returned unexpected Kizami")
 	}
-	if k.startedAt.Format("2006-01-02 15:04:05") != "2010-01-02 03:04:05" {
+	if k.StartedAt().Format("2006-01-02 15:04:05") != "2010-01-02 03:04:05" {
 		t.Error("Edit returned unexpected Kizami")
 	}
-	if k.stoppedAt.Format("2006-01-02 15:04:05") != "2011-01-02 03:04:05" {
+	if k.StoppedAt().Format("2006-01-02 15:04:05") != "2011-01-02 03:04:05" {
 		t.Error("Edit returned unexpected Kizami")
 	}
 
@@ -207,16 +207,16 @@ func TestNormalWithDB(t *testing.T) {
 	if err != nil {
 		t.Error("Stop returned error")
 	}
-	if k.id != 1 {
+	if k.ID() != 1 {
 		t.Error("Stop returned unexpected Kizami")
 	}
-	if k.desc != "edited" {
+	if k.Desc() != "edited" {
 		t.Error("Stop returned unexpected Kizami")
 	}
-	if k.startedAt.Format("2006-01-02 15:04:05") != "2010-01-02 03:04:05" {
+	if k.StartedAt().Format("2006-01-02 15:04:05") != "2010-01-02 03:04:05" {
 		t.Error("Stop returned unexpected Kizami")
 	}
-	if k.stoppedAt.Format("2006-01-02 15:04:05") == "1970-01-01 00:00:00" {
+	if k.StoppedAt().Format("2006-01-02 15:04:05") == "1970-01-01 00:00:00" {
 		t.Error("Stop returned unexpected Kizami")
 	}
 
@@ -224,16 +224,16 @@ func TestNormalWithDB(t *testing.T) {
 	if err != nil {
 		t.Error("Stop returned error")
 	}
-	if k.id != 1 {
+	if k.ID() != 1 {
 		t.Error("Stop returned unexpected Kizami")
 	}
-	if k.desc != "edited" {
+	if k.Desc() != "edited" {
 		t.Error("Stop returned unexpected Kizami")
 	}
-	if k.startedAt.Format("2006-01-02 15:04:05") != "2010-01-02 03:04:05" {
+	if k.StartedAt().Format("2006-01-02 15:04:05") != "2010-01-02 03:04:05" {
 		t.Error("Stop returned unexpected Kizami")
 	}
-	if k.stoppedAt.Format("2006-01-02 15:04:05") == "1970-01-01 00:00:00" {
+	if k.StoppedAt().Format("2006-01-02 15:04:05") == "1970-01-01 00:00:00" {
 		t.Error("Stop returned unexpected Kizami")
 	}
 
@@ -262,16 +262,16 @@ func TestNormalWithDB(t *testing.T) {
 	if err != nil {
 		t.Error("Get returned error")
 	}
-	if k.id != 2 {
+	if k.ID() != 2 {
 		t.Error("Get returned unexpected Kizami")
 	}
-	if k.desc != "test" {
+	if k.Desc() != "test" {
 		t.Error("Get returned unexpected Kizami")
 	}
-	if k.startedAt.Format("2006-01-02 15:04:05") != "2010-01-02 03:04:05" {
+	if k.StartedAt().Format("2006-01-02 15:04:05") != "2010-01-02 03:04:05" {
 		t.Error("Get returned unexpected Kizami")
 	}
-	if k.stoppedAt.Format("2006-01-02 15:04:05") == "1970-01-01 00:00:00" {
+	if k.StoppedAt().Format("2006-01-02 15:04:05") == "1970-01-01 00:00:00" {
 		t.Error("Get returned unexpected Kizami")
 	}
 
@@ -349,7 +349,7 @@ func TestEditNormal(t *testing.T) {
 	if k == nil {
 		t.Error("Edit returned nil")
 	}
-	if k.desc != "edited" {
+	if k.Desc() != "edited" {
 		t.Error("edit returned unexpected value")
 	}
 }
@@ -407,13 +407,13 @@ func TestListNormal(t *testing.T) {
 	if ks == nil {
 		t.Error("List returned nil")
 	}
-	if ks[0].desc != "test0" {
+	if ks[0].Desc() != "test0" {
 		t.Error("List returned unexpected value")
 	}
-	if ks[1].desc != "test1" {
+	if ks[1].Desc() != "test1" {
 		t.Error("List returned unexpected value")
 	}
-	if ks[2].desc != "test2" {
+	if ks[2].Desc() != "test2" {
 		t.Error("List returned unexpected value")
 	}
 }

@@ -82,8 +82,7 @@ func round(d, r time.Duration) time.Duration {
 	return d
 }
 
-func toString(k *kokizami.Kizami) string {
-
+func toString(k kokizami.Kizamier) string {
 	var stoppedAt string
 	if k.StoppedAt().Unix() == 0 {
 		stoppedAt = "*" + time.Now().In(time.Local).Format("2006-01-02 15:04:05")
