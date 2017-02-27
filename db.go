@@ -56,6 +56,26 @@ func (db *DB) createTable() error {
 	q += ")"
 
 	_, err := db.conn.Exec(q)
+	if err != nil {
+		return err
+	}
+
+	q = "CREATE TABLE tag ("
+	q += " id INTEGER PRIMARY KEY AUTOINCREMENT"
+	q += ", tag VARCHAR(255) NOT NULL"
+	q += ")"
+
+	_, err = db.conn.Exec(q)
+	if err != nil {
+		return err
+	}
+
+	q = "CREATE TABLE relation ("
+	q += " kizami_id INTEGER NOT NULL"
+	q += " tag_id INTEGER NOT NULL"
+	q += ")"
+
+	_, err = db.conn.Exec(q)
 	return err
 }
 
