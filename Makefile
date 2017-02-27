@@ -20,9 +20,17 @@ deps: $(CURDIR)/vendor
 $(CURDIR)/vendor:
 	@glide install
 
+install-tools: glide goverage
+	@echo done!
+
 glide:
 ifeq ($(shell command -v glide 2> /dev/null),)
 	go get -u github.com/Masterminds/glide
+endif
+
+goverage:
+ifeq ($(shell command -v goverage 2> /dev/null),)
+	go get -u github.com/haya14busa/goverage
 endif
 
 install: test
