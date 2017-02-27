@@ -1,13 +1,16 @@
 
 
+PKGS=$(shell go list ./...  | grep -v vendor)
+
 .PHONY: all test build deps show
 
 all: test
 
 test: build
-	@golint $(`go list | grep -v vendor`)
-	@gosimple
-	@go test -coverprofile=coverage.out
+	@golint $(PKGS)
+	@gosimple $(PKGS)
+	@go test -cover $(PKGS)
+	@goverage -coverprofile=coverage.out $(PKGS)
 
 build: deps
 	@make -C $(CURDIR)/cmd/kkzm
