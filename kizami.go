@@ -3,9 +3,6 @@ package kokizami
 import (
 	"strconv"
 	"time"
-
-	// go-sqlite3 is only imported here
-	_ "github.com/mattn/go-sqlite3"
 )
 
 // Kizamier represents interface of Kizami
