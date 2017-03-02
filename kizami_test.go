@@ -14,6 +14,7 @@ type DBMock struct {
 	mockCreateTable func() error
 	mockStart       func(desc string) (*kizami, error)
 	mockEdit        func(id int, field, newValue string) (*kizami, error)
+	mockCount       func() (int, error)
 	mockList        func() ([]*kizami, error)
 	mockStop        func(id int) error
 	mockDelete      func(id int) error
@@ -39,7 +40,11 @@ func (db *DBMock) edit(id int, field, newValue string) (*kizami, error) {
 	return db.mockEdit(id, field, newValue)
 }
 
-func (db *DBMock) list() ([]*kizami, error) {
+func (db *DBMock) count() (int, error) {
+	return db.mockCount()
+}
+
+func (db *DBMock) list(start, end int) ([]*kizami, error) {
 	return db.mockList()
 }
 
@@ -67,6 +72,9 @@ func genDefaultDBMock() *DBMock {
 		},
 		mockEdit: func(id int, field, newValue string) (*kizami, error) {
 			return &kizami{desc: "edited"}, nil
+		},
+		mockCount: func() (int, error) {
+			return 3, nil
 		},
 		mockList: func() ([]*kizami, error) {
 			t := make([]*kizami, 0, 0)
