@@ -2,9 +2,11 @@ package kokizami
 
 import (
 	"database/sql"
+	"fmt"
 	"strconv"
 	"time"
 
+	"github.com/pkg/errors"
 	// go-sqlite3 is only imported here
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -17,7 +19,8 @@ type DBInterface interface {
 	start(desc string) (*kizami, error)
 	get(id int) (*kizami, error)
 	edit(id int, field, newValue string) (*kizami, error)
-	list() ([]*kizami, error)
+	count() (int, error)
+	list(start, end int) ([]*kizami, error)
 	stop(id int) error
 	stopall() error
 	delete(id int) error
@@ -141,14 +144,31 @@ func (db *DB) edit(id int, field, newValue string) (*kizami, error) {
 	return t, nil
 }
 
-func (db *DB) list() ([]*kizami, error) {
+func (db *DB) count() (int, error) {
+	q := "SELECT count(*) " +
+		"FROM todo"
+	var num int
+	err := db.conn.QueryRow(q).Scan(&num)
+	if err != nil {
+		return -1, err
+	}
+	return num, nil
+}
+
+func (db *DB) list(start, end int) ([]*kizami, error) {
+	if end < start {
+		return nil, errors.New("end must be bigger than start")
+	}
+	s := strconv.Itoa(start)
+	c := strconv.Itoa(end - start)
 	q := "SELECT id, desc, started_at, stopped_at " +
 		"FROM todo " +
-		"ORDER BY started_at ASC"
+		"ORDER BY started_at ASC " +
+		"LIMIT " + s + ", " + c
 
 	rows, err := db.conn.Query(q)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, fmt.Sprintf("query was: %s", q))
 	}
 
 	todos := make([]*kizami, 0, 0)

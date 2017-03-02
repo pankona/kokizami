@@ -146,7 +146,12 @@ func List() ([]Kizamier, error) {
 	}
 	defer dbinterface.close()
 
-	l, err := dbinterface.list()
+	c, err := dbinterface.count()
+	if err != nil {
+		return nil, err
+	}
+
+	l, err := dbinterface.list(0, c)
 	if err != nil {
 		return nil, err
 	}
