@@ -79,7 +79,6 @@ func (db *DB) createTable() error {
 
 	q = "CREATE TABLE relation ("
 	q += " kizami_id INTEGER NOT NULL"
-	q += " tag_id INTEGER NOT NULL"
 	q += ")"
 
 	_, err = db.conn.Exec(q)
