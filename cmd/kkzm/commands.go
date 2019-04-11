@@ -348,10 +348,5 @@ func CmdDelete(c *cli.Context) error {
 		return err
 	}
 
-	err = kokizami.Delete(id)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return kokizami.Delete(id)
 }
