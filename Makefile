@@ -15,7 +15,7 @@ test: install-goverage
 install:
 	@make install -C $(CURDIR)/cmd/kkzm
 
-show:
+show-coverage:
 	@go tool cover -html=coverage.out
 
 install-goverage:
