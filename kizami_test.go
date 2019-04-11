@@ -132,6 +132,7 @@ func TestStartNormal(t *testing.T) {
 	}
 }
 
+// nolint: gocyclo
 func TestNormalWithDB(t *testing.T) {
 	fp, err := ioutil.TempFile("", "tmp_")
 	if err != nil {
