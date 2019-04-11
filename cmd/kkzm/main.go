@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/user"
+	"path/filepath"
 
 	"github.com/pankona/kokizami"
 	"github.com/urfave/cli"
@@ -11,7 +13,12 @@ import (
 
 func main() {
 	// TODO: support multi platform
-	err := kokizami.Initialize(os.Getenv("HOME") + "/.kokizami.db")
+	u, err := user.Current()
+	if err != nil {
+		panic(fmt.Sprintf("failed to get current user: %v", err))
+	}
+
+	err = kokizami.Initialize(filepath.Join(u.HomeDir, ".config", "kokizami", "db"))
 	if err != nil {
 		panic(fmt.Sprintf("failed to initialize: %v", err))
 	}

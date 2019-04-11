@@ -1,6 +1,9 @@
 package kokizami
 
 import (
+	"fmt"
+	"os"
+	"path/filepath"
 	"strconv"
 	"time"
 )
@@ -77,12 +80,17 @@ func Initialize(dbpath string) error {
 }
 
 func initialize(dbi DBInterface, dbpath string) error {
+	err := os.MkdirAll(filepath.Dir(dbpath), 0755)
+	if err != nil {
+		return fmt.Errorf("failed to create a directory to store DB: %v", err)
+	}
+
 	dbinterface = dbi
 	if dbinterface == nil {
 		dbinterface = newDB(dbpath)
 	}
 
-	err := dbinterface.openDB()
+	err = dbinterface.openDB()
 	if err != nil {
 		return err
 	}
