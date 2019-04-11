@@ -55,7 +55,7 @@ func (db *DB) close() {
 }
 
 func (db *DB) createTable() error {
-	q := "CREATE TABLE todo ("
+	q := "CREATE TABLE IF NOT EXISTS todo ("
 	q += " id INTEGER PRIMARY KEY AUTOINCREMENT"
 	q += ", desc VARCHAR(255) NOT NULL"
 	q += ", started_at TIMESTAMP DEFAULT (DATETIME('now'))"
@@ -67,7 +67,7 @@ func (db *DB) createTable() error {
 		return err
 	}
 
-	q = "CREATE TABLE tag ("
+	q = "CREATE TABLE IF NOT EXISTS tag ("
 	q += " id INTEGER PRIMARY KEY AUTOINCREMENT"
 	q += ", tag VARCHAR(255) NOT NULL"
 	q += ")"
@@ -77,7 +77,7 @@ func (db *DB) createTable() error {
 		return err
 	}
 
-	q = "CREATE TABLE relation ("
+	q = "CREATE TABLE IF NOT EXISTS relation ("
 	q += " kizami_id INTEGER NOT NULL"
 	q += ")"
 

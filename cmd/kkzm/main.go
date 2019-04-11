@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 
@@ -12,7 +13,7 @@ func main() {
 	// TODO: support multi platform
 	err := kokizami.Initialize(os.Getenv("HOME") + "/.kokizami.db")
 	if err != nil {
-		panic("failed to initialize")
+		panic(fmt.Sprintf("failed to initialize: %v", err))
 	}
 
 	app := cli.NewApp()

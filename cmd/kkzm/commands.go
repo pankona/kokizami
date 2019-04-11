@@ -101,24 +101,7 @@ func toString(k kokizami.Kizamier) string {
 func CmdStart(c *cli.Context) error {
 	args := c.Args()
 	if len(args) == 0 {
-		fp, err := ioutil.TempFile("", "tmp_")
-		if err != nil {
-			return err
-		}
-		defer func() {
-			err = os.Remove(fp.Name())
-			if err != nil {
-				fmt.Printf("%v\n", err)
-			}
-		}()
-
-		filepath := fp.Name()
-		err = fp.Close()
-		if err != nil {
-			return err
-		}
-
-		err = runEditor(filepath)
+		filepath, err := editTextWithEditor("")
 		if err != nil {
 			return err
 		}
@@ -132,6 +115,7 @@ func CmdStart(c *cli.Context) error {
 		if len(ss) < 1 {
 			return fmt.Errorf("invalid arguments. needs (desc, started_at, stopped_at)")
 		}
+
 		k, err := kokizami.Start(ss[0])
 		if err != nil {
 			return err
@@ -178,95 +162,42 @@ func CmdRestart(c *cli.Context) error {
 }
 
 // CmdEdit edits a specified task
-// kokizami edit [id]
-// kokizami edit [id] desc       [new desc]
-// kokizami edit [id] started_at [new started_at]
-// kokizami edit [id] stopped_at [new stopped_at]
 func CmdEdit(c *cli.Context) error {
 	args := c.Args()
-	if len(args) == 1 {
-		// FIXME: very long method. make them shorten...
+
+	switch len(args) {
+	// len(args) == 1 means that the whole of task will be edited with text editor
+	// e.g) kkzm edit [id]
+	case 1:
 		id, err := strconv.Atoi(args[0])
 		if err != nil {
 			return err
 		}
 
-		k, err := kokizami.Get(id)
+		k, err := editTaskWithEditor(id)
 		if err != nil {
 			return err
 		}
 
-		fp, err := ioutil.TempFile("", "tmp_")
-		if err != nil {
-			return err
-		}
-		defer func() {
-			err = os.Remove(fp.Name())
-			if err != nil {
-				fmt.Printf("%v\n", err)
-				return
-			}
-		}()
-
-		filepath := fp.Name()
-
-		_, err = fp.WriteString(k.Desc() + "\n" +
-			k.StartedAt().In(time.Local).Format("2006-01-02 15:04:05") + "\n" +
-			k.StoppedAt().In(time.Local).Format("2006-01-02 15:04:05"))
-		if err != nil {
-			return err
-		}
-		err = fp.Close()
-		if err != nil {
-			return err
-		}
-
-		err = runEditor(filepath)
-		if err != nil {
-			return err
-		}
-
-		bytes, err := ioutil.ReadFile(filepath) // #nosec
-		if err != nil {
-			return err
-		}
-
-		ss := strings.Split(string(bytes), string("\n"))
-		if len(ss) < 3 {
-			return fmt.Errorf("invalid arguments. needs (desc, started_at, stopped_at)")
-		}
-		// kokizami: fixme. should be done by one transaction
-		_, err = kokizami.Edit(id, "desc", ss[0])
-		if err != nil {
-			return err
-		}
-
-		startedAt, err := time.ParseInLocation("2006-01-02 15:04:05", ss[1], time.Local)
-		startedAtStr := startedAt.UTC().Format("2006-01-02 15:04:05")
-		_, err = kokizami.Edit(id, "started_at", startedAtStr)
-		if err != nil {
-			return err
-		}
-		stoppedAt, err := time.ParseInLocation("2006-01-02 15:04:05", ss[2], time.Local)
-		stoppedAtStr := stoppedAt.UTC().Format("2006-01-02 15:04:05")
-		k, err = kokizami.Edit(id, "stopped_at", stoppedAtStr)
-		if err != nil {
-			return err
-		}
 		fmt.Println(toString(k))
 		return nil
-	} else if len(args) == 3 {
+
+	// len(args) == 3 means that a part of task will be edited with specified value
+	// e.g)
+	// kkzm edit [id] desc       [new desc]
+	// kkzm edit [id] started_at [new started_at]
+	// kkzm edit [id] stopped_at [new stopped_at]
+	case 3:
 		id, err := strconv.Atoi(args[0])
 		if err != nil {
 			return err
 		}
-		field := args[1]
-		newValue := args[2]
 
-		k, err := kokizami.Edit(id, field, newValue)
+		k, err := kokizami.Edit(id, args[1], args[2])
 		if err != nil {
 			return err
 		}
+
 		fmt.Println(k)
 		return nil
 	}
@@ -335,12 +266,105 @@ func CmdDelete(c *cli.Context) error {
 	return kokizami.Delete(id)
 }
 
-func runEditor(filepath string) error {
+func editTaskWithEditor(id int) (kokizami.Kizamier, error) {
+	k, err := kokizami.Get(id)
+	if err != nil {
+		return nil, fmt.Errorf("failed to task by ID: %v", err)
+	}
+
+	filename, err := editTextWithEditor(fmt.Sprintf("%s\n%s\n%s",
+		k.Desc(),
+		k.StartedAt().In(time.Local).Format("2006-01-02 15:04:05"),
+		k.StoppedAt().In(time.Local).Format("2006-01-02 15:04:05")))
+	if err != nil {
+		return nil, fmt.Errorf("failed to edit text with editor: %v", err)
+	}
+	defer func() {
+		e := os.Remove(filename)
+		if e != nil {
+			fmt.Printf("%v\n", e)
+		}
+	}()
+
+	bytes, err := ioutil.ReadFile(filename) // #nosec
+	if err != nil {
+		return nil, fmt.Errorf("failed to read file: %v", err)
+	}
+
+	ss := strings.Split(string(bytes), string("\n"))
+	if len(ss) < 3 {
+		return nil, fmt.Errorf("invalid arguments. needs (desc, started_at, stopped_at)")
+	}
+
+	k, err = editBulk(id, ss[0], ss[1], ss[2])
+	if err != nil {
+		return nil, fmt.Errorf("failed to edit a task: %v", err)
+	}
+	return k, nil
+}
+
+func editBulk(id int, desc, start, stop string) (kokizami.Kizamier, error) {
+	_, err := kokizami.Edit(id, "desc", desc)
+	if err != nil {
+		return nil, err
+	}
+
+	startedAt, err := time.ParseInLocation("2006-01-02 15:04:05", start, time.Local)
+	if err != nil {
+		return nil, err
+	}
+
+	startedAtStr := startedAt.UTC().Format("2006-01-02 15:04:05")
+	_, err = kokizami.Edit(id, "started_at", startedAtStr)
+	if err != nil {
+		return nil, err
+	}
+
+	stoppedAt, err := time.ParseInLocation("2006-01-02 15:04:05", stop, time.Local)
+	if err != nil {
+		return nil, err
+	}
+
+	stoppedAtStr := stoppedAt.UTC().Format("2006-01-02 15:04:05")
+	k, err := kokizami.Edit(id, "stopped_at", stoppedAtStr)
+	if err != nil {
+		return nil, err
+	}
+
+	return k, nil
+}
+
+func editTextWithEditor(prewrite string) (string, error) {
+	f, err := ioutil.TempFile("", "tmp_")
+	if err != nil {
+		return "", fmt.Errorf("failed to open temporary file: %v", err)
+	}
+	defer func() {
+		err = f.Close()
+		if err != nil {
+			fmt.Printf("%v\n", err)
+		}
+	}()
+
+	_, err = f.WriteString(prewrite)
+	if err != nil {
+		return "", fmt.Errorf("failed to write string on temporary file: %v", err)
+	}
+
+	err = runEditor(f.Name())
+	if err != nil {
+		return "", fmt.Errorf("failed to run editor: %v", err)
+	}
+
+	return f.Name(), nil
+}
+
+func runEditor(filename string) error {
 	editor := os.Getenv("EDITOR")
 	if editor == "" {
 		editor = "vim"
 	}
-	cmd := exec.Command(editor, filepath) // #nosec
+	cmd := exec.Command(editor, filename) // #nosec
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
