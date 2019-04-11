@@ -118,15 +118,7 @@ func CmdStart(c *cli.Context) error {
 			return err
 		}
 
-		editor := os.Getenv("EDITOR")
-		if editor == "" {
-			editor = "vim"
-		}
-		cmd := exec.Command(editor, filepath) // #nosec
-		cmd.Stdin = os.Stdin
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		err = cmd.Run()
+		err = runEditor(filepath)
 		if err != nil {
 			return err
 		}
@@ -229,15 +221,7 @@ func CmdEdit(c *cli.Context) error {
 			return err
 		}
 
-		editor := os.Getenv("EDITOR")
-		if editor == "" {
-			editor = "vim"
-		}
-		cmd := exec.Command(editor, filepath) // #nosec
-		cmd.Stdin = os.Stdin
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		err = cmd.Run()
+		err = runEditor(filepath)
 		if err != nil {
 			return err
 		}
@@ -349,4 +333,16 @@ func CmdDelete(c *cli.Context) error {
 	}
 
 	return kokizami.Delete(id)
+}
+
+func runEditor(filepath string) error {
+	editor := os.Getenv("EDITOR")
+	if editor == "" {
+		editor = "vim"
+	}
+	cmd := exec.Command(editor, filepath) // #nosec
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
 }
