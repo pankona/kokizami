@@ -77,7 +77,7 @@ func genDefaultDBMock() *DBMock {
 			return 3, nil
 		},
 		mockList: func() ([]*kizami, error) {
-			t := make([]*kizami, 0, 0)
+			t := make([]*kizami, 0)
 			t = append(t, &kizami{desc: "test0"})
 			t = append(t, &kizami{desc: "test1"})
 			t = append(t, &kizami{desc: "test2"})
