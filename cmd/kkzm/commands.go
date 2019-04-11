@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"os/exec"
 	"strconv"
@@ -99,25 +98,24 @@ func toString(k kokizami.Kizamier) string {
 
 // CmdStart starts a new task
 // kokizami start [new desc]
-func CmdStart(c *cli.Context) {
+func CmdStart(c *cli.Context) error {
 	args := c.Args()
 	if len(args) == 0 {
 		fp, err := ioutil.TempFile("", "tmp_")
 		if err != nil {
-			log.Println(err)
-			return
+			return err
 		}
 		defer func() {
 			err = os.Remove(fp.Name())
 			if err != nil {
-				log.Println(err)
+				fmt.Printf("%v\n", err)
 			}
 		}()
 
 		filepath := fp.Name()
 		err = fp.Close()
 		if err != nil {
-			log.Println(err)
+			return err
 		}
 
 		editor := os.Getenv("EDITOR")
@@ -130,63 +128,61 @@ func CmdStart(c *cli.Context) {
 		cmd.Stderr = os.Stderr
 		err = cmd.Run()
 		if err != nil {
-			log.Println(err)
-			return
+			return err
 		}
 
 		bytes, err := ioutil.ReadFile(filepath) // #nosec
 		if err != nil {
-			log.Println(err)
-			return
+			return err
 		}
 
 		ss := strings.Split(string(bytes), string("\n"))
 		if len(ss) < 1 {
-			log.Println("invalid arguments. needs (desc, started_at, stopped_at)")
-			return
+			return fmt.Errorf("invalid arguments. needs (desc, started_at, stopped_at)")
 		}
 		k, err := kokizami.Start(ss[0])
 		if err != nil {
-			log.Println(err)
+			return err
 		}
 		fmt.Println(toString(k))
+		return nil
 	} else if len(args) == 1 {
 		desc := args[0]
 		k, err := kokizami.Start(desc)
 		if err != nil {
-			log.Println(err)
+			return err
 		}
 		fmt.Println(toString(k))
-	} else {
-		log.Println("start needs one arguments [desc]")
-		return
+		return nil
 	}
+
+	return fmt.Errorf("start needs one arguments [desc]")
 }
 
 // CmdRestart starts a task from old task list
 // kokizami restart [id]
-func CmdRestart(c *cli.Context) {
+func CmdRestart(c *cli.Context) error {
 	args := c.Args()
 	if len(args) != 1 {
-		log.Println("restart needs one arguments [id]")
-		return
+		return fmt.Errorf("restart needs one arguments [id]")
 	}
 
 	id, err := strconv.Atoi(args[0])
 	if err != nil {
-		log.Println(err)
+		return err
 	}
 
 	k, err := kokizami.Get(id)
 	if err != nil {
-		log.Println(err)
+		return err
 	}
 
 	k, err = kokizami.Start(k.Desc())
 	if err != nil {
-		log.Println(err)
+		return err
 	}
 	fmt.Println(toString(k))
+	return nil
 }
 
 // CmdEdit edits a specified task
@@ -194,31 +190,28 @@ func CmdRestart(c *cli.Context) {
 // kokizami edit [id] desc       [new desc]
 // kokizami edit [id] started_at [new started_at]
 // kokizami edit [id] stopped_at [new stopped_at]
-func CmdEdit(c *cli.Context) {
+func CmdEdit(c *cli.Context) error {
 	args := c.Args()
 	if len(args) == 1 {
 		// FIXME: very long method. make them shorten...
 		id, err := strconv.Atoi(args[0])
 		if err != nil {
-			log.Println(err)
-			return
+			return err
 		}
 
 		k, err := kokizami.Get(id)
 		if err != nil {
-			log.Println(err)
-			return
+			return err
 		}
 
 		fp, err := ioutil.TempFile("", "tmp_")
 		if err != nil {
-			log.Println(err)
-			return
+			return err
 		}
 		defer func() {
 			err = os.Remove(fp.Name())
 			if err != nil {
-				log.Println(err)
+				fmt.Printf("%v\n", err)
 				return
 			}
 		}()
@@ -229,13 +222,11 @@ func CmdEdit(c *cli.Context) {
 			k.StartedAt().In(time.Local).Format("2006-01-02 15:04:05") + "\n" +
 			k.StoppedAt().In(time.Local).Format("2006-01-02 15:04:05"))
 		if err != nil {
-			log.Println(err)
-			return
+			return err
 		}
 		err = fp.Close()
 		if err != nil {
-			log.Println(err)
-			return
+			return err
 		}
 
 		editor := os.Getenv("EDITOR")
@@ -248,128 +239,119 @@ func CmdEdit(c *cli.Context) {
 		cmd.Stderr = os.Stderr
 		err = cmd.Run()
 		if err != nil {
-			log.Println(err)
-			return
+			return err
 		}
 
 		bytes, err := ioutil.ReadFile(filepath) // #nosec
 		if err != nil {
-			log.Println(err)
-			return
+			return err
 		}
 
 		ss := strings.Split(string(bytes), string("\n"))
 		if len(ss) < 3 {
-			log.Println("invalid arguments. needs (desc, started_at, stopped_at)")
-			return
+			return fmt.Errorf("invalid arguments. needs (desc, started_at, stopped_at)")
 		}
 		// kokizami: fixme. should be done by one transaction
 		_, err = kokizami.Edit(id, "desc", ss[0])
 		if err != nil {
-			log.Println(err)
-			return
+			return err
 		}
 
 		startedAt, err := time.ParseInLocation("2006-01-02 15:04:05", ss[1], time.Local)
 		startedAtStr := startedAt.UTC().Format("2006-01-02 15:04:05")
 		_, err = kokizami.Edit(id, "started_at", startedAtStr)
 		if err != nil {
-			log.Println(err)
-			return
+			return err
 		}
 		stoppedAt, err := time.ParseInLocation("2006-01-02 15:04:05", ss[2], time.Local)
 		stoppedAtStr := stoppedAt.UTC().Format("2006-01-02 15:04:05")
 		k, err = kokizami.Edit(id, "stopped_at", stoppedAtStr)
 		if err != nil {
-			log.Println(err)
-			return
+			return err
 		}
 		fmt.Println(toString(k))
-		return
+		return nil
 	} else if len(args) == 3 {
 		id, err := strconv.Atoi(args[0])
 		if err != nil {
-			log.Println(err)
-			return
+			return err
 		}
 		field := args[1]
 		newValue := args[2]
 
 		k, err := kokizami.Edit(id, field, newValue)
 		if err != nil {
-			log.Println(err)
+			return err
 		}
 		fmt.Println(k)
-	} else {
-		log.Println("edit needs three arguments " +
-			"(id, [desc|started_at|stopped_at], [new value])")
-		return
+		return nil
 	}
+
+	return fmt.Errorf("edit needs three arguments (id, [desc|started_at|stopped_at], [new value])")
 }
 
 // CmdList shows kokizami list
 // kokizami list
-func CmdList(c *cli.Context) {
+func CmdList(c *cli.Context) error {
 	l, err := kokizami.List()
 	if err != nil {
-		log.Println(err)
-		return
+		return err
 	}
 
 	if len(l) == 0 {
 		fmt.Println("list is empty")
-		return
+		return nil
 	}
 
 	for _, v := range l {
 		fmt.Println(toString(v))
 	}
+	return nil
 }
 
 // CmdStop update specified task's stopped_at
 // kokizami stop      ... stop all tasks they don't have stopped_at
 // kokizami stop [id] ... stop a task by specified id
-func CmdStop(c *cli.Context) {
+func CmdStop(c *cli.Context) error {
 	args := c.Args()
 	switch len(args) {
 	case 0:
 		err := kokizami.StopAll()
 		if err != nil {
-			log.Println(err)
+			return err
 		}
 	case 1:
 		id, err := strconv.Atoi(args[0])
 		if err != nil {
-			log.Println(err)
-			return
+			return err
 		}
 		err = kokizami.Stop(id)
 		if err != nil {
-			log.Println(err)
+			return err
 		}
 	default:
-		log.Println("stop needs at most one arguments [id]")
-		return
+		return fmt.Errorf("stop needs at most one arguments [id]")
 	}
+	return nil
 }
 
 // CmdDelete deletes specified task
 // kokizami delete [id]
-func CmdDelete(c *cli.Context) {
+func CmdDelete(c *cli.Context) error {
 	args := c.Args()
 	if len(args) != 1 {
-		log.Println("delete needs one arguments [id]")
-		return
+		return fmt.Errorf("delete needs one arguments [id]")
 	}
 
 	id, err := strconv.Atoi(args[0])
 	if err != nil {
-		log.Println(err)
-		return
+		return err
 	}
 
 	err = kokizami.Delete(id)
 	if err != nil {
-		log.Println(err)
+		return err
 	}
+
+	return nil
 }
