@@ -3,6 +3,7 @@ package kokizami
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"strconv"
 	"time"
 
@@ -47,7 +48,10 @@ func (db *DB) openDB() error {
 }
 
 func (db *DB) close() {
-	_ = db.conn.Close()
+	err := db.conn.Close()
+	if err != nil {
+		log.Printf("failed to close DB: %v", err)
+	}
 }
 
 func (db *DB) createTable() error {
@@ -171,7 +175,7 @@ func (db *DB) list(start, end int) ([]*kizami, error) {
 		return nil, errors.Wrap(err, fmt.Sprintf("query was: %s", q))
 	}
 
-	todos := make([]*kizami, 0, 0)
+	todos := make([]*kizami, 0)
 	var id int
 	var desc string
 	var startedAt time.Time

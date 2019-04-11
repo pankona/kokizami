@@ -108,7 +108,7 @@ func CmdStart(c *cli.Context) {
 			return
 		}
 		defer func() {
-			err := os.Remove(fp.Name())
+			err = os.Remove(fp.Name())
 			if err != nil {
 				log.Println(err)
 			}
@@ -124,7 +124,7 @@ func CmdStart(c *cli.Context) {
 		if editor == "" {
 			editor = "vim"
 		}
-		cmd := exec.Command(editor, filepath)
+		cmd := exec.Command(editor, filepath) // #nosec
 		cmd.Stdin = os.Stdin
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
@@ -134,7 +134,7 @@ func CmdStart(c *cli.Context) {
 			return
 		}
 
-		bytes, err := ioutil.ReadFile(filepath)
+		bytes, err := ioutil.ReadFile(filepath) // #nosec
 		if err != nil {
 			log.Println(err)
 			return
@@ -242,7 +242,7 @@ func CmdEdit(c *cli.Context) {
 		if editor == "" {
 			editor = "vim"
 		}
-		cmd := exec.Command(editor, filepath)
+		cmd := exec.Command(editor, filepath) // #nosec
 		cmd.Stdin = os.Stdin
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
@@ -252,7 +252,7 @@ func CmdEdit(c *cli.Context) {
 			return
 		}
 
-		bytes, err := ioutil.ReadFile(filepath)
+		bytes, err := ioutil.ReadFile(filepath) // #nosec
 		if err != nil {
 			log.Println(err)
 			return
@@ -264,7 +264,7 @@ func CmdEdit(c *cli.Context) {
 			return
 		}
 		// kokizami: fixme. should be done by one transaction
-		k, err = kokizami.Edit(id, "desc", ss[0])
+		_, err = kokizami.Edit(id, "desc", ss[0])
 		if err != nil {
 			log.Println(err)
 			return
@@ -272,7 +272,7 @@ func CmdEdit(c *cli.Context) {
 
 		startedAt, err := time.ParseInLocation("2006-01-02 15:04:05", ss[1], time.Local)
 		startedAtStr := startedAt.UTC().Format("2006-01-02 15:04:05")
-		k, err = kokizami.Edit(id, "started_at", startedAtStr)
+		_, err = kokizami.Edit(id, "started_at", startedAtStr)
 		if err != nil {
 			log.Println(err)
 			return

@@ -20,7 +20,6 @@ type kizami struct {
 	desc      string
 	startedAt time.Time
 	stoppedAt time.Time
-	elapsed   time.Time
 }
 
 // String returns string representation of a kizami.
@@ -89,8 +88,7 @@ func initialize(dbi DBInterface, dbpath string) error {
 	}
 	defer dbinterface.close()
 
-	_ = dbinterface.createTable()
-	return nil
+	return dbinterface.createTable()
 }
 
 // Start starts a specified Kizami to DB
@@ -155,7 +153,7 @@ func List() ([]Kizamier, error) {
 	if err != nil {
 		return nil, err
 	}
-	kizamiers := make([]Kizamier, 0, 0)
+	kizamiers := make([]Kizamier, 0)
 	for _, v := range l {
 		kizamiers = append(kizamiers, v)
 	}

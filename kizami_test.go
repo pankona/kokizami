@@ -77,7 +77,7 @@ func genDefaultDBMock() *DBMock {
 			return 3, nil
 		},
 		mockList: func() ([]*kizami, error) {
-			t := make([]*kizami, 0, 0)
+			t := make([]*kizami, 0)
 			t = append(t, &kizami{desc: "test0"})
 			t = append(t, &kizami{desc: "test1"})
 			t = append(t, &kizami{desc: "test2"})
@@ -138,7 +138,7 @@ func TestNormalWithDB(t *testing.T) {
 		t.Error("failed to create temp file")
 	}
 	defer func() {
-		err := os.Remove(fp.Name())
+		err = os.Remove(fp.Name())
 		if err != nil {
 			t.Error("failed to remove temporary file")
 		}
@@ -257,7 +257,7 @@ func TestNormalWithDB(t *testing.T) {
 		t.Error("List returned unexpected result")
 	}
 
-	k, err = Start("test")
+	_, err = Start("test")
 	if err != nil {
 		t.Error("Delete returned error")
 	}
