@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/codegangsta/cli"
 	"github.com/pankona/kokizami"
+	"github.com/urfave/cli"
 )
 
 // GlobalFlags can be used globally
