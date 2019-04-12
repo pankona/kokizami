@@ -12,7 +12,6 @@ import (
 )
 
 func main() {
-	// TODO: support multi platform
 	u, err := user.Current()
 	if err != nil {
 		panic(fmt.Sprintf("failed to get current user: %v", err))
