@@ -95,7 +95,8 @@ func genDefaultDBMock() *DBMock {
 func TestInitializeNormal(t *testing.T) {
 	dbmock := genDefaultDBMock()
 
-	err := initialize(dbmock, "")
+	kkzm := &Kokizami{}
+	err := kkzm.initialize(dbmock, "")
 	if err != nil {
 		t.Fatalf("failed to initialize: %v", err)
 	}
@@ -107,7 +108,8 @@ func TestInitializeError(t *testing.T) {
 		return errors.New("error")
 	}
 
-	err := initialize(dbmock, "")
+	kkzm := &Kokizami{}
+	err := kkzm.initialize(dbmock, "")
 	if err == nil {
 		t.Fatalf("Initialize succeeded but failure is expected")
 	}
@@ -116,11 +118,12 @@ func TestInitializeError(t *testing.T) {
 func TestStartNormal(t *testing.T) {
 	dbmock := genDefaultDBMock()
 
-	err := initialize(dbmock, "")
+	kkzm := &Kokizami{}
+	err := kkzm.initialize(dbmock, "")
 	if err != nil {
 		t.Fatalf("failed to initialize: %v", err)
 	}
-	k, err := Start("test")
+	k, err := kkzm.Start("test")
 	if err != nil {
 		t.Fatalf("Start returned error: %v", err)
 	}
@@ -145,11 +148,12 @@ func TestNormalWithDB(t *testing.T) {
 		}
 	}()
 
-	err = initialize(nil, fp.Name())
+	kkzm := &Kokizami{}
+	err = kkzm.initialize(nil, fp.Name())
 	if err != nil {
 		t.Fatalf("failed to initialize: %v", err)
 	}
-	k, err := Start("test")
+	k, err := kkzm.Start("test")
 	if err != nil {
 		t.Fatalf("Start returned error: %v", err)
 	}
@@ -159,7 +163,7 @@ func TestNormalWithDB(t *testing.T) {
 	if k.Desc() != "test" {
 		t.Fatalf("Start returned unexpected kizami instance")
 	}
-	l, err := List()
+	l, err := kkzm.List()
 	if err != nil {
 		t.Fatalf("List returned error: %v", err)
 	}
@@ -167,7 +171,7 @@ func TestNormalWithDB(t *testing.T) {
 		t.Fatalf("unexpected list length")
 	}
 
-	k, err = Edit(1, "desc", "edited")
+	k, err = kkzm.Edit(1, "desc", "edited")
 	if err != nil {
 		t.Fatalf("Edit returned error: %v", err)
 	}
@@ -178,7 +182,7 @@ func TestNormalWithDB(t *testing.T) {
 		t.Fatalf("Edit returned unexpected kizami")
 	}
 
-	k, err = Edit(1, "started_at", "2010-01-02 03:04:05")
+	k, err = kkzm.Edit(1, "started_at", "2010-01-02 03:04:05")
 	if err != nil {
 		t.Fatalf("Edit returned error: %v", err)
 	}
@@ -195,7 +199,7 @@ func TestNormalWithDB(t *testing.T) {
 		t.Fatalf("Edit returned unexpected kizami")
 	}
 
-	k, err = Edit(1, "stopped_at", "2011-01-02 03:04:05")
+	k, err = kkzm.Edit(1, "stopped_at", "2011-01-02 03:04:05")
 	if err != nil {
 		t.Fatalf("Edit returned error: %v", err)
 	}
@@ -212,7 +216,7 @@ func TestNormalWithDB(t *testing.T) {
 		t.Fatalf("Edit returned unexpected kizami")
 	}
 
-	err = Stop(1)
+	err = kkzm.Stop(1)
 	if err != nil {
 		t.Fatalf("Stop returned error: %v", err)
 	}
@@ -229,7 +233,7 @@ func TestNormalWithDB(t *testing.T) {
 		t.Fatalf("Stop returned unexpected kizami")
 	}
 
-	k, err = Get(1)
+	k, err = kkzm.Get(1)
 	if err != nil {
 		t.Fatalf("Stop returned error: %v", err)
 	}
@@ -246,11 +250,11 @@ func TestNormalWithDB(t *testing.T) {
 		t.Fatalf("Stop returned unexpected kizami")
 	}
 
-	err = Delete(1)
+	err = kkzm.Delete(1)
 	if err != nil {
 		t.Fatalf("Delete returned error: %v", err)
 	}
-	l, err = List()
+	l, err = kkzm.List()
 	if err != nil {
 		t.Fatalf("Delete returned error: %v", err)
 	}
@@ -258,16 +262,16 @@ func TestNormalWithDB(t *testing.T) {
 		t.Fatalf("List returned unexpected result")
 	}
 
-	_, err = Start("test")
+	_, err = kkzm.Start("test")
 	if err != nil {
 		t.Fatalf("Delete returned error: %v", err)
 	}
 
-	err = StopAll()
+	err = kkzm.StopAll()
 	if err != nil {
 		t.Fatalf("Delete returned error: %v", err)
 	}
-	k, err = Edit(2, "started_at", "2010-01-02 03:04:05")
+	k, err = kkzm.Edit(2, "started_at", "2010-01-02 03:04:05")
 	if err != nil {
 		t.Fatalf("Get returned error: %v", err)
 	}
@@ -284,7 +288,7 @@ func TestNormalWithDB(t *testing.T) {
 		t.Fatalf("Get returned unexpected kizami")
 	}
 
-	k, err = Edit(2, "stopped_at", "2010-01-02 04:04:05")
+	k, err = kkzm.Edit(2, "stopped_at", "2010-01-02 04:04:05")
 	if err != nil {
 		t.Fatalf("Get returned error: %v", err)
 	}
@@ -312,11 +316,13 @@ func TestStartError(t *testing.T) {
 	dbmock.mockOpenDB = func() error {
 		return errors.New("error")
 	}
-	err := initialize(dbmock, "")
+
+	kkzm := &Kokizami{}
+	err := kkzm.initialize(dbmock, "")
 	if err == nil {
 		t.Fatalf("Initialize succeeded but failure is expected")
 	}
-	k, err := Start("test")
+	k, err := kkzm.Start("test")
 	if k != nil {
 		t.Fatalf("k is not nil but nil is expected")
 	}
@@ -331,11 +337,13 @@ func TestStartError(t *testing.T) {
 	dbmock.mockStart = func(desc string) (*kizami, error) {
 		return nil, errors.New("error")
 	}
-	err = initialize(dbmock, "")
+
+	kkzm = &Kokizami{}
+	err = kkzm.initialize(dbmock, "")
 	if err != nil {
 		t.Fatalf("failed to initialize: %v", err)
 	}
-	k, err = Start("test")
+	k, err = kkzm.Start("test")
 	if k != nil {
 		t.Fatalf("k is not nil but nil is expected")
 	}
@@ -347,11 +355,12 @@ func TestStartError(t *testing.T) {
 func TestEditNormal(t *testing.T) {
 	dbmock := genDefaultDBMock()
 
-	err := initialize(dbmock, "")
+	kkzm := &Kokizami{}
+	err := kkzm.initialize(dbmock, "")
 	if err != nil {
 		t.Fatalf("failed to initialize: %v", err)
 	}
-	k, err := Edit(0, "desc", "edited")
+	k, err := kkzm.Edit(0, "desc", "edited")
 	if err != nil {
 		t.Fatalf("Edit returned error: %v", err)
 	}
@@ -370,11 +379,13 @@ func TestEditError(t *testing.T) {
 	dbmock.mockOpenDB = func() error {
 		return errors.New("error")
 	}
-	err := initialize(dbmock, "")
+
+	kkzm := &Kokizami{}
+	err := kkzm.initialize(dbmock, "")
 	if err == nil {
 		t.Fatalf("Initialize succeeded but this is not expected: %v", err)
 	}
-	k, err := Edit(0, "desc", "edited")
+	k, err := kkzm.Edit(0, "desc", "edited")
 	if k != nil {
 		t.Fatalf("k is not nil but this is not expected")
 	}
@@ -389,11 +400,13 @@ func TestEditError(t *testing.T) {
 	dbmock.mockEdit = func(id int, field, newValue string) (*kizami, error) {
 		return nil, errors.New("error")
 	}
-	err = initialize(dbmock, "")
+
+	kkzm = &Kokizami{}
+	err = kkzm.initialize(dbmock, "")
 	if err != nil {
 		t.Fatalf("failed to initialize: %v", err)
 	}
-	k, err = Edit(0, "desc", "edited")
+	k, err = kkzm.Edit(0, "desc", "edited")
 	if k != nil {
 		t.Fatalf("k is not nil but this is not expected")
 	}
@@ -405,11 +418,12 @@ func TestEditError(t *testing.T) {
 func TestListNormal(t *testing.T) {
 	dbmock := genDefaultDBMock()
 
-	err := initialize(dbmock, "")
+	kkzm := &Kokizami{}
+	err := kkzm.initialize(dbmock, "")
 	if err != nil {
 		t.Fatalf("initialize failed")
 	}
-	ks, err := List()
+	ks, err := kkzm.List()
 	if err != nil {
 		t.Fatalf("List returned error: %v", err)
 	}
@@ -434,11 +448,13 @@ func TestListError(t *testing.T) {
 	dbmock.mockOpenDB = func() error {
 		return errors.New("error")
 	}
-	err := initialize(dbmock, "")
+
+	kkzm := &Kokizami{}
+	err := kkzm.initialize(dbmock, "")
 	if err == nil {
 		t.Fatalf("initialize succeeded but this failure is expected")
 	}
-	ks, err := List()
+	ks, err := kkzm.List()
 	if ks != nil {
 		t.Fatalf("list of kizami is not nil but failure is expected")
 	}
@@ -453,11 +469,13 @@ func TestListError(t *testing.T) {
 	dbmock.mockList = func() ([]*kizami, error) {
 		return nil, errors.New("error")
 	}
-	err = initialize(dbmock, "")
+
+	kkzm = &Kokizami{}
+	err = kkzm.initialize(dbmock, "")
 	if err != nil {
 		t.Fatalf("Initialize failed: %v", err)
 	}
-	ks, err = List()
+	ks, err = kkzm.List()
 	if ks != nil {
 		t.Fatalf("list of kizami is not nil but this is not expected")
 	}
@@ -469,11 +487,12 @@ func TestListError(t *testing.T) {
 func TestStopNormal(t *testing.T) {
 	dbmock := genDefaultDBMock()
 
-	err := initialize(dbmock, "")
+	kkzm := &Kokizami{}
+	err := kkzm.initialize(dbmock, "")
 	if err != nil {
 		t.Fatalf("failed to initialize: %v", err)
 	}
-	err = Stop(0)
+	err = kkzm.Stop(0)
 	if err != nil {
 		t.Fatalf("Stop returned error: %v", err)
 	}
@@ -486,11 +505,13 @@ func TestStopError(t *testing.T) {
 	dbmock.mockOpenDB = func() error {
 		return errors.New("error")
 	}
-	err := initialize(dbmock, "")
+
+	kkzm := &Kokizami{}
+	err := kkzm.initialize(dbmock, "")
 	if err == nil {
 		t.Fatalf("initialize succeeded but failure is expected")
 	}
-	err = Stop(0)
+	err = kkzm.Stop(0)
 	if err == nil {
 		t.Fatalf("err is nil but this is not expected")
 	}
@@ -502,11 +523,13 @@ func TestStopError(t *testing.T) {
 	dbmock.mockStop = func(id int) error {
 		return errors.New("error")
 	}
-	err = initialize(dbmock, "")
+
+	kkzm = &Kokizami{}
+	err = kkzm.initialize(dbmock, "")
 	if err != nil {
 		t.Fatalf("Initialize failed")
 	}
-	err = Stop(0)
+	err = kkzm.Stop(0)
 	if err == nil {
 		t.Fatalf("err is nil but this is not expected")
 	}
@@ -515,11 +538,12 @@ func TestStopError(t *testing.T) {
 func TestDeleteNormal(t *testing.T) {
 	dbmock := genDefaultDBMock()
 
-	err := initialize(dbmock, "")
+	kkzm := &Kokizami{}
+	err := kkzm.initialize(dbmock, "")
 	if err != nil {
 		t.Fatalf("failed to initialize: %v", err)
 	}
-	err = Delete(0)
+	err = kkzm.Delete(0)
 	if err != nil {
 		t.Fatalf("Delete returned error: %v", err)
 	}
@@ -532,11 +556,13 @@ func TestDeleteError(t *testing.T) {
 	dbmock.mockOpenDB = func() error {
 		return errors.New("error")
 	}
-	err := initialize(dbmock, "")
+
+	kkzm := &Kokizami{}
+	err := kkzm.initialize(dbmock, "")
 	if err == nil {
 		t.Fatalf("initialize succeeded but failure is expected")
 	}
-	err = Delete(0)
+	err = kkzm.Delete(0)
 	if err == nil {
 		t.Fatalf("err is nil but this is not expected")
 	}
@@ -548,11 +574,13 @@ func TestDeleteError(t *testing.T) {
 	dbmock.mockDelete = func(id int) error {
 		return errors.New("error")
 	}
-	err = initialize(dbmock, "")
+
+	kkzm = &Kokizami{}
+	err = kkzm.initialize(dbmock, "")
 	if err != nil {
 		t.Fatalf("Initialize failed: %v", err)
 	}
-	err = Delete(0)
+	err = kkzm.Delete(0)
 	if err == nil {
 		t.Fatalf("err is nil but this is not expected")
 	}

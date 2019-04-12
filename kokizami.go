@@ -8,13 +8,16 @@ import (
 
 var dbinterface DBInterface
 
+// Kokizami provides APIs to manage tasks
+type Kokizami struct{}
+
 // Initialize initializes Kizami library.
 // this function will create DB file and prepare tables.
-func Initialize(dbpath string) error {
-	return initialize(nil, dbpath)
+func (k *Kokizami) Initialize(dbpath string) error {
+	return k.initialize(nil, dbpath)
 }
 
-func initialize(dbi DBInterface, dbpath string) error {
+func (k *Kokizami) initialize(dbi DBInterface, dbpath string) error {
 	err := os.MkdirAll(filepath.Dir(dbpath), 0755) // #nosec
 	if err != nil {
 		return fmt.Errorf("failed to create a directory to store DB: %v", err)
@@ -35,7 +38,7 @@ func initialize(dbi DBInterface, dbpath string) error {
 }
 
 // Start starts a specified Kizami to DB
-func Start(desc string) (Kizamier, error) {
+func (k *Kokizami) Start(desc string) (Kizamier, error) {
 	err := dbinterface.openDB()
 	if err != nil {
 		return nil, err
@@ -50,7 +53,7 @@ func Start(desc string) (Kizamier, error) {
 }
 
 // Get returns a Kizami by specified id
-func Get(id int) (Kizamier, error) {
+func (k *Kokizami) Get(id int) (Kizamier, error) {
 	err := dbinterface.openDB()
 	if err != nil {
 		return nil, err
@@ -65,7 +68,7 @@ func Get(id int) (Kizamier, error) {
 }
 
 // Edit edits a specified Kizami item
-func Edit(id int, field, newValue string) (Kizamier, error) {
+func (k *Kokizami) Edit(id int, field, newValue string) (Kizamier, error) {
 	err := dbinterface.openDB()
 	if err != nil {
 		return nil, err
@@ -80,7 +83,7 @@ func Edit(id int, field, newValue string) (Kizamier, error) {
 }
 
 // List returns list of Kizami
-func List() ([]Kizamier, error) {
+func (k *Kokizami) List() ([]Kizamier, error) {
 	err := dbinterface.openDB()
 	if err != nil {
 		return nil, err
@@ -104,7 +107,7 @@ func List() ([]Kizamier, error) {
 }
 
 // Stop updates specified task's stopped_at
-func Stop(id int) error {
+func (k *Kokizami) Stop(id int) error {
 	err := dbinterface.openDB()
 	if err != nil {
 		return err
@@ -116,7 +119,7 @@ func Stop(id int) error {
 }
 
 // StopAll updates specified task's stopped_at
-func StopAll() error {
+func (k *Kokizami) StopAll() error {
 	err := dbinterface.openDB()
 	if err != nil {
 		return err
@@ -128,7 +131,7 @@ func StopAll() error {
 }
 
 // Delete delets specified task
-func Delete(id int) error {
+func (k *Kokizami) Delete(id int) error {
 	err := dbinterface.openDB()
 	if err != nil {
 		return err

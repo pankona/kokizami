@@ -97,10 +97,15 @@ func toString(k kokizami.Kizamier) string {
 		round(k.Elapsed(), time.Second).String()
 }
 
+func kkzm(c *cli.Context) *kokizami.Kokizami {
+	return c.App.Metadata["kkzm"].(*kokizami.Kokizami)
+}
+
 // CmdStart starts a new task
 // kokizami start [new desc]
 func CmdStart(c *cli.Context) error {
 	args := c.Args()
+
 	if len(args) == 0 {
 		filepath, err := editTextWithEditor("")
 		if err != nil {
@@ -117,7 +122,7 @@ func CmdStart(c *cli.Context) error {
 			return fmt.Errorf("invalid arguments. needs (desc, started_at, stopped_at)")
 		}
 
-		k, err := kokizami.Start(ss[0])
+		k, err := kkzm(c).Start(ss[0])
 		if err != nil {
 			return err
 		}
@@ -125,7 +130,7 @@ func CmdStart(c *cli.Context) error {
 		return nil
 	} else if len(args) == 1 {
 		desc := args[0]
-		k, err := kokizami.Start(desc)
+		k, err := kkzm(c).Start(desc)
 		if err != nil {
 			return err
 		}
@@ -149,12 +154,12 @@ func CmdRestart(c *cli.Context) error {
 		return err
 	}
 
-	k, err := kokizami.Get(id)
+	k, err := kkzm(c).Get(id)
 	if err != nil {
 		return err
 	}
 
-	k, err = kokizami.Start(k.Desc())
+	k, err = kkzm(c).Start(k.Desc())
 	if err != nil {
 		return err
 	}
@@ -175,7 +180,7 @@ func CmdEdit(c *cli.Context) error {
 			return err
 		}
 
-		k, err := editTaskWithEditor(id)
+		k, err := editTaskWithEditor(kkzm(c), id)
 		if err != nil {
 			return err
 		}
@@ -194,7 +199,7 @@ func CmdEdit(c *cli.Context) error {
 			return err
 		}
 
-		k, err := kokizami.Edit(id, args[1], args[2])
+		k, err := kkzm(c).Edit(id, args[1], args[2])
 		if err != nil {
 			return err
 		}
@@ -209,7 +214,7 @@ func CmdEdit(c *cli.Context) error {
 // CmdList shows kokizami list
 // kokizami list
 func CmdList(c *cli.Context) error {
-	l, err := kokizami.List()
+	l, err := kkzm(c).List()
 	if err != nil {
 		return err
 	}
@@ -232,7 +237,7 @@ func CmdStop(c *cli.Context) error {
 	args := c.Args()
 	switch len(args) {
 	case 0:
-		err := kokizami.StopAll()
+		err := kkzm(c).StopAll()
 		if err != nil {
 			return err
 		}
@@ -241,7 +246,7 @@ func CmdStop(c *cli.Context) error {
 		if err != nil {
 			return err
 		}
-		err = kokizami.Stop(id)
+		err = kkzm(c).Stop(id)
 		if err != nil {
 			return err
 		}
@@ -264,11 +269,11 @@ func CmdDelete(c *cli.Context) error {
 		return err
 	}
 
-	return kokizami.Delete(id)
+	return kkzm(c).Delete(id)
 }
 
-func editTaskWithEditor(id int) (kokizami.Kizamier, error) {
-	k, err := kokizami.Get(id)
+func editTaskWithEditor(kkzm *kokizami.Kokizami, id int) (kokizami.Kizamier, error) {
+	k, err := kkzm.Get(id)
 	if err != nil {
 		return nil, fmt.Errorf("failed to task by ID: %v", err)
 	}
@@ -297,15 +302,15 @@ func editTaskWithEditor(id int) (kokizami.Kizamier, error) {
 		return nil, fmt.Errorf("invalid arguments. needs (desc, started_at, stopped_at)")
 	}
 
-	k, err = editBulk(id, ss[0], ss[1], ss[2])
+	k, err = editBulk(kkzm, id, ss[0], ss[1], ss[2])
 	if err != nil {
 		return nil, fmt.Errorf("failed to edit a task: %v", err)
 	}
 	return k, nil
 }
 
-func editBulk(id int, desc, start, stop string) (kokizami.Kizamier, error) {
-	_, err := kokizami.Edit(id, "desc", desc)
+func editBulk(kkzm *kokizami.Kokizami, id int, desc, start, stop string) (kokizami.Kizamier, error) {
+	_, err := kkzm.Edit(id, "desc", desc)
 	if err != nil {
 		return nil, err
 	}
@@ -316,7 +321,7 @@ func editBulk(id int, desc, start, stop string) (kokizami.Kizamier, error) {
 	}
 
 	startedAtStr := startedAt.UTC().Format("2006-01-02 15:04:05")
-	_, err = kokizami.Edit(id, "started_at", startedAtStr)
+	_, err = kkzm.Edit(id, "started_at", startedAtStr)
 	if err != nil {
 		return nil, err
 	}
@@ -327,7 +332,7 @@ func editBulk(id int, desc, start, stop string) (kokizami.Kizamier, error) {
 	}
 
 	stoppedAtStr := stoppedAt.UTC().Format("2006-01-02 15:04:05")
-	k, err := kokizami.Edit(id, "stopped_at", stoppedAtStr)
+	k, err := kkzm.Edit(id, "stopped_at", stoppedAtStr)
 	if err != nil {
 		return nil, err
 	}

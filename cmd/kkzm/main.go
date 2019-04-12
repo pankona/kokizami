@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -12,16 +11,6 @@ import (
 )
 
 func main() {
-	u, err := user.Current()
-	if err != nil {
-		panic(fmt.Sprintf("failed to get current user: %v", err))
-	}
-
-	err = kokizami.Initialize(filepath.Join(u.HomeDir, ".config", "kokizami", "db"))
-	if err != nil {
-		panic(fmt.Sprintf("failed to initialize: %v", err))
-	}
-
 	app := cli.NewApp()
 	app.Name = Name
 	app.Version = Version
@@ -32,9 +21,26 @@ func main() {
 	app.Action = CmdList // show list if no argument
 	app.Commands = Commands
 	app.CommandNotFound = CommandNotFound
-	err = app.Run(os.Args)
+
+	app.Before = func(ctx *cli.Context) error {
+		u, err := user.Current()
+		if err != nil {
+			return fmt.Errorf("failed to get current user: %v", err)
+		}
+
+		kkzm := &kokizami.Kokizami{}
+		err = kkzm.Initialize(filepath.Join(u.HomeDir, ".config", "kokizami", "db"))
+		if err != nil {
+			return fmt.Errorf("failed to initialize: %v", err)
+		}
+
+		app.Metadata["kkzm"] = kkzm
+		return nil
+	}
+
+	err := app.Run(os.Args)
 	if err != nil {
-		log.Println(err)
+		fmt.Println(err)
 		os.Exit(1)
 	}
 	os.Exit(0)
