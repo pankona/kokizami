@@ -15,7 +15,7 @@ func Initialize(dbpath string) error {
 }
 
 func initialize(dbi DBInterface, dbpath string) error {
-	err := os.MkdirAll(filepath.Dir(dbpath), 0755)
+	err := os.MkdirAll(filepath.Dir(dbpath), 0755) // #nosec
 	if err != nil {
 		return fmt.Errorf("failed to create a directory to store DB: %v", err)
 	}
