@@ -6,10 +6,10 @@ import (
 	"path/filepath"
 )
 
-var dbinterface DBInterface
-
 // Kokizami provides APIs to manage tasks
-type Kokizami struct{}
+type Kokizami struct {
+	DB DBInterface
+}
 
 // Initialize initializes Kizami library.
 // this function will create DB file and prepare tables.
@@ -23,29 +23,29 @@ func (k *Kokizami) initialize(dbi DBInterface, dbpath string) error {
 		return fmt.Errorf("failed to create a directory to store DB: %v", err)
 	}
 
-	dbinterface = dbi
-	if dbinterface == nil {
-		dbinterface = newDB(dbpath)
+	k.DB = dbi
+	if k.DB == nil {
+		k.DB = newDB(dbpath)
 	}
 
-	err = dbinterface.openDB()
+	err = k.DB.openDB()
 	if err != nil {
 		return err
 	}
-	defer dbinterface.close()
+	defer k.DB.close()
 
-	return dbinterface.createTable()
+	return k.DB.createTable()
 }
 
 // Start starts a specified Kizami to DB
 func (k *Kokizami) Start(desc string) (Kizamier, error) {
-	err := dbinterface.openDB()
+	err := k.DB.openDB()
 	if err != nil {
 		return nil, err
 	}
-	defer dbinterface.close()
+	defer k.DB.close()
 
-	t, err := dbinterface.start(desc)
+	t, err := k.DB.start(desc)
 	if err != nil {
 		return nil, err
 	}
@@ -54,13 +54,13 @@ func (k *Kokizami) Start(desc string) (Kizamier, error) {
 
 // Get returns a Kizami by specified id
 func (k *Kokizami) Get(id int) (Kizamier, error) {
-	err := dbinterface.openDB()
+	err := k.DB.openDB()
 	if err != nil {
 		return nil, err
 	}
-	defer dbinterface.close()
+	defer k.DB.close()
 
-	t, err := dbinterface.get(id)
+	t, err := k.DB.get(id)
 	if err != nil {
 		return nil, err
 	}
@@ -69,13 +69,13 @@ func (k *Kokizami) Get(id int) (Kizamier, error) {
 
 // Edit edits a specified Kizami item
 func (k *Kokizami) Edit(id int, field, newValue string) (Kizamier, error) {
-	err := dbinterface.openDB()
+	err := k.DB.openDB()
 	if err != nil {
 		return nil, err
 	}
-	defer dbinterface.close()
+	defer k.DB.close()
 
-	t, err := dbinterface.edit(id, field, newValue)
+	t, err := k.DB.edit(id, field, newValue)
 	if err != nil {
 		return nil, err
 	}
@@ -84,18 +84,18 @@ func (k *Kokizami) Edit(id int, field, newValue string) (Kizamier, error) {
 
 // List returns list of Kizami
 func (k *Kokizami) List() ([]Kizamier, error) {
-	err := dbinterface.openDB()
+	err := k.DB.openDB()
 	if err != nil {
 		return nil, err
 	}
-	defer dbinterface.close()
+	defer k.DB.close()
 
-	c, err := dbinterface.count()
+	c, err := k.DB.count()
 	if err != nil {
 		return nil, err
 	}
 
-	l, err := dbinterface.list(0, c)
+	l, err := k.DB.list(0, c)
 	if err != nil {
 		return nil, err
 	}
@@ -108,36 +108,36 @@ func (k *Kokizami) List() ([]Kizamier, error) {
 
 // Stop updates specified task's stopped_at
 func (k *Kokizami) Stop(id int) error {
-	err := dbinterface.openDB()
+	err := k.DB.openDB()
 	if err != nil {
 		return err
 	}
-	defer dbinterface.close()
+	defer k.DB.close()
 
-	err = dbinterface.stop(id)
+	err = k.DB.stop(id)
 	return err
 }
 
 // StopAll updates specified task's stopped_at
 func (k *Kokizami) StopAll() error {
-	err := dbinterface.openDB()
+	err := k.DB.openDB()
 	if err != nil {
 		return err
 	}
-	defer dbinterface.close()
+	defer k.DB.close()
 
-	err = dbinterface.stopall()
+	err = k.DB.stopall()
 	return err
 }
 
 // Delete delets specified task
 func (k *Kokizami) Delete(id int) error {
-	err := dbinterface.openDB()
+	err := k.DB.openDB()
 	if err != nil {
 		return err
 	}
-	defer dbinterface.close()
+	defer k.DB.close()
 
-	err = dbinterface.delete(id)
+	err = k.DB.delete(id)
 	return err
 }
