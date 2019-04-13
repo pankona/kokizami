@@ -9,8 +9,6 @@ import (
 
 type DBMock struct {
 	DBInterface
-	mockOpenDB      func() error
-	mockClose       func()
 	mockCreateTable func() error
 	mockStart       func(desc string) (*kizami, error)
 	mockEdit        func(id int, field, newValue string) (*kizami, error)
@@ -18,14 +16,6 @@ type DBMock struct {
 	mockList        func() ([]*kizami, error)
 	mockStop        func(id int) error
 	mockDelete      func(id int) error
-}
-
-func (db *DBMock) openDB() error {
-	return db.mockOpenDB()
-}
-
-func (db *DBMock) close() {
-	db.mockClose()
 }
 
 func (db *DBMock) createTable() error {
@@ -59,11 +49,6 @@ func (db *DBMock) delete(id int) error {
 // default mock implementation
 func genDefaultDBMock() *DBMock {
 	return &DBMock{
-		mockOpenDB: func() error {
-			return nil
-		},
-		mockClose: func() {
-		},
 		mockCreateTable: func() error {
 			return nil
 		},
@@ -104,7 +89,7 @@ func TestInitializeNormal(t *testing.T) {
 
 func TestInitializeError(t *testing.T) {
 	dbmock := genDefaultDBMock()
-	dbmock.mockOpenDB = func() error {
+	dbmock.mockCreateTable = func() error {
 		return errors.New("error")
 	}
 
@@ -311,10 +296,11 @@ func TestNormalWithDB(t *testing.T) {
 
 func TestStartError(t *testing.T) {
 	dbmock := genDefaultDBMock()
-
-	// openDB goes failure
-	dbmock.mockOpenDB = func() error {
+	dbmock.mockCreateTable = func() error {
 		return errors.New("error")
+	}
+	dbmock.mockStart = func(desc string) (*kizami, error) {
+		return nil, errors.New("error")
 	}
 
 	kkzm := &Kokizami{}
@@ -330,10 +316,7 @@ func TestStartError(t *testing.T) {
 		t.Fatalf("error is nil but non-nil is expected")
 	}
 
-	// openDB goes success but Start goes failure
-	dbmock.mockOpenDB = func() error {
-		return nil
-	}
+	dbmock = genDefaultDBMock()
 	dbmock.mockStart = func(desc string) (*kizami, error) {
 		return nil, errors.New("error")
 	}
@@ -374,16 +357,17 @@ func TestEditNormal(t *testing.T) {
 
 func TestEditError(t *testing.T) {
 	dbmock := genDefaultDBMock()
-
-	// openDB goes failure
-	dbmock.mockOpenDB = func() error {
+	dbmock.mockCreateTable = func() error {
 		return errors.New("error")
+	}
+	dbmock.mockEdit = func(id int, field, newValue string) (*kizami, error) {
+		return nil, errors.New("error")
 	}
 
 	kkzm := &Kokizami{}
 	err := kkzm.initialize(dbmock, "")
 	if err == nil {
-		t.Fatalf("Initialize succeeded but this is not expected: %v", err)
+		t.Fatalf("Initialize succeeded but failure is expected")
 	}
 	k, err := kkzm.Edit(0, "desc", "edited")
 	if k != nil {
@@ -393,10 +377,7 @@ func TestEditError(t *testing.T) {
 		t.Fatalf("error is not nil but this is not expected")
 	}
 
-	// openDB goes success but Edit goes failure
-	dbmock.mockOpenDB = func() error {
-		return nil
-	}
+	dbmock = genDefaultDBMock()
 	dbmock.mockEdit = func(id int, field, newValue string) (*kizami, error) {
 		return nil, errors.New("error")
 	}
@@ -443,10 +424,11 @@ func TestListNormal(t *testing.T) {
 
 func TestListError(t *testing.T) {
 	dbmock := genDefaultDBMock()
-
-	// openDB goes failure
-	dbmock.mockOpenDB = func() error {
+	dbmock.mockCreateTable = func() error {
 		return errors.New("error")
+	}
+	dbmock.mockList = func() ([]*kizami, error) {
+		return nil, errors.New("error")
 	}
 
 	kkzm := &Kokizami{}
@@ -462,10 +444,7 @@ func TestListError(t *testing.T) {
 		t.Fatalf("err is nil but this is not expected")
 	}
 
-	// openDB goes success but List goes failure
-	dbmock.mockOpenDB = func() error {
-		return nil
-	}
+	dbmock = genDefaultDBMock()
 	dbmock.mockList = func() ([]*kizami, error) {
 		return nil, errors.New("error")
 	}
@@ -500,9 +479,10 @@ func TestStopNormal(t *testing.T) {
 
 func TestStopError(t *testing.T) {
 	dbmock := genDefaultDBMock()
-
-	// openDB goes failure
-	dbmock.mockOpenDB = func() error {
+	dbmock.mockCreateTable = func() error {
+		return errors.New("error")
+	}
+	dbmock.mockStop = func(id int) error {
 		return errors.New("error")
 	}
 
@@ -516,10 +496,7 @@ func TestStopError(t *testing.T) {
 		t.Fatalf("err is nil but this is not expected")
 	}
 
-	// openDB goes success but stop goes failure
-	dbmock.mockOpenDB = func() error {
-		return nil
-	}
+	dbmock = genDefaultDBMock()
 	dbmock.mockStop = func(id int) error {
 		return errors.New("error")
 	}
@@ -551,9 +528,10 @@ func TestDeleteNormal(t *testing.T) {
 
 func TestDeleteError(t *testing.T) {
 	dbmock := genDefaultDBMock()
-
-	// openDB goes failure
-	dbmock.mockOpenDB = func() error {
+	dbmock.mockCreateTable = func() error {
+		return errors.New("error")
+	}
+	dbmock.mockDelete = func(id int) error {
 		return errors.New("error")
 	}
 
@@ -567,10 +545,7 @@ func TestDeleteError(t *testing.T) {
 		t.Fatalf("err is nil but this is not expected")
 	}
 
-	// openDB goes success but stop goes failure
-	dbmock.mockOpenDB = func() error {
-		return nil
-	}
+	dbmock = genDefaultDBMock()
 	dbmock.mockDelete = func(id int) error {
 		return errors.New("error")
 	}
