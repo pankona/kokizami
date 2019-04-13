@@ -51,32 +51,29 @@ func (db *DB) execWithFunc(f func(conn *sql.DB) error) error {
 
 func (db *DB) createTable() error {
 	return db.execWithFunc(func(conn *sql.DB) error {
-		q := "CREATE TABLE IF NOT EXISTS todo ("
-		q += " id INTEGER PRIMARY KEY AUTOINCREMENT"
-		q += ", desc VARCHAR(255) NOT NULL"
-		q += ", started_at TIMESTAMP DEFAULT (DATETIME('now'))"
-		q += ", stopped_at TIMESTAMP DEFAULT (DATETIME('1970-01-01'))"
-		q += ")"
-
+		q := "CREATE TABLE IF NOT EXISTS todo (" +
+			" id INTEGER PRIMARY KEY AUTOINCREMENT" +
+			", desc VARCHAR(255) NOT NULL" +
+			", started_at TIMESTAMP DEFAULT (DATETIME('now'))" +
+			", stopped_at TIMESTAMP DEFAULT (DATETIME('1970-01-01'))" +
+			")"
 		_, err := conn.Exec(q)
 		if err != nil {
 			return err
 		}
 
-		q = "CREATE TABLE IF NOT EXISTS tag ("
-		q += " id INTEGER PRIMARY KEY AUTOINCREMENT"
-		q += ", tag VARCHAR(255) NOT NULL"
-		q += ")"
-
+		q = "CREATE TABLE IF NOT EXISTS tag (" +
+			" id INTEGER PRIMARY KEY AUTOINCREMENT" +
+			", tag VARCHAR(255) NOT NULL" +
+			")"
 		_, err = conn.Exec(q)
 		if err != nil {
 			return err
 		}
 
-		q = "CREATE TABLE IF NOT EXISTS relation ("
-		q += " kizami_id INTEGER NOT NULL"
-		q += ")"
-
+		q = "CREATE TABLE IF NOT EXISTS relation (" +
+			" kizami_id INTEGER NOT NULL" +
+			")"
 		_, err = conn.Exec(q)
 		return err
 	})
@@ -85,7 +82,6 @@ func (db *DB) createTable() error {
 func (db *DB) start(desc string) (*kizami, error) {
 	k := &kizami{}
 	return k, db.execWithFunc(func(conn *sql.DB) error {
-		// FIXME: this should not be done here
 		q := "UPDATE todo " +
 			"SET stopped_at = (DATETIME('now')) " +
 			"WHERE stopped_at = (DATETIME('1970-01-01'))"
