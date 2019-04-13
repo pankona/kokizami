@@ -27,7 +27,6 @@ type DBInterface interface {
 
 // DB represents DB instance
 type DB struct {
-	conn   *sql.DB
 	dbpath string
 }
 
@@ -35,236 +34,187 @@ func newDB(dbpath string) *DB {
 	return &DB{dbpath: dbpath}
 }
 
-func (db *DB) openDB() error {
+func (db *DB) execWithFunc(f func(conn *sql.DB) error) error {
 	conn, err := sql.Open("sqlite3", db.dbpath)
 	if err != nil {
 		return err
 	}
-	db.conn = conn
-	return nil
-}
+	defer func() {
+		e := conn.Close()
+		if e != nil {
+			log.Printf("failed to close DB connection: %v", e)
+		}
+	}()
 
-func (db *DB) close() {
-	err := db.conn.Close()
-	if err != nil {
-		log.Printf("failed to close DB: %v", err)
-	}
+	return f(conn)
 }
 
 func (db *DB) createTable() error {
-	err := db.openDB()
-	if err != nil {
+	return db.execWithFunc(func(conn *sql.DB) error {
+		q := "CREATE TABLE IF NOT EXISTS todo ("
+		q += " id INTEGER PRIMARY KEY AUTOINCREMENT"
+		q += ", desc VARCHAR(255) NOT NULL"
+		q += ", started_at TIMESTAMP DEFAULT (DATETIME('now'))"
+		q += ", stopped_at TIMESTAMP DEFAULT (DATETIME('1970-01-01'))"
+		q += ")"
+
+		_, err := conn.Exec(q)
+		if err != nil {
+			return err
+		}
+
+		q = "CREATE TABLE IF NOT EXISTS tag ("
+		q += " id INTEGER PRIMARY KEY AUTOINCREMENT"
+		q += ", tag VARCHAR(255) NOT NULL"
+		q += ")"
+
+		_, err = conn.Exec(q)
+		if err != nil {
+			return err
+		}
+
+		q = "CREATE TABLE IF NOT EXISTS relation ("
+		q += " kizami_id INTEGER NOT NULL"
+		q += ")"
+
+		_, err = conn.Exec(q)
 		return err
-	}
-	defer db.close()
-
-	q := "CREATE TABLE IF NOT EXISTS todo ("
-	q += " id INTEGER PRIMARY KEY AUTOINCREMENT"
-	q += ", desc VARCHAR(255) NOT NULL"
-	q += ", started_at TIMESTAMP DEFAULT (DATETIME('now'))"
-	q += ", stopped_at TIMESTAMP DEFAULT (DATETIME('1970-01-01'))"
-	q += ")"
-
-	_, err = db.conn.Exec(q)
-	if err != nil {
-		return err
-	}
-
-	q = "CREATE TABLE IF NOT EXISTS tag ("
-	q += " id INTEGER PRIMARY KEY AUTOINCREMENT"
-	q += ", tag VARCHAR(255) NOT NULL"
-	q += ")"
-
-	_, err = db.conn.Exec(q)
-	if err != nil {
-		return err
-	}
-
-	q = "CREATE TABLE IF NOT EXISTS relation ("
-	q += " kizami_id INTEGER NOT NULL"
-	q += ")"
-
-	_, err = db.conn.Exec(q)
-	return err
+	})
 }
 
 func (db *DB) start(desc string) (*kizami, error) {
-	err := db.openDB()
-	if err != nil {
-		return nil, err
-	}
-	defer db.close()
+	k := &kizami{}
+	return k, db.execWithFunc(func(conn *sql.DB) error {
+		// FIXME: this should not be done here
+		q := "UPDATE todo " +
+			"SET stopped_at = (DATETIME('now')) " +
+			"WHERE stopped_at = (DATETIME('1970-01-01'))"
+		_, err := conn.Exec(q)
+		if err != nil {
+			return err
+		}
 
-	// FIXME: this should not be done here
-	q := "UPDATE todo " +
-		"SET stopped_at = (DATETIME('now')) " +
-		"WHERE stopped_at = (DATETIME('1970-01-01'))"
-	_, err = db.conn.Exec(q)
-	if err != nil {
-		return nil, err
-	}
+		q = "INSERT INTO todo (desc) " +
+			"VALUES ('" + desc + "')"
+		result, err := conn.Exec(q)
+		if err != nil {
+			return err
+		}
 
-	q = "INSERT INTO todo (desc) " +
-		"VALUES ('" + desc + "')"
-	result, err := db.conn.Exec(q)
-	if err != nil {
-		return nil, err
-	}
+		id, err := result.LastInsertId()
+		if err != nil {
+			return err
+		}
 
-	id, err := result.LastInsertId()
-	if err != nil {
-		return nil, err
-	}
-
-	q = "SELECT id, desc, started_at, stopped_at " +
-		"FROM todo WHERE id = ?"
-	t := &kizami{}
-	err = db.conn.QueryRow(q, id).Scan(&t.id, &t.desc, &t.startedAt, &t.stoppedAt)
-	if err != nil {
-		return nil, err
-	}
-	return t, nil
+		q = "SELECT id, desc, started_at, stopped_at " +
+			"FROM todo WHERE id = ?"
+		return conn.QueryRow(q, id).Scan(&k.id, &k.desc, &k.startedAt, &k.stoppedAt)
+	})
 }
 
 func (db *DB) get(id int) (*kizami, error) {
-	err := db.openDB()
-	if err != nil {
-		return nil, err
-	}
-	defer db.close()
-
-	q := "SELECT id, desc, started_at, stopped_at " +
-		"FROM todo WHERE id = ?"
-	t := &kizami{}
-	err = db.conn.QueryRow(q, id).Scan(&t.id, &t.desc, &t.startedAt, &t.stoppedAt)
-	if err != nil {
-		return nil, err
-	}
-	return t, nil
+	k := &kizami{}
+	return k, db.execWithFunc(func(conn *sql.DB) error {
+		q := "SELECT id, desc, started_at, stopped_at " +
+			"FROM todo WHERE id = ?"
+		return conn.QueryRow(q, id).Scan(&k.id, &k.desc, &k.startedAt, &k.stoppedAt)
+	})
 }
 
 func (db *DB) edit(id int, field, newValue string) (*kizami, error) {
-	err := db.openDB()
-	if err != nil {
-		return nil, err
-	}
-	defer db.close()
+	k := &kizami{}
+	return k, db.execWithFunc(func(conn *sql.DB) error {
+		q := "UPDATE todo " +
+			"SET " + field + " = '" + newValue + "' " +
+			"WHERE id = " + strconv.Itoa(id)
+		_, err := conn.Exec(q)
+		if err != nil {
+			return err
+		}
 
-	q := "UPDATE todo " +
-		"SET " + field + " = '" + newValue + "' " +
-		"WHERE id = " + strconv.Itoa(id)
-	_, err = db.conn.Exec(q)
-	if err != nil {
-		return nil, err
-	}
-
-	q = "SELECT id, desc, started_at, stopped_at " +
-		"FROM todo WHERE id = ?"
-	t := &kizami{}
-	err = db.conn.QueryRow(q, id).Scan(&t.id, &t.desc, &t.startedAt, &t.stoppedAt)
-	if err != nil {
-		return nil, err
-	}
-	return t, nil
+		q = "SELECT id, desc, started_at, stopped_at " +
+			"FROM todo WHERE id = ?"
+		return conn.QueryRow(q, id).Scan(&k.id, &k.desc, &k.startedAt, &k.stoppedAt)
+	})
 }
 
 func (db *DB) count() (int, error) {
-	err := db.openDB()
-	if err != nil {
-		return -1, err
-	}
-	defer db.close()
-
-	q := "SELECT count(*) " +
-		"FROM todo"
-	var num int
-	err = db.conn.QueryRow(q).Scan(&num)
-	if err != nil {
-		return -1, err
-	}
-	return num, nil
+	var n int
+	return n, db.execWithFunc(func(conn *sql.DB) error {
+		q := "SELECT count(*) " +
+			"FROM todo"
+		return conn.QueryRow(q).Scan(&n)
+	})
 }
 
 func (db *DB) list(start, end int) ([]*kizami, error) {
-	err := db.openDB()
-	if err != nil {
-		return nil, err
-	}
-	defer db.close()
-
-	if end < start {
-		return nil, errors.New("end must be bigger than start")
-	}
-	s := strconv.Itoa(start)
-	c := strconv.Itoa(end - start)
-	q := "SELECT id, desc, started_at, stopped_at " +
-		"FROM todo " +
-		"ORDER BY started_at ASC " +
-		"LIMIT " + s + ", " + c
-
-	rows, err := db.conn.Query(q)
-	if err != nil {
-		return nil, errors.Wrap(err, fmt.Sprintf("query was: %s", q))
-	}
-
-	todos := make([]*kizami, 0)
-	var id int
-	var desc string
-	var startedAt time.Time
-	var stoppedAt time.Time
-	for rows.Next() {
-		err = rows.Scan(&id, &desc, &startedAt, &stoppedAt)
-		if err != nil {
-			panic(err.Error())
+	var ks []*kizami
+	return ks, db.execWithFunc(func(conn *sql.DB) error {
+		if end < start {
+			return errors.New("end must be bigger than start")
 		}
-		todos = append(todos,
-			&kizami{
-				id:        id,
-				desc:      desc,
-				startedAt: startedAt,
-				stoppedAt: stoppedAt,
-			})
-	}
-	return todos, nil
+		s := strconv.Itoa(start)
+		c := strconv.Itoa(end - start)
+		q := "SELECT id, desc, started_at, stopped_at " +
+			"FROM todo " +
+			"ORDER BY started_at ASC " +
+			"LIMIT " + s + ", " + c
+
+		rows, err := conn.Query(q)
+		if err != nil {
+			return errors.Wrap(err, fmt.Sprintf("query was: %s", q))
+		}
+
+		todos := make([]*kizami, 0)
+		var (
+			id        int
+			desc      string
+			startedAt time.Time
+			stoppedAt time.Time
+		)
+		for rows.Next() {
+			err = rows.Scan(&id, &desc, &startedAt, &stoppedAt)
+			if err != nil {
+				return err
+			}
+			todos = append(todos,
+				&kizami{
+					id:        id,
+					desc:      desc,
+					startedAt: startedAt,
+					stoppedAt: stoppedAt,
+				})
+		}
+		ks = todos
+		return nil
+	})
 }
 
 func (db *DB) stop(id int) error {
-	err := db.openDB()
-	if err != nil {
+	return db.execWithFunc(func(conn *sql.DB) error {
+		q := "UPDATE todo " +
+			"SET stopped_at = (DATETIME('now')) " +
+			"WHERE id = " + strconv.Itoa(id)
+		_, err := conn.Exec(q)
 		return err
-	}
-	defer db.close()
-
-	q := "UPDATE todo " +
-		"SET stopped_at = (DATETIME('now')) " +
-		"WHERE id = " + strconv.Itoa(id)
-	_, err = db.conn.Exec(q)
-	return err
+	})
 }
 
 func (db *DB) stopall() error {
-	err := db.openDB()
-	if err != nil {
+	return db.execWithFunc(func(conn *sql.DB) error {
+		q := "UPDATE todo " +
+			"SET stopped_at = (DATETIME('now')) " +
+			"WHERE stopped_at = (DATETIME('1970-01-01'))"
+		_, err := conn.Exec(q)
 		return err
-	}
-	defer db.close()
-
-	q := "UPDATE todo " +
-		"SET stopped_at = (DATETIME('now')) " +
-		"WHERE stopped_at = (DATETIME('1970-01-01'))"
-	_, err = db.conn.Exec(q)
-	return err
+	})
 }
 
 func (db *DB) delete(id int) error {
-	err := db.openDB()
-	if err != nil {
+	return db.execWithFunc(func(conn *sql.DB) error {
+		q := "DELETE from todo " +
+			"WHERE id = " + strconv.Itoa(id)
+		_, err := conn.Exec(q)
 		return err
-	}
-	defer db.close()
-
-	q := "DELETE from todo " +
-		"WHERE id = " + strconv.Itoa(id)
-	_, err = db.conn.Exec(q)
-	return err
+	})
 }
