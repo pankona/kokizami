@@ -29,7 +29,6 @@ type DBInterface interface {
 
 // DB represents DB instance
 type DB struct {
-	DBInterface
 	conn   *sql.DB
 	dbpath string
 }
