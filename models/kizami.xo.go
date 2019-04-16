@@ -155,3 +155,42 @@ func KizamiByID(db XODB, id int) (*Kizami, error) {
 
 	return &k, nil
 }
+
+// KizamisByStoppedAt retrieves a row from 'kizami' as a Kizami.
+//
+// Generated from index 'stopped_at_index'.
+func KizamisByStoppedAt(db XODB, stoppedAt xoutil.SqTime) ([]*Kizami, error) {
+	var err error
+
+	// sql query
+	const sqlstr = `SELECT ` +
+		`id, desc, started_at, stopped_at ` +
+		`FROM kizami ` +
+		`WHERE stopped_at = ?`
+
+	// run query
+	XOLog(sqlstr, stoppedAt)
+	q, err := db.Query(sqlstr, stoppedAt)
+	if err != nil {
+		return nil, err
+	}
+	defer q.Close()
+
+	// load results
+	res := []*Kizami{}
+	for q.Next() {
+		k := Kizami{
+			_exists: true,
+		}
+
+		// scan
+		err = q.Scan(&k.ID, &k.Desc, &k.StartedAt, &k.StoppedAt)
+		if err != nil {
+			return nil, err
+		}
+
+		res = append(res, &k)
+	}
+
+	return res, nil
+}
