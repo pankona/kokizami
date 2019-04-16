@@ -51,8 +51,8 @@ func (db *DB) execWithFunc(f func(conn *sql.DB) error) error {
 
 func (db *DB) createTable() error {
 	return db.execWithFunc(func(conn *sql.DB) error {
-		q := "CREATE TABLE IF NOT EXISTS todo (" +
-			" id INTEGER PRIMARY KEY AUTOINCREMENT" +
+		q := "CREATE TABLE IF NOT EXISTS kizami (" +
+			" id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL" +
 			", desc VARCHAR(255) NOT NULL" +
 			", started_at TIMESTAMP DEFAULT (DATETIME('now'))" +
 			", stopped_at TIMESTAMP DEFAULT (DATETIME('1970-01-01'))" +
@@ -63,7 +63,7 @@ func (db *DB) createTable() error {
 		}
 
 		q = "CREATE TABLE IF NOT EXISTS tag (" +
-			" id INTEGER PRIMARY KEY AUTOINCREMENT" +
+			" id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL" +
 			", tag VARCHAR(255) NOT NULL" +
 			")"
 		_, err = conn.Exec(q)
@@ -82,7 +82,7 @@ func (db *DB) createTable() error {
 func (db *DB) start(desc string) (*kizami, error) {
 	k := &kizami{}
 	return k, db.execWithFunc(func(conn *sql.DB) error {
-		q := "UPDATE todo " +
+		q := "UPDATE kizami " +
 			"SET stopped_at = (DATETIME('now')) " +
 			"WHERE stopped_at = (DATETIME('1970-01-01'))"
 		_, err := conn.Exec(q)
@@ -90,7 +90,7 @@ func (db *DB) start(desc string) (*kizami, error) {
 			return err
 		}
 
-		q = "INSERT INTO todo (desc) " +
+		q = "INSERT INTO kizami (desc) " +
 			"VALUES ('" + desc + "')"
 		result, err := conn.Exec(q)
 		if err != nil {
@@ -103,7 +103,7 @@ func (db *DB) start(desc string) (*kizami, error) {
 		}
 
 		q = "SELECT id, desc, started_at, stopped_at " +
-			"FROM todo WHERE id = ?"
+			"FROM kizami WHERE id = ?"
 		return conn.QueryRow(q, id).Scan(&k.id, &k.desc, &k.startedAt, &k.stoppedAt)
 	})
 }
@@ -112,7 +112,7 @@ func (db *DB) get(id int) (*kizami, error) {
 	k := &kizami{}
 	return k, db.execWithFunc(func(conn *sql.DB) error {
 		q := "SELECT id, desc, started_at, stopped_at " +
-			"FROM todo WHERE id = ?"
+			"FROM kizami WHERE id = ?"
 		return conn.QueryRow(q, id).Scan(&k.id, &k.desc, &k.startedAt, &k.stoppedAt)
 	})
 }
@@ -120,7 +120,7 @@ func (db *DB) get(id int) (*kizami, error) {
 func (db *DB) edit(id int, field, newValue string) (*kizami, error) {
 	k := &kizami{}
 	return k, db.execWithFunc(func(conn *sql.DB) error {
-		q := "UPDATE todo " +
+		q := "UPDATE kizami " +
 			"SET " + field + " = '" + newValue + "' " +
 			"WHERE id = " + strconv.Itoa(id)
 		_, err := conn.Exec(q)
@@ -129,7 +129,7 @@ func (db *DB) edit(id int, field, newValue string) (*kizami, error) {
 		}
 
 		q = "SELECT id, desc, started_at, stopped_at " +
-			"FROM todo WHERE id = ?"
+			"FROM kizami WHERE id = ?"
 		return conn.QueryRow(q, id).Scan(&k.id, &k.desc, &k.startedAt, &k.stoppedAt)
 	})
 }
@@ -138,7 +138,7 @@ func (db *DB) count() (int, error) {
 	var n int
 	return n, db.execWithFunc(func(conn *sql.DB) error {
 		q := "SELECT count(*) " +
-			"FROM todo"
+			"FROM kizami"
 		return conn.QueryRow(q).Scan(&n)
 	})
 }
@@ -152,7 +152,7 @@ func (db *DB) list(start, end int) ([]*kizami, error) {
 		s := strconv.Itoa(start)
 		c := strconv.Itoa(end - start)
 		q := "SELECT id, desc, started_at, stopped_at " +
-			"FROM todo " +
+			"FROM kizami " +
 			"ORDER BY started_at ASC " +
 			"LIMIT " + s + ", " + c
 
@@ -188,7 +188,7 @@ func (db *DB) list(start, end int) ([]*kizami, error) {
 
 func (db *DB) stop(id int) error {
 	return db.execWithFunc(func(conn *sql.DB) error {
-		q := "UPDATE todo " +
+		q := "UPDATE kizami " +
 			"SET stopped_at = (DATETIME('now')) " +
 			"WHERE id = " + strconv.Itoa(id)
 		_, err := conn.Exec(q)
@@ -198,7 +198,7 @@ func (db *DB) stop(id int) error {
 
 func (db *DB) stopall() error {
 	return db.execWithFunc(func(conn *sql.DB) error {
-		q := "UPDATE todo " +
+		q := "UPDATE kizami " +
 			"SET stopped_at = (DATETIME('now')) " +
 			"WHERE stopped_at = (DATETIME('1970-01-01'))"
 		_, err := conn.Exec(q)
@@ -208,7 +208,7 @@ func (db *DB) stopall() error {
 
 func (db *DB) delete(id int) error {
 	return db.execWithFunc(func(conn *sql.DB) error {
-		q := "DELETE from todo " +
+		q := "DELETE from kizami " +
 			"WHERE id = " + strconv.Itoa(id)
 		_, err := conn.Exec(q)
 		return err
