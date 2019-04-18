@@ -22,37 +22,37 @@ var GlobalFlags = []cli.Flag{}
 var Commands = []cli.Command{
 	{
 		Name:   "start",
-		Usage:  "start new task",
+		Usage:  "Start new task",
 		Action: CmdStart,
 		Flags:  []cli.Flag{},
 	},
 	{
 		Name:   "restart",
-		Usage:  "restart old task",
+		Usage:  "Restart old task",
 		Action: CmdRestart,
 		Flags:  []cli.Flag{},
 	},
 	{
 		Name:   "edit",
-		Usage:  "edit task",
+		Usage:  "Edit task",
 		Action: CmdEdit,
 		Flags:  []cli.Flag{},
 	},
 	{
 		Name:   "list",
-		Usage:  "show list of tasks",
+		Usage:  "Show list of tasks",
 		Action: CmdList,
 		Flags:  []cli.Flag{},
 	},
 	{
 		Name:   "stop",
-		Usage:  "stop task",
+		Usage:  "Stop task",
 		Action: CmdStop,
 		Flags:  []cli.Flag{},
 	},
 	{
 		Name:   "delete",
-		Usage:  "delete task",
+		Usage:  "Delete task",
 		Action: CmdDelete,
 		Flags:  []cli.Flag{},
 	},
