@@ -6,7 +6,7 @@ import (
 	"os/user"
 	"path/filepath"
 
-	kokizami "github.com/pankona/kokizami/usecase"
+	"github.com/pankona/kokizami"
 	"github.com/urfave/cli"
 )
 

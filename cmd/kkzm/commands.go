@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/pankona/kokizami"
 	"github.com/pankona/kokizami/models"
-	kokizami "github.com/pankona/kokizami/usecase"
 	"github.com/urfave/cli"
 	"github.com/xo/xoutil"
 )
