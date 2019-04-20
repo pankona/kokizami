@@ -2,29 +2,43 @@
 
 ## Description
 
-this application is for tracking tasks (that is called *kizami*) and its elapsed time (like toggl).
-since this application is standalone, network access is not required.
+This application is for tracking tasks (each task is called _kizami_ in this application) and its elapsed time.
+Since this application is standalone, network access is not required.
 
 ## Usage
 
-following commands are available.
+Following commands are available.
 
-* kkzm start [desc]
-    * if desc is NOT specified, enter mode to edit desc via editor.
-* kkzm stop [kizami id]
-    * if id is not specified, all kizami that is in ongoing are stopped.
-* kkzm restart (kizami id)
-    * start new kizami with specified id's description.
-* kkzm list
-    * lists all kizamis
-* kkzm edit [id] [desc|started_at|stopped_at] [new value]
-    * if desc (or something) is NOT specified, open editor to edit all of them.
-* kkzm delete [id]
-    * delete specified kizami
+```
+NAME:
+   kkzm - awesome task timer and tracker
+
+USAGE:
+   kkzm [global options] command [command options] [arguments...]
+
+VERSION:
+   2.0.0
+
+AUTHOR:
+   pankona <yosuke.akatsuka@gmail.com>
+
+COMMANDS:
+     start    Start new task
+     restart  Restart old task
+     edit     Edit task
+     list     Show list of tasks
+     stop     Stop task
+     delete   Delete task
+     help, h  Shows a list of commands or help for one command
+
+GLOBAL OPTIONS:
+   --help, -h     show help
+   --version, -v  print the version
+```
 
 ## Notes
 
-* this application will create a database file (.kokizami.db) at user's home directory.
+- This application will create a database file on `$HOME/.config/kokizami/db`
 
 ## Install
 
