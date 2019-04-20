@@ -64,4 +64,4 @@ MIT
 
 ## Author
 
-[pankona](https://github.com/pankona)
+[Yosuke Akatsuka (a.k.a pankona)](https://github.com/pankona)
