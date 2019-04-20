@@ -9,8 +9,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pankona/kokizami"
+	"github.com/pankona/kokizami/models"
+	kokizami "github.com/pankona/kokizami/usecase"
 	"github.com/urfave/cli"
+	"github.com/xo/xoutil"
 )
 
 // GlobalFlags can be used globally
@@ -82,17 +84,17 @@ func round(d, r time.Duration) time.Duration {
 	return d
 }
 
-func toString(k kokizami.Kizamier) string {
+func toString(k *models.Kizami) string {
 	var stoppedAt string
-	if k.StoppedAt().Unix() == 0 {
+	if k.StoppedAt.Unix() == 0 {
 		stoppedAt = "*" + time.Now().In(time.Local).Format("2006-01-02 15:04:05")
 	} else {
-		stoppedAt = k.StoppedAt().In(time.Local).Format("2006-01-02 15:04:05")
+		stoppedAt = k.StoppedAt.In(time.Local).Format("2006-01-02 15:04:05")
 	}
 
-	return strconv.Itoa(k.ID()) + "\t" +
-		k.Desc() + "\t" +
-		k.StartedAt().In(time.Local).Format("2006-01-02 15:04:05") + "\t" +
+	return strconv.Itoa(k.ID) + "\t" +
+		k.Desc + "\t" +
+		k.StartedAt.In(time.Local).Format("2006-01-02 15:04:05") + "\t" +
 		stoppedAt + "\t" +
 		round(k.Elapsed(), time.Second).String()
 }
@@ -159,7 +161,7 @@ func CmdRestart(c *cli.Context) error {
 		return err
 	}
 
-	k, err = kkzm(c).Start(k.Desc())
+	k, err = kkzm(c).Start(k.Desc)
 	if err != nil {
 		return err
 	}
@@ -186,25 +188,6 @@ func CmdEdit(c *cli.Context) error {
 		}
 
 		fmt.Println(toString(k))
-		return nil
-
-	// len(args) == 3 means that a part of task will be edited with specified value
-	// e.g)
-	// kkzm edit [id] desc       [new desc]
-	// kkzm edit [id] started_at [new started_at]
-	// kkzm edit [id] stopped_at [new stopped_at]
-	case 3:
-		id, err := strconv.Atoi(args[0])
-		if err != nil {
-			return err
-		}
-
-		k, err := kkzm(c).Edit(id, args[1], args[2])
-		if err != nil {
-			return err
-		}
-
-		fmt.Println(k)
 		return nil
 	}
 
@@ -272,16 +255,16 @@ func CmdDelete(c *cli.Context) error {
 	return kkzm(c).Delete(id)
 }
 
-func editTaskWithEditor(kkzm *kokizami.Kokizami, id int) (kokizami.Kizamier, error) {
+func editTaskWithEditor(kkzm *kokizami.Kokizami, id int) (*models.Kizami, error) {
 	k, err := kkzm.Get(id)
 	if err != nil {
 		return nil, fmt.Errorf("failed to task by ID: %v", err)
 	}
 
 	filename, err := editTextWithEditor(fmt.Sprintf("%s\n%s\n%s",
-		k.Desc(),
-		k.StartedAt().In(time.Local).Format("2006-01-02 15:04:05"),
-		k.StoppedAt().In(time.Local).Format("2006-01-02 15:04:05")))
+		k.Desc,
+		k.StartedAt.In(time.Local).Format("2006-01-02 15:04:05"),
+		k.StoppedAt.In(time.Local).Format("2006-01-02 15:04:05")))
 	if err != nil {
 		return nil, fmt.Errorf("failed to edit text with editor: %v", err)
 	}
@@ -302,26 +285,15 @@ func editTaskWithEditor(kkzm *kokizami.Kokizami, id int) (kokizami.Kizamier, err
 		return nil, fmt.Errorf("invalid arguments. needs (desc, started_at, stopped_at)")
 	}
 
-	k, err = editBulk(kkzm, id, ss[0], ss[1], ss[2])
+	k, err = edit(kkzm, k, id, ss[0], ss[1], ss[2])
 	if err != nil {
 		return nil, fmt.Errorf("failed to edit a task: %v", err)
 	}
 	return k, nil
 }
 
-func editBulk(kkzm *kokizami.Kokizami, id int, desc, start, stop string) (kokizami.Kizamier, error) {
-	_, err := kkzm.Edit(id, "desc", desc)
-	if err != nil {
-		return nil, err
-	}
-
+func edit(kkzm *kokizami.Kokizami, k *models.Kizami, id int, desc, start, stop string) (*models.Kizami, error) {
 	startedAt, err := time.ParseInLocation("2006-01-02 15:04:05", start, time.Local)
-	if err != nil {
-		return nil, err
-	}
-
-	startedAtStr := startedAt.UTC().Format("2006-01-02 15:04:05")
-	_, err = kkzm.Edit(id, "started_at", startedAtStr)
 	if err != nil {
 		return nil, err
 	}
@@ -331,13 +303,12 @@ func editBulk(kkzm *kokizami.Kokizami, id int, desc, start, stop string) (kokiza
 		return nil, err
 	}
 
-	stoppedAtStr := stoppedAt.UTC().Format("2006-01-02 15:04:05")
-	k, err := kkzm.Edit(id, "stopped_at", stoppedAtStr)
-	if err != nil {
-		return nil, err
-	}
+	k.ID = id
+	k.Desc = desc
+	k.StartedAt = xoutil.SqTime{startedAt}
+	k.StoppedAt = xoutil.SqTime{stoppedAt}
 
-	return k, nil
+	return kkzm.Edit(k)
 }
 
 func editTextWithEditor(prewrite string) (string, error) {

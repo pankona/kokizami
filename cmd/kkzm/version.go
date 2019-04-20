@@ -4,4 +4,4 @@ package main
 const Name string = "kkzm"
 
 // Version indicates current version of this application
-const Version string = "1.0.0"
+const Version string = "2.0.0"

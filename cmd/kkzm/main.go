@@ -6,7 +6,7 @@ import (
 	"os/user"
 	"path/filepath"
 
-	"github.com/pankona/kokizami"
+	kokizami "github.com/pankona/kokizami/usecase"
 	"github.com/urfave/cli"
 )
 
@@ -28,10 +28,16 @@ func main() {
 			return fmt.Errorf("failed to get current user: %v", err)
 		}
 
-		kkzm := &kokizami.Kokizami{}
-		err = kkzm.Initialize(filepath.Join(u.HomeDir, ".config", "kokizami", "db"))
+		configDir := filepath.Join(u.HomeDir, ".config", "kokizami")
+		err = os.MkdirAll(configDir, 0655) // #nosec
 		if err != nil {
-			return fmt.Errorf("failed to initialize: %v", err)
+			return fmt.Errorf("failed to create directory on %v", configDir)
+		}
+
+		// TODO: Copy empty DB on configDir if DB doesn't exist
+
+		kkzm := &kokizami.Kokizami{
+			DBPath: filepath.Join(configDir, "db"),
 		}
 
 		app.Metadata["kkzm"] = kkzm
