@@ -1,92 +1,138 @@
 package kokizami
 
 import (
+	"database/sql"
 	"fmt"
-	"os"
-	"path/filepath"
+	"log"
+	"time"
+
+	_ "github.com/mattn/go-sqlite3"
+	"github.com/pankona/kokizami/models"
+	"github.com/xo/xoutil"
 )
 
-// Kokizami provides APIs to manage tasks
 type Kokizami struct {
-	DB DBInterface
+	DBPath string
 }
 
-// Initialize initializes Kizami library.
-// this function will create DB file and prepare tables.
-func (k *Kokizami) Initialize(dbpath string) error {
-	return k.initialize(nil, dbpath)
-}
+func (k *Kokizami) execWithDB(f func(db models.XODB) error) error {
+	models.XOLog = func(s string, p ...interface{}) {
+		fmt.Printf("-------------------------------------\nQUERY: %s\n  VAL: %v\n", s, p)
+	}
 
-func (k *Kokizami) initialize(dbi DBInterface, dbpath string) error {
-	err := os.MkdirAll(filepath.Dir(dbpath), 0755) // #nosec
+	conn, err := sql.Open("sqlite3", k.DBPath)
 	if err != nil {
-		return fmt.Errorf("failed to create a directory to store DB: %v", err)
+		return err
 	}
+	defer func() {
+		e := conn.Close()
+		if e != nil {
+			log.Printf("failed to close DB connection: %v", e)
+		}
+	}()
 
-	k.DB = dbi
-	if k.DB == nil {
-		k.DB = newDB(dbpath)
-	}
-
-	return k.DB.createTable()
+	return f(conn)
 }
 
-// Start starts a specified Kizami to DB
-func (k *Kokizami) Start(desc string) (Kizamier, error) {
-	t, err := k.DB.start(desc)
+func mustParse(format, value string) time.Time {
+	t, err := time.Parse(format, value)
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
-	return t, nil
+	return t
 }
 
-// Get returns a Kizami by specified id
-func (k *Kokizami) Get(id int) (Kizamier, error) {
-	t, err := k.DB.get(id)
-	if err != nil {
-		return nil, err
-	}
-	return t, nil
+func (k *Kokizami) Start(desc string) (*models.Kizami, error) {
+	var ki *models.Kizami
+	return ki, k.execWithDB(func(db models.XODB) error {
+		entry := &models.Kizami{
+			Desc:      desc,
+			StartedAt: xoutil.SqTime{time.Now()},
+			StoppedAt: xoutil.SqTime{mustParse("2006-01-02 15:04:05", "1970-01-01 00:00:00")},
+		}
+		err := entry.Insert(db)
+		if err != nil {
+			return err
+		}
+		ki, err = models.KizamiByID(db, entry.ID)
+		return err
+	})
 }
 
-// Edit edits a specified Kizami item
-func (k *Kokizami) Edit(id int, field, newValue string) (Kizamier, error) {
-	t, err := k.DB.edit(id, field, newValue)
-	if err != nil {
-		return nil, err
-	}
-	return t, nil
+func (k *Kokizami) Get(id int) (*models.Kizami, error) {
+	var ki *models.Kizami
+	var err error
+	return ki, k.execWithDB(func(db models.XODB) error {
+		ki, err = models.KizamiByID(db, id)
+		return err
+	})
 }
 
-// List returns list of Kizami
-func (k *Kokizami) List() ([]Kizamier, error) {
-	c, err := k.DB.count()
-	if err != nil {
-		return nil, err
-	}
+func (k *Kokizami) Edit(ki *models.Kizami) (*models.Kizami, error) {
+	return ki, k.execWithDB(func(db models.XODB) error {
+		a, err := models.KizamiByID(db, ki.ID)
+		if err != nil {
+			return err
+		}
 
-	l, err := k.DB.list(0, c)
-	if err != nil {
-		return nil, err
-	}
-	kizamiers := make([]Kizamier, 0)
-	for _, v := range l {
-		kizamiers = append(kizamiers, v)
-	}
-	return kizamiers, nil
+		*a = *ki
+
+		err = a.Update(db)
+		if err != nil {
+			return err
+		}
+		ki, err = models.KizamiByID(db, ki.ID)
+		return err
+	})
 }
 
-// Stop updates specified task's stopped_at
 func (k *Kokizami) Stop(id int) error {
-	return k.DB.stop(id)
+	return k.execWithDB(func(db models.XODB) error {
+		ki, err := models.KizamiByID(db, id)
+		if err != nil {
+			return err
+		}
+		ki.StoppedAt = xoutil.SqTime{time.Now()}
+		return ki.Update(db)
+	})
 }
 
-// StopAll updates specified task's stopped_at
 func (k *Kokizami) StopAll() error {
-	return k.DB.stopall()
+	return k.execWithDB(func(db models.XODB) error {
+		t, err := time.Parse("2006-01-02 15:04:05", "1970-01-01 00:00:00")
+		if err != nil {
+			return err
+		}
+		ks, err := models.KizamisByStoppedAt(db, xoutil.SqTime{t})
+		if err != nil {
+			return err
+		}
+		now := time.Now()
+		for i := range ks {
+			ks[i].StoppedAt = xoutil.SqTime{now}
+			if err := ks[i].Update(db); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
 }
 
-// Delete delets specified task
 func (k *Kokizami) Delete(id int) error {
-	return k.DB.delete(id)
+	return k.execWithDB(func(db models.XODB) error {
+		ki, err := models.KizamiByID(db, id)
+		if err != nil {
+			return err
+		}
+		return ki.Delete(db)
+	})
+}
+
+func (k *Kokizami) List() ([]*models.Kizami, error) {
+	var ks []*models.Kizami
+	return ks, k.execWithDB(func(db models.XODB) error {
+		var err error
+		ks, err = models.AllKizami(db)
+		return err
+	})
 }
