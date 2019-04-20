@@ -2,7 +2,6 @@ package kokizami
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 	"time"
 
@@ -16,10 +15,6 @@ type Kokizami struct {
 }
 
 func (k *Kokizami) execWithDB(f func(db models.XODB) error) error {
-	models.XOLog = func(s string, p ...interface{}) {
-		fmt.Printf("-------------------------------------\nQUERY: %s\n  VAL: %v\n", s, p)
-	}
-
 	conn, err := sql.Open("sqlite3", k.DBPath)
 	if err != nil {
 		return err
