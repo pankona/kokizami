@@ -2,6 +2,7 @@ package kokizami
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"time"
 
@@ -13,6 +14,15 @@ import (
 type Kokizami struct {
 	DBPath string
 }
+
+// initialTime is used to insert a time value that indicates initial value of time.
+var initialTime = func() time.Time {
+	t, err := time.Parse("2006-01-02 15:04:05", "1970-01-01 00:00:00")
+	if err != nil {
+		panic(fmt.Sprintf("failed to parse time for initial value for time: %v", err))
+	}
+	return t
+}()
 
 func (k *Kokizami) execWithDB(f func(db models.XODB) error) error {
 	conn, err := sql.Open("sqlite3", k.DBPath)
@@ -43,7 +53,7 @@ func (k *Kokizami) Start(desc string) (*models.Kizami, error) {
 		entry := &models.Kizami{
 			Desc:      desc,
 			StartedAt: xoutil.SqTime{time.Now()},
-			StoppedAt: xoutil.SqTime{mustParse("2006-01-02 15:04:05", "1970-01-01 00:00:00")},
+			StoppedAt: xoutil.SqTime{initialTime},
 		}
 		err := entry.Insert(db)
 		if err != nil {
