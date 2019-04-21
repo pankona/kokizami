@@ -29,7 +29,7 @@ func main() {
 		}
 
 		configDir := filepath.Join(u.HomeDir, ".config", "kokizami")
-		err = os.MkdirAll(configDir, 0655) // #nosec
+		err = os.MkdirAll(configDir, 0755) // #nosec
 		if err != nil {
 			return fmt.Errorf("failed to create directory on %v", configDir)
 		}
