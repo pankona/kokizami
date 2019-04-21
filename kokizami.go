@@ -6,6 +6,7 @@ import (
 	"log"
 	"time"
 
+	// go-sqlite3 is imported only here
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/pankona/kokizami/models"
 	"github.com/xo/xoutil"
