@@ -130,35 +130,9 @@ func (k *Kizami) Delete(db XODB) error {
 	return nil
 }
 
-// KizamiByID retrieves a row from 'kizami' as a Kizami.
-//
-// Generated from index 'kizami_id_pkey'.
-func KizamiByID(db XODB, id int) (*Kizami, error) {
-	var err error
-
-	// sql query
-	const sqlstr = `SELECT ` +
-		`id, desc, started_at, stopped_at ` +
-		`FROM kizami ` +
-		`WHERE id = ?`
-
-	// run query
-	XOLog(sqlstr, id)
-	k := Kizami{
-		_exists: true,
-	}
-
-	err = db.QueryRow(sqlstr, id).Scan(&k.ID, &k.Desc, &k.StartedAt, &k.StoppedAt)
-	if err != nil {
-		return nil, err
-	}
-
-	return &k, nil
-}
-
 // KizamisByStoppedAt retrieves a row from 'kizami' as a Kizami.
 //
-// Generated from index 'stopped_at_index'.
+// Generated from index 'index_stopped_at'.
 func KizamisByStoppedAt(db XODB, stoppedAt xoutil.SqTime) ([]*Kizami, error) {
 	var err error
 
@@ -193,4 +167,30 @@ func KizamisByStoppedAt(db XODB, stoppedAt xoutil.SqTime) ([]*Kizami, error) {
 	}
 
 	return res, nil
+}
+
+// KizamiByID retrieves a row from 'kizami' as a Kizami.
+//
+// Generated from index 'kizami_id_pkey'.
+func KizamiByID(db XODB, id int) (*Kizami, error) {
+	var err error
+
+	// sql query
+	const sqlstr = `SELECT ` +
+		`id, desc, started_at, stopped_at ` +
+		`FROM kizami ` +
+		`WHERE id = ?`
+
+	// run query
+	XOLog(sqlstr, id)
+	k := Kizami{
+		_exists: true,
+	}
+
+	err = db.QueryRow(sqlstr, id).Scan(&k.ID, &k.Desc, &k.StartedAt, &k.StoppedAt)
+	if err != nil {
+		return nil, err
+	}
+
+	return &k, nil
 }

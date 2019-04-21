@@ -6,4 +6,5 @@ package models
 // Relation represents a row from 'relation'.
 type Relation struct {
 	KizamiID int `json:"kizami_id"` // kizami_id
+	TagID    int `json:"tag_id"`    // tag_id
 }
