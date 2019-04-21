@@ -18,7 +18,7 @@ func CreateKizamiTable(db XODB) error {
 		return err
 	}
 
-	sqlstr = "CREATE INDEX index_stopped_at ON kizami(stopped_at)"
+	sqlstr = "CREATE INDEX IF NOT EXISTS index_stopped_at ON kizami(stopped_at)"
 	_, err = db.Exec(sqlstr)
 	return err
 }
