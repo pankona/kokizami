@@ -39,14 +39,6 @@ func (k *Kokizami) execWithDB(f func(db models.XODB) error) error {
 	return f(conn)
 }
 
-func mustParse(format, value string) time.Time {
-	t, err := time.Parse(format, value)
-	if err != nil {
-		panic(err)
-	}
-	return t
-}
-
 func (k *Kokizami) Initialize() error {
 	return k.execWithDB(func(db models.XODB) error {
 		if err := models.CreateKizamiTable(db); err != nil {
