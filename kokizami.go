@@ -47,6 +47,21 @@ func mustParse(format, value string) time.Time {
 	return t
 }
 
+func (k *Kokizami) Initialize() error {
+	return k.execWithDB(func(db models.XODB) error {
+		if err := models.CreateKizamiTable(db); err != nil {
+			return fmt.Errorf("failed to create kizami table: %v", err)
+		}
+		if err := models.CreateTagTable(db); err != nil {
+			return fmt.Errorf("failed to create tag table: %v", err)
+		}
+		if err := models.CreateRelationTable(db); err != nil {
+			return fmt.Errorf("failed to create relation table: %v", err)
+		}
+		return nil
+	})
+}
+
 func (k *Kokizami) Start(desc string) (*models.Kizami, error) {
 	var ki *models.Kizami
 	return ki, k.execWithDB(func(db models.XODB) error {

@@ -34,10 +34,13 @@ func main() {
 			return fmt.Errorf("failed to create directory on %v", configDir)
 		}
 
-		// TODO: Copy empty DB on configDir if DB doesn't exist
-
 		kkzm := &kokizami.Kokizami{
 			DBPath: filepath.Join(configDir, "db"),
+		}
+
+		err = kkzm.Initialize()
+		if err != nil {
+			return fmt.Errorf("failed to initialize kokizami: %v", err)
 		}
 
 		app.Metadata["kkzm"] = kkzm
