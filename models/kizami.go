@@ -2,6 +2,21 @@ package models
 
 import "time"
 
+func CreateKizamiTable(db XODB) error {
+	var err error
+
+	// sql query
+	const sqlstr = "CREATE TABLE IF NOT EXISTS kizami (" +
+		" id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL" +
+		", desc VARCHAR(255) NOT NULL" +
+		", started_at TIMESTAMP DEFAULT (DATETIME('now'))" +
+		", stopped_at TIMESTAMP DEFAULT (DATETIME('1970-01-01'))" +
+		")"
+	XOLog(sqlstr)
+	_, err = db.Exec(sqlstr)
+	return err
+}
+
 func AllKizami(db XODB) ([]*Kizami, error) {
 	var err error
 
