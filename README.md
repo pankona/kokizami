@@ -29,6 +29,7 @@ COMMANDS:
      list     Show list of tasks
      stop     Stop task
      delete   Delete task
+     summary  Show summary of specified month
      help, h  Shows a list of commands or help for one command
 
 GLOBAL OPTIONS:
