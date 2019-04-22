@@ -56,6 +56,12 @@ var Commands = []cli.Command{
 		Action: CmdDelete,
 		Flags:  []cli.Flag{},
 	},
+	{
+		Name:   "summary",
+		Usage:  "Summary of specified month",
+		Action: CmdSummary,
+		Flags:  []cli.Flag{},
+	},
 }
 
 // CommandNotFound is called when specified subcommand is not found
@@ -346,4 +352,29 @@ func runEditor(filename string) error {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	return cmd.Run()
+}
+
+type summary models.Elapsed
+
+func (s *summary) String() string {
+	return fmt.Sprintf("%s\t%s", s.Desc, s.Elapsed)
+
+}
+
+func CmdSummary(c *cli.Context) error {
+	args := c.Args()
+	if len(args) != 1 {
+		return fmt.Errorf("summary needs one arguments to specify month like [yyyy-mm]")
+	}
+
+	s, err := kkzm(c).SummaryOfMonth(args[0])
+	if err != nil {
+		return err
+	}
+	fmt.Printf("Summary of %s\n", args[0])
+	fmt.Println("Desc\tCount\tElapsed time")
+	for _, v := range s {
+		fmt.Println((*summary)(v))
+	}
+	return nil
 }

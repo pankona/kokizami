@@ -145,3 +145,19 @@ func (k *Kokizami) List() ([]*models.Kizami, error) {
 		return err
 	})
 }
+
+func (k *Kokizami) SummaryOfMonth(yyyymm string) ([]*models.Elapsed, error) {
+	var s []*models.Elapsed
+	// validate input
+	_, err := time.Parse("2006-01", yyyymm)
+	if err != nil {
+		return nil, fmt.Errorf("invalid argument format. should be yyyy-mm: %v", err)
+	}
+	return s, k.execWithDB(func(db models.XODB) error {
+		var err error
+		s, err = models.ElapsedWithQuery(db, yyyymm)
+		return err
+	})
+
+	return s, nil
+}

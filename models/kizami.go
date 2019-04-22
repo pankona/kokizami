@@ -1,6 +1,9 @@
 package models
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 func CreateKizamiTable(db XODB) error {
 	var err error
@@ -72,4 +75,41 @@ func (k *Kizami) Elapsed() time.Duration {
 		}
 	}
 	return elapsed
+}
+
+type Elapsed struct {
+	Desc    string
+	Count   int
+	Elapsed time.Duration
+}
+
+func ElapsedWithQuery(db XODB, yyyymm string) ([]*Elapsed, error) {
+	sqlstr := fmt.Sprintf(`SELECT `+
+		`desc, COUNT(desc), SUM(strftime('%%s', stopped_at) - strftime('%%s', started_at)) AS elapsed `+
+		`FROM kizami `+
+		`WHERE started_at LIKE '%s-%%' `+
+		`GROUP BY desc`, yyyymm)
+	XOLog(sqlstr)
+	q, err := db.Query(sqlstr)
+	if err != nil {
+		return nil, err
+	}
+	defer q.Close()
+
+	res := []*Elapsed{}
+	var sec int64
+	for q.Next() {
+		e := Elapsed{}
+
+		// scan
+		err = q.Scan(&e.Desc, &e.Count, &sec)
+		if err != nil {
+			return nil, err
+		}
+		e.Elapsed = time.Duration(sec) * time.Second
+
+		res = append(res, &e)
+	}
+
+	return res, nil
 }
