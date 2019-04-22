@@ -18,6 +18,10 @@ import (
 // GlobalFlags can be used globally
 var GlobalFlags = []cli.Flag{}
 
+var thisMonth = func() string {
+	return time.Now().Format("2006-01")
+}()
+
 // Commands represents list of subcommands
 var Commands = []cli.Command{
 	{
@@ -58,9 +62,15 @@ var Commands = []cli.Command{
 	},
 	{
 		Name:   "summary",
-		Usage:  "Summary of specified month",
+		Usage:  "Show summary of specified month",
 		Action: CmdSummary,
-		Flags:  []cli.Flag{},
+		Flags: []cli.Flag{
+			cli.StringFlag{
+				Name:  "m, month",
+				Value: thisMonth,
+				Usage: "Specify year and month to show summary",
+			},
+		},
 	},
 }
 
@@ -362,17 +372,14 @@ func (s *summary) String() string {
 }
 
 func CmdSummary(c *cli.Context) error {
-	args := c.Args()
-	if len(args) != 1 {
-		return fmt.Errorf("summary needs one arguments to specify month like [yyyy-mm]")
-	}
-
-	s, err := kkzm(c).SummaryOfMonth(args[0])
+	yyyymm := c.String("month")
+	s, err := kkzm(c).SummaryOfMonth(yyyymm)
 	if err != nil {
 		return err
 	}
-	fmt.Printf("Summary of %s\n", args[0])
-	fmt.Println("Desc\tCount\tElapsed time")
+
+	fmt.Printf("Summary of %s\n", yyyymm)
+	fmt.Println("Desc\tElapsed time")
 	for _, v := range s {
 		fmt.Println((*summary)(v))
 	}
