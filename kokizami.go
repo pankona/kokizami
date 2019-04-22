@@ -112,11 +112,7 @@ func (k *Kokizami) Stop(id int) error {
 
 func (k *Kokizami) StopAll() error {
 	return k.execWithDB(func(db models.XODB) error {
-		t, err := time.Parse("2006-01-02 15:04:05", "1970-01-01 00:00:00")
-		if err != nil {
-			return err
-		}
-		ks, err := models.KizamisByStoppedAt(db, xoutil.SqTime{t})
+		ks, err := models.KizamisByStoppedAt(db, xoutil.SqTime{initialTime})
 		if err != nil {
 			return err
 		}
