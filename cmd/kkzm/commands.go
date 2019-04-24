@@ -321,8 +321,8 @@ func edit(kkzm *kokizami.Kokizami, k *models.Kizami, id int, desc, start, stop s
 
 	k.ID = id
 	k.Desc = desc
-	k.StartedAt = xoutil.SqTime{startedAt}
-	k.StoppedAt = xoutil.SqTime{stoppedAt}
+	k.StartedAt = SqTime(startedAt)
+	k.StoppedAt = SqTime(stoppedAt)
 
 	return kkzm.Edit(k)
 }
@@ -384,4 +384,8 @@ func CmdSummary(c *cli.Context) error {
 		fmt.Println((*summary)(v))
 	}
 	return nil
+}
+
+func SqTime(t time.Time) xoutil.SqTime {
+	return xoutil.SqTime{Time: t}
 }

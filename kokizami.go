@@ -60,8 +60,8 @@ func (k *Kokizami) Start(desc string) (*models.Kizami, error) {
 	return ki, k.execWithDB(func(db models.XODB) error {
 		entry := &models.Kizami{
 			Desc:      desc,
-			StartedAt: xoutil.SqTime{time.Now()},
-			StoppedAt: xoutil.SqTime{initialTime},
+			StartedAt: SqTime(time.Now()),
+			StoppedAt: SqTime(initialTime),
 		}
 		err := entry.Insert(db)
 		if err != nil {
@@ -105,20 +105,20 @@ func (k *Kokizami) Stop(id int) error {
 		if err != nil {
 			return err
 		}
-		ki.StoppedAt = xoutil.SqTime{time.Now()}
+		ki.StoppedAt = SqTime(time.Now())
 		return ki.Update(db)
 	})
 }
 
 func (k *Kokizami) StopAll() error {
 	return k.execWithDB(func(db models.XODB) error {
-		ks, err := models.KizamisByStoppedAt(db, xoutil.SqTime{initialTime})
+		ks, err := models.KizamisByStoppedAt(db, SqTime(initialTime))
 		if err != nil {
 			return err
 		}
 		now := time.Now()
 		for i := range ks {
-			ks[i].StoppedAt = xoutil.SqTime{now}
+			ks[i].StoppedAt = SqTime(now)
 			if err := ks[i].Update(db); err != nil {
 				return err
 			}
@@ -158,4 +158,8 @@ func (k *Kokizami) Summary(yyyymm string) ([]*models.Elapsed, error) {
 		s, err = models.ElapsedWithQuery(db, yyyymm)
 		return err
 	})
+}
+
+func SqTime(t time.Time) xoutil.SqTime {
+	return xoutil.SqTime{Time: t}
 }
