@@ -40,7 +40,12 @@ func AllKizami(db XODB) ([]*Kizami, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer q.Close()
+	defer func() {
+		e := q.Close()
+		if e != nil {
+			XOLog(fmt.Sprintf("failed close query: %v", e))
+		}
+	}()
 
 	// load results
 	res := []*Kizami{}
@@ -94,7 +99,12 @@ func ElapsedWithQuery(db XODB, yyyymm string) ([]*Elapsed, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer q.Close()
+	defer func() {
+		e := q.Close()
+		if e != nil {
+			XOLog(fmt.Sprintf("failed close query: %v", e))
+		}
+	}()
 
 	res := []*Elapsed{}
 	var sec int64
