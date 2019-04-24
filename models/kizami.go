@@ -88,7 +88,7 @@ func ElapsedWithQuery(db XODB, yyyymm string) ([]*Elapsed, error) {
 		`desc, COUNT(desc), SUM(strftime('%%s', stopped_at) - strftime('%%s', started_at)) AS elapsed `+
 		`FROM kizami `+
 		`WHERE started_at LIKE '%s-%%' `+
-		`GROUP BY desc`, yyyymm)
+		`GROUP BY desc`, yyyymm) // #nosec
 	XOLog(sqlstr)
 	q, err := db.Query(sqlstr)
 	if err != nil {
