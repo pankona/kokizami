@@ -158,6 +158,4 @@ func (k *Kokizami) Summary(yyyymm string) ([]*models.Elapsed, error) {
 		s, err = models.ElapsedWithQuery(db, yyyymm)
 		return err
 	})
-
-	return s, nil
 }
