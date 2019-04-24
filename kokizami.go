@@ -146,7 +146,7 @@ func (k *Kokizami) List() ([]*models.Kizami, error) {
 	})
 }
 
-func (k *Kokizami) SummaryOfMonth(yyyymm string) ([]*models.Elapsed, error) {
+func (k *Kokizami) Summary(yyyymm string) ([]*models.Elapsed, error) {
 	var s []*models.Elapsed
 	// validate input
 	_, err := time.Parse("2006-01", yyyymm)

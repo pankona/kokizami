@@ -373,7 +373,7 @@ func (s *summary) String() string {
 
 func CmdSummary(c *cli.Context) error {
 	yyyymm := c.String("month")
-	s, err := kkzm(c).SummaryOfMonth(yyyymm)
+	s, err := kkzm(c).Summary(yyyymm)
 	if err != nil {
 		return err
 	}
