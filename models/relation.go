@@ -5,7 +5,8 @@ func CreateRelationTable(db XODB) error {
 
 	// sql query
 	const sqlstr = "CREATE TABLE IF NOT EXISTS relation (" +
-		" kizami_id INTEGER NOT NULL" +
+		" id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL" +
+		", kizami_id INTEGER NOT NULL" +
 		", tag_id INTEGER NOT NULL" +
 		")"
 	XOLog(sqlstr)
