@@ -1,5 +1,7 @@
 package models
 
+import "fmt"
+
 // CreateTagTable creates table for tag model
 func CreateTagTable(db XODB) error {
 	var err error
@@ -12,4 +14,45 @@ func CreateTagTable(db XODB) error {
 	XOLog(sqlstr)
 	_, err = db.Exec(sqlstr)
 	return err
+}
+
+// AllTags returns all tags from tag table
+func AllTags(db XODB) ([]*Tag, error) {
+	var err error
+
+	// sql query
+	const sqlstr = `SELECT ` +
+		`id, tag ` +
+		`FROM tag`
+
+	// run query
+	XOLog(sqlstr)
+	q, err := db.Query(sqlstr)
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		e := q.Close()
+		if e != nil {
+			XOLog(fmt.Sprintf("failed close query: %v", e))
+		}
+	}()
+
+	// load results
+	res := []*Tag{}
+	for q.Next() {
+		t := Tag{
+			_exists: true,
+		}
+
+		// scan
+		err = q.Scan(&t.ID, &t.Tag)
+		if err != nil {
+			return nil, err
+		}
+
+		res = append(res, &t)
+	}
+
+	return res, nil
 }

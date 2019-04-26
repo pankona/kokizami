@@ -78,6 +78,7 @@ func (k *Kokizami) Start(desc string) (*Kizami, error) {
 		if err != nil {
 			return err
 		}
+
 		m, err := models.KizamiByID(db, entry.ID)
 		ki = toKizami(m)
 		return err
@@ -195,6 +196,75 @@ func (k *Kokizami) Summary(yyyymm string) ([]Elapsed, error) {
 			s[i].Count = ms[i].Count
 			s[i].Elapsed = ms[i].Elapsed
 		}
+		return nil
+	})
+}
+
+func (k *Kokizami) AddTag(tag string) (*Tag, error) {
+	var t *Tag
+	return t, k.execWithDB(func(db database) error {
+		entry := &models.Tag{Tag: tag}
+		err := entry.Insert(db)
+		if err != nil {
+			return err
+		}
+
+		m, err := models.TagByID(db, entry.ID)
+		if err != nil {
+			return err
+		}
+
+		t = toTag(m)
+		return nil
+	})
+}
+
+func (k *Kokizami) DeleteTag(id int) error {
+	return k.execWithDB(func(db database) error {
+		m, err := models.TagByID(db, id)
+		if err != nil {
+			return err
+		}
+		return m.Delete(db)
+	})
+}
+
+func (k *Kokizami) Tags() ([]Tag, error) {
+	var ts []Tag
+	return ts, k.execWithDB(func(db database) error {
+		ms, err := models.AllTags(db)
+		if err != nil {
+			return err
+		}
+
+		ts = make([]Tag, len(ts))
+		for i := range ts {
+			ts[i].ID = ms[i].ID
+			ts[i].Tag = ms[i].Tag
+		}
+		return nil
+	})
+}
+
+func (k *Kokizami) Tagging(kizamiID int, tagIDs []int) error {
+	return k.execWithDB(func(db database) error {
+		for _, v := range tagIDs {
+			_, err := models.TagByID(db, v)
+			if err != nil {
+				fmt.Errorf("warning. [%d] is invalid tag id: err", v, err)
+				continue
+			}
+
+			m := &models.Relation{
+				KizamiID: kizamiID,
+				TagID:    v,
+			}
+			err = m.Insert(db)
+			if err != nil {
+				return err
+			}
+		}
+
 		return nil
 	})
 }
