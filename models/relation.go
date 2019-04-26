@@ -1,5 +1,6 @@
 package models
 
+// CreateRelationTable creates table for relation model
 func CreateRelationTable(db XODB) error {
 	var err error
 

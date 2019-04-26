@@ -6,6 +6,7 @@ import (
 	"github.com/pankona/kokizami/models"
 )
 
+// Kizami represents a task
 type Kizami struct {
 	ID        int
 	Desc      string

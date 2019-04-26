@@ -12,6 +12,8 @@ import (
 	"github.com/xo/xoutil"
 )
 
+// Kokizami represents a instance of kokizami
+// Kokizami provides most APIs of kokizami library
 type Kokizami struct {
 	DBPath string
 }
@@ -42,6 +44,8 @@ func (k *Kokizami) execWithDB(f func(db database) error) error {
 	return f(conn)
 }
 
+// Initialize initializes Kokizami
+// Kokizami's member field must be fulfilled in advance of calling this function
 func (k *Kokizami) Initialize() error {
 	return k.execWithDB(func(db database) error {
 		if err := models.CreateKizamiTable(db); err != nil {
@@ -57,6 +61,7 @@ func (k *Kokizami) Initialize() error {
 	})
 }
 
+// Start starts a new kizami with specified desc
 func (k *Kokizami) Start(desc string) (*Kizami, error) {
 	var ki *Kizami
 	return ki, k.execWithDB(func(db database) error {
@@ -75,6 +80,7 @@ func (k *Kokizami) Start(desc string) (*Kizami, error) {
 	})
 }
 
+// Get returns a Kizami by specified ID
 func (k *Kokizami) Get(id int) (*Kizami, error) {
 	var ki *Kizami
 	return ki, k.execWithDB(func(db database) error {
@@ -84,6 +90,7 @@ func (k *Kokizami) Get(id int) (*Kizami, error) {
 	})
 }
 
+// Edit edits a specified kizami and update its model
 func (k *Kokizami) Edit(ki *Kizami) (*Kizami, error) {
 	return ki, k.execWithDB(func(db database) error {
 		m, err := models.KizamiByID(db, ki.ID)
@@ -103,6 +110,7 @@ func (k *Kokizami) Edit(ki *Kizami) (*Kizami, error) {
 	})
 }
 
+// Stop stops a on-going kizami by specified ID
 func (k *Kokizami) Stop(id int) error {
 	return k.execWithDB(func(db database) error {
 		ki, err := models.KizamiByID(db, id)
@@ -114,6 +122,7 @@ func (k *Kokizami) Stop(id int) error {
 	})
 }
 
+// StopAll stops all on-going kizamis
 func (k *Kokizami) StopAll() error {
 	return k.execWithDB(func(db database) error {
 		ks, err := models.KizamisByStoppedAt(db, sqTime(initialTime))
@@ -131,6 +140,7 @@ func (k *Kokizami) StopAll() error {
 	})
 }
 
+// Delete deletes a kizami by specified ID
 func (k *Kokizami) Delete(id int) error {
 	return k.execWithDB(func(db database) error {
 		ki, err := models.KizamiByID(db, id)
@@ -141,6 +151,7 @@ func (k *Kokizami) Delete(id int) error {
 	})
 }
 
+// List returns all Kizamis
 func (k *Kokizami) List() ([]Kizami, error) {
 	var ks []Kizami
 	return ks, k.execWithDB(func(db database) error {
@@ -160,6 +171,7 @@ func (k *Kokizami) List() ([]Kizami, error) {
 	})
 }
 
+// Summary returns total elapsed time of Kizamis in specified month
 func (k *Kokizami) Summary(yyyymm string) ([]Elapsed, error) {
 	var s []Elapsed
 	// validate input
@@ -168,7 +180,7 @@ func (k *Kokizami) Summary(yyyymm string) ([]Elapsed, error) {
 		return nil, fmt.Errorf("invalid argument format. should be yyyy-mm: %v", err)
 	}
 	return s, k.execWithDB(func(db database) error {
-		ms, err := models.ElapsedWithQuery(db, yyyymm)
+		ms, err := models.ElapsedOfMonth(db, yyyymm)
 		if err != nil {
 			return err
 		}

@@ -5,6 +5,7 @@ import (
 	"time"
 )
 
+// CreateKizamiTable creates table and index for Kizami model
 func CreateKizamiTable(db XODB) error {
 	var err error
 
@@ -26,6 +27,7 @@ func CreateKizamiTable(db XODB) error {
 	return err
 }
 
+// AllKizami returns all Kizami from kizami table
 func AllKizami(db XODB) ([]*Kizami, error) {
 	var err error
 
@@ -66,13 +68,16 @@ func AllKizami(db XODB) ([]*Kizami, error) {
 	return res, nil
 }
 
+// Elapsed represents elapsed time, that are
+// calculated from all kizami items with specified term
 type Elapsed struct {
 	Desc    string
 	Count   int
 	Elapsed time.Duration
 }
 
-func ElapsedWithQuery(db XODB, yyyymm string) ([]*Elapsed, error) {
+// ElapsedOfMonth returns each all kizami's total elapsed time elapsed in specified month
+func ElapsedOfMonth(db XODB, yyyymm string) ([]*Elapsed, error) {
 	sqlstr := fmt.Sprintf(`SELECT `+
 		`desc, COUNT(desc), SUM(strftime('%%s', stopped_at) - strftime('%%s', started_at)) AS elapsed `+
 		`FROM kizami `+

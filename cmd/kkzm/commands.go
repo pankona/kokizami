@@ -369,6 +369,7 @@ func (s *summary) String() string {
 
 }
 
+// CmdSummary shows summary of kizami in specified month
 func CmdSummary(c *cli.Context) error {
 	yyyymm := c.String("month")
 	s, err := kkzm(c).Summary(yyyymm)

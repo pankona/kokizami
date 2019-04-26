@@ -1,5 +1,6 @@
 package models
 
+// CreateTagTable creates table for tag model
 func CreateTagTable(db XODB) error {
 	var err error
 
