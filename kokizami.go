@@ -25,7 +25,9 @@ var initialTime = func() time.Time {
 	return t
 }()
 
-func (k *Kokizami) execWithDB(f func(db models.XODB) error) error {
+type database models.XODB
+
+func (k *Kokizami) execWithDB(f func(db database) error) error {
 	conn, err := sql.Open("sqlite3", k.DBPath)
 	if err != nil {
 		return err
@@ -41,7 +43,7 @@ func (k *Kokizami) execWithDB(f func(db models.XODB) error) error {
 }
 
 func (k *Kokizami) Initialize() error {
-	return k.execWithDB(func(db models.XODB) error {
+	return k.execWithDB(func(db database) error {
 		if err := models.CreateKizamiTable(db); err != nil {
 			return fmt.Errorf("failed to create kizami table: %v", err)
 		}
@@ -57,11 +59,11 @@ func (k *Kokizami) Initialize() error {
 
 func (k *Kokizami) Start(desc string) (*Kizami, error) {
 	var ki *Kizami
-	return ki, k.execWithDB(func(db models.XODB) error {
+	return ki, k.execWithDB(func(db database) error {
 		entry := &models.Kizami{
 			Desc:      desc,
-			StartedAt: SqTime(time.Now()),
-			StoppedAt: SqTime(initialTime),
+			StartedAt: sqTime(time.Now()),
+			StoppedAt: sqTime(initialTime),
 		}
 		err := entry.Insert(db)
 		if err != nil {
@@ -75,7 +77,7 @@ func (k *Kokizami) Start(desc string) (*Kizami, error) {
 
 func (k *Kokizami) Get(id int) (*Kizami, error) {
 	var ki *Kizami
-	return ki, k.execWithDB(func(db models.XODB) error {
+	return ki, k.execWithDB(func(db database) error {
 		m, err := models.KizamiByID(db, id)
 		ki = toKizami(m)
 		return err
@@ -83,7 +85,7 @@ func (k *Kokizami) Get(id int) (*Kizami, error) {
 }
 
 func (k *Kokizami) Edit(ki *Kizami) (*Kizami, error) {
-	return ki, k.execWithDB(func(db models.XODB) error {
+	return ki, k.execWithDB(func(db database) error {
 		m, err := models.KizamiByID(db, ki.ID)
 		if err != nil {
 			return err
@@ -102,25 +104,25 @@ func (k *Kokizami) Edit(ki *Kizami) (*Kizami, error) {
 }
 
 func (k *Kokizami) Stop(id int) error {
-	return k.execWithDB(func(db models.XODB) error {
+	return k.execWithDB(func(db database) error {
 		ki, err := models.KizamiByID(db, id)
 		if err != nil {
 			return err
 		}
-		ki.StoppedAt = SqTime(time.Now())
+		ki.StoppedAt = sqTime(time.Now())
 		return ki.Update(db)
 	})
 }
 
 func (k *Kokizami) StopAll() error {
-	return k.execWithDB(func(db models.XODB) error {
-		ks, err := models.KizamisByStoppedAt(db, SqTime(initialTime))
+	return k.execWithDB(func(db database) error {
+		ks, err := models.KizamisByStoppedAt(db, sqTime(initialTime))
 		if err != nil {
 			return err
 		}
 		now := time.Now()
 		for i := range ks {
-			ks[i].StoppedAt = SqTime(now)
+			ks[i].StoppedAt = sqTime(now)
 			if err := ks[i].Update(db); err != nil {
 				return err
 			}
@@ -130,7 +132,7 @@ func (k *Kokizami) StopAll() error {
 }
 
 func (k *Kokizami) Delete(id int) error {
-	return k.execWithDB(func(db models.XODB) error {
+	return k.execWithDB(func(db database) error {
 		ki, err := models.KizamiByID(db, id)
 		if err != nil {
 			return err
@@ -141,7 +143,7 @@ func (k *Kokizami) Delete(id int) error {
 
 func (k *Kokizami) List() ([]Kizami, error) {
 	var ks []Kizami
-	return ks, k.execWithDB(func(db models.XODB) error {
+	return ks, k.execWithDB(func(db database) error {
 		ms, err := models.AllKizami(db)
 		if err != nil {
 			return err
@@ -158,20 +160,29 @@ func (k *Kokizami) List() ([]Kizami, error) {
 	})
 }
 
-func (k *Kokizami) Summary(yyyymm string) ([]*models.Elapsed, error) {
-	var s []*models.Elapsed
+func (k *Kokizami) Summary(yyyymm string) ([]Elapsed, error) {
+	var s []Elapsed
 	// validate input
 	_, err := time.Parse("2006-01", yyyymm)
 	if err != nil {
 		return nil, fmt.Errorf("invalid argument format. should be yyyy-mm: %v", err)
 	}
-	return s, k.execWithDB(func(db models.XODB) error {
-		var err error
-		s, err = models.ElapsedWithQuery(db, yyyymm)
-		return err
+	return s, k.execWithDB(func(db database) error {
+		ms, err := models.ElapsedWithQuery(db, yyyymm)
+		if err != nil {
+			return err
+		}
+
+		s = make([]Elapsed, len(ms))
+		for i := range ms {
+			s[i].Desc = ms[i].Desc
+			s[i].Count = ms[i].Count
+			s[i].Elapsed = ms[i].Elapsed
+		}
+		return nil
 	})
 }
 
-func SqTime(t time.Time) xoutil.SqTime {
+func sqTime(t time.Time) xoutil.SqTime {
 	return xoutil.SqTime{Time: t}
 }

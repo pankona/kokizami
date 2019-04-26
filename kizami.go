@@ -17,8 +17,8 @@ func (k *Kizami) toModel() *models.Kizami {
 	return &models.Kizami{
 		ID:        k.ID,
 		Desc:      k.Desc,
-		StartedAt: SqTime(k.StartedAt),
-		StoppedAt: SqTime(k.StoppedAt),
+		StartedAt: sqTime(k.StartedAt),
+		StoppedAt: sqTime(k.StoppedAt),
 	}
 }
 

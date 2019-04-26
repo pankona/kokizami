@@ -379,7 +379,7 @@ func CmdSummary(c *cli.Context) error {
 	fmt.Printf("Summary of %s\n", yyyymm)
 	fmt.Println("Desc\tElapsed time")
 	for _, v := range s {
-		fmt.Println((*summary)(v))
+		fmt.Println((*summary)(&v))
 	}
 	return nil
 }
