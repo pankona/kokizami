@@ -66,22 +66,6 @@ func AllKizami(db XODB) ([]*Kizami, error) {
 	return res, nil
 }
 
-// Elapsed returns kizami's elapsed time
-func (k *Kizami) Elapsed() time.Duration {
-	var elapsed time.Duration
-	if k.StoppedAt.Unix() == 0 {
-		// this Kizami is on going. Show elapsed time until now.
-		now := time.Now().UTC()
-		elapsed = now.Sub(k.StartedAt.Time)
-	} else {
-		elapsed = k.StoppedAt.Sub(k.StartedAt.Time)
-		if elapsed < 0 {
-			elapsed = 0
-		}
-	}
-	return elapsed
-}
-
 type Elapsed struct {
 	Desc    string
 	Count   int

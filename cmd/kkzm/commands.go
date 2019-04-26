@@ -10,9 +10,7 @@ import (
 	"time"
 
 	"github.com/pankona/kokizami"
-	"github.com/pankona/kokizami/models"
 	"github.com/urfave/cli"
-	"github.com/xo/xoutil"
 )
 
 // GlobalFlags can be used globally
@@ -100,7 +98,7 @@ func round(d, r time.Duration) time.Duration {
 	return d
 }
 
-func toString(k *models.Kizami) string {
+func toString(k *kokizami.Kizami) string {
 	var stoppedAt string
 	if k.StoppedAt.Unix() == 0 {
 		stoppedAt = "*" + time.Now().In(time.Local).Format("2006-01-02 15:04:05")
@@ -224,7 +222,7 @@ func CmdList(c *cli.Context) error {
 	}
 
 	for _, v := range l {
-		fmt.Println(toString(v))
+		fmt.Println(toString(&v))
 	}
 	return nil
 }
@@ -271,7 +269,7 @@ func CmdDelete(c *cli.Context) error {
 	return kkzm(c).Delete(id)
 }
 
-func editTaskWithEditor(kkzm *kokizami.Kokizami, id int) (*models.Kizami, error) {
+func editTaskWithEditor(kkzm *kokizami.Kokizami, id int) (*kokizami.Kizami, error) {
 	k, err := kkzm.Get(id)
 	if err != nil {
 		return nil, fmt.Errorf("failed to task by ID: %v", err)
@@ -308,7 +306,7 @@ func editTaskWithEditor(kkzm *kokizami.Kokizami, id int) (*models.Kizami, error)
 	return k, nil
 }
 
-func edit(kkzm *kokizami.Kokizami, k *models.Kizami, id int, desc, start, stop string) (*models.Kizami, error) {
+func edit(kkzm *kokizami.Kokizami, k *kokizami.Kizami, id int, desc, start, stop string) (*kokizami.Kizami, error) {
 	startedAt, err := time.ParseInLocation("2006-01-02 15:04:05", start, time.Local)
 	if err != nil {
 		return nil, err
@@ -321,8 +319,8 @@ func edit(kkzm *kokizami.Kokizami, k *models.Kizami, id int, desc, start, stop s
 
 	k.ID = id
 	k.Desc = desc
-	k.StartedAt = SqTime(startedAt)
-	k.StoppedAt = SqTime(stoppedAt)
+	k.StartedAt = startedAt
+	k.StoppedAt = stoppedAt
 
 	return kkzm.Edit(k)
 }
@@ -364,7 +362,7 @@ func runEditor(filename string) error {
 	return cmd.Run()
 }
 
-type summary models.Elapsed
+type summary kokizami.Elapsed
 
 func (s *summary) String() string {
 	return fmt.Sprintf("%s\t%s", s.Desc, s.Elapsed)
@@ -384,8 +382,4 @@ func CmdSummary(c *cli.Context) error {
 		fmt.Println((*summary)(v))
 	}
 	return nil
-}
-
-func SqTime(t time.Time) xoutil.SqTime {
-	return xoutil.SqTime{Time: t}
 }

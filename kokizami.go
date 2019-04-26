@@ -16,6 +16,61 @@ type Kokizami struct {
 	DBPath string
 }
 
+type Kizami struct {
+	ID        int
+	Desc      string
+	StartedAt time.Time
+	StoppedAt time.Time
+}
+
+func (k *Kizami) toModel() *models.Kizami {
+	return &models.Kizami{
+		ID:        k.ID,
+		Desc:      k.Desc,
+		StartedAt: SqTime(k.StartedAt),
+		StoppedAt: SqTime(k.StoppedAt),
+	}
+}
+
+func toKizami(m *models.Kizami) *Kizami {
+	return &Kizami{
+		ID:        m.ID,
+		Desc:      m.Desc,
+		StartedAt: m.StartedAt.Time,
+		StoppedAt: m.StoppedAt.Time,
+	}
+}
+
+// Elapsed returns kizami's elapsed time
+func (k *Kizami) Elapsed() time.Duration {
+	var elapsed time.Duration
+	if k.StoppedAt.Unix() == 0 {
+		// this Kizami is on going. Show elapsed time until now.
+		now := time.Now().UTC()
+		elapsed = now.Sub(k.StartedAt)
+	} else {
+		elapsed = k.StoppedAt.Sub(k.StartedAt)
+		if elapsed < 0 {
+			elapsed = 0
+		}
+	}
+	return elapsed
+}
+
+type Elapsed struct {
+	Desc    string
+	Count   int
+	Elapsed time.Duration
+}
+
+func (e *Elapsed) toModel() *models.Elapsed {
+	return (*models.Elapsed)(e)
+}
+
+func toElapsed(m *models.Elapsed) *Elapsed {
+	return (*Elapsed)(m)
+}
+
 // initialTime is used to insert a time value that indicates initial value of time.
 var initialTime = func() time.Time {
 	t, err := time.Parse("2006-01-02 15:04:05", "1970-01-01 00:00:00")
@@ -55,8 +110,8 @@ func (k *Kokizami) Initialize() error {
 	})
 }
 
-func (k *Kokizami) Start(desc string) (*models.Kizami, error) {
-	var ki *models.Kizami
+func (k *Kokizami) Start(desc string) (*Kizami, error) {
+	var ki *Kizami
 	return ki, k.execWithDB(func(db models.XODB) error {
 		entry := &models.Kizami{
 			Desc:      desc,
@@ -67,34 +122,36 @@ func (k *Kokizami) Start(desc string) (*models.Kizami, error) {
 		if err != nil {
 			return err
 		}
-		ki, err = models.KizamiByID(db, entry.ID)
+		m, err := models.KizamiByID(db, entry.ID)
+		ki = toKizami(m)
 		return err
 	})
 }
 
-func (k *Kokizami) Get(id int) (*models.Kizami, error) {
-	var ki *models.Kizami
-	var err error
+func (k *Kokizami) Get(id int) (*Kizami, error) {
+	var ki *Kizami
 	return ki, k.execWithDB(func(db models.XODB) error {
-		ki, err = models.KizamiByID(db, id)
+		m, err := models.KizamiByID(db, id)
+		ki = toKizami(m)
 		return err
 	})
 }
 
-func (k *Kokizami) Edit(ki *models.Kizami) (*models.Kizami, error) {
+func (k *Kokizami) Edit(ki *Kizami) (*Kizami, error) {
 	return ki, k.execWithDB(func(db models.XODB) error {
-		a, err := models.KizamiByID(db, ki.ID)
+		m, err := models.KizamiByID(db, ki.ID)
 		if err != nil {
 			return err
 		}
 
-		*a = *ki
+		*m = *(ki.toModel())
 
-		err = a.Update(db)
+		err = m.Update(db)
 		if err != nil {
 			return err
 		}
-		ki, err = models.KizamiByID(db, ki.ID)
+		m, err = models.KizamiByID(db, ki.ID)
+		ki = toKizami(m)
 		return err
 	})
 }
@@ -137,12 +194,22 @@ func (k *Kokizami) Delete(id int) error {
 	})
 }
 
-func (k *Kokizami) List() ([]*models.Kizami, error) {
-	var ks []*models.Kizami
+func (k *Kokizami) List() ([]Kizami, error) {
+	var ks []Kizami
 	return ks, k.execWithDB(func(db models.XODB) error {
-		var err error
-		ks, err = models.AllKizami(db)
-		return err
+		ms, err := models.AllKizami(db)
+		if err != nil {
+			return err
+		}
+
+		ks = make([]Kizami, len(ms))
+		for i := range ms {
+			ks[i].ID = ms[i].ID
+			ks[i].Desc = ms[i].Desc
+			ks[i].StartedAt = ms[i].StartedAt.Time
+			ks[i].StoppedAt = ms[i].StoppedAt.Time
+		}
+		return nil
 	})
 }
 
