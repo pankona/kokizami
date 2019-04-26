@@ -24,49 +24,49 @@ var thisMonth = func() string {
 var Commands = []cli.Command{
 	{
 		Name:   "start",
-		Usage:  "Start new task",
+		Usage:  "start new task",
 		Action: CmdStart,
 		Flags:  []cli.Flag{},
 	},
 	{
 		Name:   "restart",
-		Usage:  "Restart old task",
+		Usage:  "restart old task",
 		Action: CmdRestart,
 		Flags:  []cli.Flag{},
 	},
 	{
 		Name:   "edit",
-		Usage:  "Edit task",
+		Usage:  "edit task",
 		Action: CmdEdit,
 		Flags:  []cli.Flag{},
 	},
 	{
 		Name:   "list",
-		Usage:  "Show list of tasks",
+		Usage:  "show list of tasks",
 		Action: CmdList,
 		Flags:  []cli.Flag{},
 	},
 	{
 		Name:   "stop",
-		Usage:  "Stop task",
+		Usage:  "stop task",
 		Action: CmdStop,
 		Flags:  []cli.Flag{},
 	},
 	{
 		Name:   "delete",
-		Usage:  "Delete task",
+		Usage:  "delete task",
 		Action: CmdDelete,
 		Flags:  []cli.Flag{},
 	},
 	{
 		Name:   "summary",
-		Usage:  "Show summary of specified month",
+		Usage:  "show summary of specified month",
 		Action: CmdSummary,
 		Flags: []cli.Flag{
 			cli.StringFlag{
 				Name:  "m, month",
 				Value: thisMonth,
-				Usage: "Specify year and month to show summary",
+				Usage: "specify year and month to show summary",
 			},
 		},
 	},
