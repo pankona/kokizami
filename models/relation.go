@@ -9,6 +9,7 @@ func CreateRelationTable(db XODB) error {
 		" id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL" +
 		", kizami_id INTEGER NOT NULL" +
 		", tag_id INTEGER NOT NULL" +
+		", UNIQUE(kizami_id, tag_id) ON CONFLICT IGNORE" +
 		")"
 	XOLog(sqlstr)
 	_, err = db.Exec(sqlstr)

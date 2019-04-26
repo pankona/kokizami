@@ -126,6 +126,32 @@ func (t *Tag) Delete(db XODB) error {
 	return nil
 }
 
+// TagByTag retrieves a row from 'tag' as a Tag.
+//
+// Generated from index 'sqlite_autoindex_tag_1'.
+func TagByTag(db XODB, tag string) (*Tag, error) {
+	var err error
+
+	// sql query
+	const sqlstr = `SELECT ` +
+		`id, tag ` +
+		`FROM tag ` +
+		`WHERE tag = ?`
+
+	// run query
+	XOLog(sqlstr, tag)
+	t := Tag{
+		_exists: true,
+	}
+
+	err = db.QueryRow(sqlstr, tag).Scan(&t.ID, &t.Tag)
+	if err != nil {
+		return nil, err
+	}
+
+	return &t, nil
+}
+
 // TagByID retrieves a row from 'tag' as a Tag.
 //
 // Generated from index 'tag_id_pkey'.

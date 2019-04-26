@@ -152,3 +152,29 @@ func RelationByID(db XODB, id int) (*Relation, error) {
 
 	return &r, nil
 }
+
+// RelationByKizamiIDTagID retrieves a row from 'relation' as a Relation.
+//
+// Generated from index 'sqlite_autoindex_relation_1'.
+func RelationByKizamiIDTagID(db XODB, kizamiID int, tagID int) (*Relation, error) {
+	var err error
+
+	// sql query
+	const sqlstr = `SELECT ` +
+		`id, kizami_id, tag_id ` +
+		`FROM relation ` +
+		`WHERE kizami_id = ? AND tag_id = ?`
+
+	// run query
+	XOLog(sqlstr, kizamiID, tagID)
+	r := Relation{
+		_exists: true,
+	}
+
+	err = db.QueryRow(sqlstr, kizamiID, tagID).Scan(&r.ID, &r.KizamiID, &r.TagID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &r, nil
+}

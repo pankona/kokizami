@@ -103,7 +103,9 @@ func (k *Kokizami) Edit(ki *Kizami) (*Kizami, error) {
 			return err
 		}
 
-		*m = *(ki.toModel())
+		m.Desc = ki.Desc
+		m.StartedAt = sqTime(ki.StartedAt)
+		m.StoppedAt = sqTime(ki.StoppedAt)
 
 		err = m.Update(db)
 		if err != nil {
@@ -209,7 +211,7 @@ func (k *Kokizami) AddTag(tag string) (*Tag, error) {
 			return err
 		}
 
-		m, err := models.TagByID(db, entry.ID)
+		m, err := models.TagByTag(db, tag)
 		if err != nil {
 			return err
 		}
@@ -237,32 +239,30 @@ func (k *Kokizami) Tags() ([]Tag, error) {
 			return err
 		}
 
-		ts = make([]Tag, len(ts))
-		for i := range ts {
+		ts = make([]Tag, len(ms))
+		for i := range ms {
 			ts[i].ID = ms[i].ID
 			ts[i].Tag = ms[i].Tag
 		}
+
 		return nil
 	})
 }
 
-func (k *Kokizami) Tagging(kizamiID int, tagIDs []int) error {
+func (k *Kokizami) Tagging(kizamiID int, tagID int) error {
 	return k.execWithDB(func(db database) error {
-		for _, v := range tagIDs {
-			_, err := models.TagByID(db, v)
-			if err != nil {
-				fmt.Errorf("warning. [%d] is invalid tag id: err", v, err)
-				continue
-			}
+		_, err := models.TagByID(db, tagID)
+		if err != nil {
+			return fmt.Errorf("warning. [%d] is invalid tag id: err", tagID, err)
+		}
 
-			m := &models.Relation{
-				KizamiID: kizamiID,
-				TagID:    v,
-			}
-			err = m.Insert(db)
-			if err != nil {
-				return err
-			}
+		m := &models.Relation{
+			KizamiID: kizamiID,
+			TagID:    tagID,
+		}
+		err = m.Insert(db)
+		if err != nil {
+			return err
 		}
 
 		return nil

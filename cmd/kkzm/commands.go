@@ -71,6 +71,12 @@ var Commands = []cli.Command{
 			},
 		},
 	},
+	{
+		Name:   "tags",
+		Usage:  "show list of tags",
+		Action: CmdTags,
+		Flags:  []cli.Flag{},
+	},
 }
 
 // CommandNotFound is called when specified subcommand is not found
@@ -325,7 +331,28 @@ func edit(kkzm *kokizami.Kokizami, k *kokizami.Kizami, id int, desc, start, stop
 	k.StartedAt = startedAt
 	k.StoppedAt = stoppedAt
 
-	return kkzm.Edit(k)
+	tags := extractTagsFromString(desc)
+
+	ret, err := kkzm.Edit(k)
+	if err != nil {
+		panic(err)
+		return nil, err
+	}
+
+	for _, v := range tags {
+		t, err := kkzm.AddTag(v)
+		if err != nil {
+			return nil, err
+		}
+
+		err = kkzm.Tagging(k.ID, t.ID)
+		if err != nil {
+			panic(err)
+			return nil, err
+		}
+	}
+
+	return ret, nil
 }
 
 func editTextWithEditor(prewrite string) (string, error) {
@@ -388,4 +415,30 @@ func CmdSummary(c *cli.Context) error {
 	}
 	fmt.Printf("%s", buf)
 	return nil
+}
+
+func CmdTags(c *cli.Context) error {
+	ts, err := kkzm(c).Tags()
+	if err != nil {
+		return err
+	}
+
+	buf := bytes.NewBuffer([]byte{})
+	for _, v := range ts {
+		fmt.Fprintln(buf, v.Tag)
+	}
+
+	fmt.Printf("%s", buf)
+	return nil
+}
+
+func extractTagsFromString(s string) []string {
+	ss := strings.Split(s, " ")
+	var tags []string
+	for _, v := range ss {
+		if strings.HasPrefix(v, "#") {
+			tags = append(tags, v)
+		}
+	}
+	return tags
 }
