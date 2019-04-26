@@ -29,6 +29,10 @@ var initialTime = func() time.Time {
 
 type database models.XODB
 
+func sqTime(t time.Time) xoutil.SqTime {
+	return xoutil.SqTime{Time: t}
+}
+
 func (k *Kokizami) execWithDB(f func(db database) error) error {
 	conn, err := sql.Open("sqlite3", k.DBPath)
 	if err != nil {
@@ -193,8 +197,4 @@ func (k *Kokizami) Summary(yyyymm string) ([]Elapsed, error) {
 		}
 		return nil
 	})
-}
-
-func sqTime(t time.Time) xoutil.SqTime {
-	return xoutil.SqTime{Time: t}
 }
