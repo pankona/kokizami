@@ -23,13 +23,13 @@ AUTHOR:
    pankona <yosuke.akatsuka@gmail.com>
 
 COMMANDS:
-     start    Start new task
-     restart  Restart old task
-     edit     Edit task
-     list     Show list of tasks
-     stop     Stop task
-     delete   Delete task
-     summary  Show summary of specified month
+     start    start new task
+     restart  restart old task
+     edit     edit task
+     list     show list of tasks
+     stop     stop task
+     delete   delete task
+     summary  show summary of specified month
      help, h  Shows a list of commands or help for one command
 
 GLOBAL OPTIONS:
