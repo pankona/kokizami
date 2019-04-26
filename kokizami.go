@@ -16,61 +16,6 @@ type Kokizami struct {
 	DBPath string
 }
 
-type Kizami struct {
-	ID        int
-	Desc      string
-	StartedAt time.Time
-	StoppedAt time.Time
-}
-
-func (k *Kizami) toModel() *models.Kizami {
-	return &models.Kizami{
-		ID:        k.ID,
-		Desc:      k.Desc,
-		StartedAt: SqTime(k.StartedAt),
-		StoppedAt: SqTime(k.StoppedAt),
-	}
-}
-
-func toKizami(m *models.Kizami) *Kizami {
-	return &Kizami{
-		ID:        m.ID,
-		Desc:      m.Desc,
-		StartedAt: m.StartedAt.Time,
-		StoppedAt: m.StoppedAt.Time,
-	}
-}
-
-// Elapsed returns kizami's elapsed time
-func (k *Kizami) Elapsed() time.Duration {
-	var elapsed time.Duration
-	if k.StoppedAt.Unix() == 0 {
-		// this Kizami is on going. Show elapsed time until now.
-		now := time.Now().UTC()
-		elapsed = now.Sub(k.StartedAt)
-	} else {
-		elapsed = k.StoppedAt.Sub(k.StartedAt)
-		if elapsed < 0 {
-			elapsed = 0
-		}
-	}
-	return elapsed
-}
-
-type Elapsed struct {
-	Desc    string
-	Count   int
-	Elapsed time.Duration
-}
-
-func (e *Elapsed) toModel() *models.Elapsed {
-	return (*models.Elapsed)(e)
-}
-
-func toElapsed(m *models.Elapsed) *Elapsed {
-	return (*Elapsed)(m)
-}
-
 // initialTime is used to insert a time value that indicates initial value of time.
 var initialTime = func() time.Time {
 	t, err := time.Parse("2006-01-02 15:04:05", "1970-01-01 00:00:00")
