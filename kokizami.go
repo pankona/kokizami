@@ -178,22 +178,52 @@ func (k *Kokizami) List() ([]Kizami, error) {
 	})
 }
 
-// Summary returns total elapsed time of Kizamis in specified month
-func (k *Kokizami) Summary(yyyymm string) ([]Elapsed, error) {
+// SummaryByTag returns total elapsed time of Kizamis in specified month grouped by tag
+func (k *Kokizami) SummaryByTag(yyyymm string) ([]Elapsed, error) {
 	var s []Elapsed
+
 	// validate input
 	_, err := time.Parse("2006-01", yyyymm)
 	if err != nil {
 		return nil, fmt.Errorf("invalid argument format. should be yyyy-mm: %v", err)
 	}
+
 	return s, k.execWithDB(func(db database) error {
-		ms, err := models.ElapsedOfMonth(db, yyyymm)
+		ms, err := models.ElapsedOfMonthByTag(db, yyyymm)
 		if err != nil {
 			return err
 		}
 
 		s = make([]Elapsed, len(ms))
 		for i := range ms {
+			s[i].Tag = ms[i].Tag
+			s[i].Desc = ms[i].Desc
+			s[i].Count = ms[i].Count
+			s[i].Elapsed = ms[i].Elapsed
+		}
+		return nil
+	})
+}
+
+// SummaryByDesc returns total elapsed time of Kizamis in specified month grouped by desc
+func (k *Kokizami) SummaryByDesc(yyyymm string) ([]Elapsed, error) {
+	var s []Elapsed
+
+	// validate input
+	_, err := time.Parse("2006-01", yyyymm)
+	if err != nil {
+		return nil, fmt.Errorf("invalid argument format. should be yyyy-mm: %v", err)
+	}
+
+	return s, k.execWithDB(func(db database) error {
+		ms, err := models.ElapsedOfMonthByDesc(db, yyyymm)
+		if err != nil {
+			return err
+		}
+
+		s = make([]Elapsed, len(ms))
+		for i := range ms {
+			s[i].Tag = ms[i].Tag
 			s[i].Desc = ms[i].Desc
 			s[i].Count = ms[i].Count
 			s[i].Elapsed = ms[i].Elapsed
@@ -253,18 +283,13 @@ func (k *Kokizami) Tagging(kizamiID int, tagID int) error {
 	return k.execWithDB(func(db database) error {
 		_, err := models.TagByID(db, tagID)
 		if err != nil {
-			return fmt.Errorf("warning. [%d] is invalid tag id: err", tagID, err)
+			return fmt.Errorf("warning. [%d] is invalid tag id: %v", tagID, err)
 		}
 
 		m := &models.Relation{
 			KizamiID: kizamiID,
 			TagID:    tagID,
 		}
-		err = m.Insert(db)
-		if err != nil {
-			return err
-		}
-
-		return nil
+		return m.Insert(db)
 	})
 }

@@ -14,15 +14,6 @@ type Kizami struct {
 	StoppedAt time.Time
 }
 
-func (k *Kizami) toModel() *models.Kizami {
-	return &models.Kizami{
-		ID:        k.ID,
-		Desc:      k.Desc,
-		StartedAt: sqTime(k.StartedAt),
-		StoppedAt: sqTime(k.StoppedAt),
-	}
-}
-
 func toKizami(m *models.Kizami) *Kizami {
 	return &Kizami{
 		ID:        m.ID,

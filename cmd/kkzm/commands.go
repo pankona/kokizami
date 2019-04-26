@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -335,7 +336,6 @@ func edit(kkzm *kokizami.Kokizami, k *kokizami.Kizami, id int, desc, start, stop
 
 	ret, err := kkzm.Edit(k)
 	if err != nil {
-		panic(err)
 		return nil, err
 	}
 
@@ -347,7 +347,6 @@ func edit(kkzm *kokizami.Kokizami, k *kokizami.Kizami, id int, desc, start, stop
 
 		err = kkzm.Tagging(k.ID, t.ID)
 		if err != nil {
-			panic(err)
 			return nil, err
 		}
 	}
@@ -392,30 +391,86 @@ func runEditor(filename string) error {
 	return cmd.Run()
 }
 
-type summary kokizami.Elapsed
+type descSummary struct {
+	desc        string
+	descElapsed time.Duration
+}
 
-func (s *summary) String() string {
-	return fmt.Sprintf("%s\t%s", s.Desc, s.Elapsed)
+type tagSummary struct {
+	tagElapsed    time.Duration
+	descSummaries []*descSummary
+}
 
+type tagSummaries map[string]*tagSummary
+
+func (s tagSummaries) String() string {
+	keys := make([]string, len(s))
+	var index int
+	for k := range s {
+		keys[index] = k
+		index++
+	}
+	sort.Strings(keys)
+
+	buf := bytes.NewBuffer([]byte{})
+	for _, v := range keys {
+		fmt.Fprintf(buf, "%s\t%s\n", v, s[v].tagElapsed)
+		for _, d := range s[v].descSummaries {
+			fmt.Fprintf(buf, "  %s\t%s\n", d.desc, d.descElapsed)
+		}
+	}
+	return buf.String()
+}
+
+func CmdSummary(c *cli.Context) error {
+	yyyymm := c.String("month")
+	tags, err := kkzm(c).SummaryByTag(yyyymm)
+	if err != nil {
+		return err
+	}
+
+	tagSummaries := tagSummaries{}
+	for _, v := range tags {
+		tagSummaries[v.Tag] = &tagSummary{
+			tagElapsed: v.Elapsed,
+		}
+	}
+
+	descs, err := kkzm(c).SummaryByDesc(yyyymm)
+	if err != nil {
+		return err
+	}
+
+	for _, v := range descs {
+		tagSummaries[v.Tag].descSummaries = append(tagSummaries[v.Tag].descSummaries, &descSummary{
+			desc:        v.Desc,
+			descElapsed: v.Elapsed,
+		})
+	}
+
+	fmt.Printf("%s\n", tagSummaries)
+	return nil
 }
 
 // CmdSummary shows summary of kizami in specified month
+/*
 func CmdSummary(c *cli.Context) error {
 	yyyymm := c.String("month")
-	s, err := kkzm(c).Summary(yyyymm)
+	tagSummary, err := kkzm(c).SummaryByTag(yyyymm)
 	if err != nil {
 		return err
 	}
 
 	buf := bytes.NewBuffer([]byte{})
 	fmt.Fprintf(buf, "Summary of %s\n", yyyymm)
-	fmt.Fprintln(buf, "Desc\tElapsed time")
-	for _, v := range s {
+	fmt.Fprintln(buf, "Tag\tDesc\tElapsed time")
+	for _, v := range tagSummary {
 		fmt.Fprintln(buf, (*summary)(&v))
 	}
 	fmt.Printf("%s", buf)
 	return nil
 }
+*/
 
 func CmdTags(c *cli.Context) error {
 	ts, err := kkzm(c).Tags()

@@ -71,18 +71,20 @@ func AllKizami(db XODB) ([]*Kizami, error) {
 // Elapsed represents elapsed time, that are
 // calculated from all kizami items with specified term
 type Elapsed struct {
+	Tag     string
 	Desc    string
 	Count   int
 	Elapsed time.Duration
 }
 
-// ElapsedOfMonth returns each all kizami's total elapsed time elapsed in specified month
-func ElapsedOfMonth(db XODB, yyyymm string) ([]*Elapsed, error) {
+func elapsedOfMonthBy(db XODB, yyyymm string, groupBy string) ([]*Elapsed, error) {
 	sqlstr := fmt.Sprintf(`SELECT `+
-		`desc, COUNT(desc), SUM(strftime('%%s', stopped_at) - strftime('%%s', started_at)) AS elapsed `+
+		`tag, desc, count(desc), SUM(strftime('%%s', kizami.stopped_at) - strftime('%%s', kizami.started_at)) AS elapsed `+
 		`FROM kizami `+
+		`LEFT JOIN relation ON kizami.id = relation.kizami_id `+
+		`LEFT JOIN tag      ON tag.id    = relation.tag_id `+
 		`WHERE started_at LIKE '%s-%%' `+
-		`GROUP BY desc`, yyyymm) // #nosec
+		`GROUP BY %s`, yyyymm, groupBy) // #nosec
 	XOLog(sqlstr)
 	q, err := db.Query(sqlstr)
 	if err != nil {
@@ -101,7 +103,7 @@ func ElapsedOfMonth(db XODB, yyyymm string) ([]*Elapsed, error) {
 		e := Elapsed{}
 
 		// scan
-		err = q.Scan(&e.Desc, &e.Count, &sec)
+		err = q.Scan(&e.Tag, &e.Desc, &e.Count, &sec)
 		if err != nil {
 			return nil, err
 		}
@@ -111,4 +113,14 @@ func ElapsedOfMonth(db XODB, yyyymm string) ([]*Elapsed, error) {
 	}
 
 	return res, nil
+}
+
+// ElapsedOfMonth returns each all kizami's total elapsed time elapsed in specified month
+func ElapsedOfMonthByDesc(db XODB, yyyymm string) ([]*Elapsed, error) {
+	return elapsedOfMonthBy(db, yyyymm, "desc, tag")
+}
+
+// ElapsedOfMonth returns each all kizami's total elapsed time elapsed in specified month
+func ElapsedOfMonthByTag(db XODB, yyyymm string) ([]*Elapsed, error) {
+	return elapsedOfMonthBy(db, yyyymm, "tag")
 }
