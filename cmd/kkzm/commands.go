@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -221,9 +222,11 @@ func CmdList(c *cli.Context) error {
 		return nil
 	}
 
+	buf := bytes.NewBuffer([]byte{})
 	for _, v := range l {
-		fmt.Println(toString(&v))
+		fmt.Fprintln(buf, toString(&v))
 	}
+	fmt.Printf("%s", buf)
 	return nil
 }
 
@@ -377,10 +380,12 @@ func CmdSummary(c *cli.Context) error {
 		return err
 	}
 
-	fmt.Printf("Summary of %s\n", yyyymm)
-	fmt.Println("Desc\tElapsed time")
+	buf := bytes.NewBuffer([]byte{})
+	fmt.Fprintf(buf, "Summary of %s\n", yyyymm)
+	fmt.Fprintln(buf, "Desc\tElapsed time")
 	for _, v := range s {
-		fmt.Println((*summary)(&v))
+		fmt.Fprintln(buf, (*summary)(&v))
 	}
+	fmt.Printf("%s", buf)
 	return nil
 }
