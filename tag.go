@@ -2,6 +2,7 @@ package kokizami
 
 import "github.com/pankona/kokizami/models"
 
+// Tag represents a tag
 type Tag struct {
 	ID  int
 	Tag string

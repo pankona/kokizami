@@ -115,12 +115,14 @@ func elapsedOfMonthBy(db XODB, yyyymm string, groupBy string) ([]*Elapsed, error
 	return res, nil
 }
 
-// ElapsedOfMonth returns each all kizami's total elapsed time elapsed in specified month
+// ElapsedOfMonthByDesc returns each all kizami's total elapsed time
+// elapsed in specified month group by desc and tag
 func ElapsedOfMonthByDesc(db XODB, yyyymm string) ([]*Elapsed, error) {
 	return elapsedOfMonthBy(db, yyyymm, "desc, tag")
 }
 
-// ElapsedOfMonth returns each all kizami's total elapsed time elapsed in specified month
+// ElapsedOfMonthByTag returns each all kizami's total
+// elapsed time elapsed in specified month group by tag
 func ElapsedOfMonthByTag(db XODB, yyyymm string) ([]*Elapsed, error) {
 	return elapsedOfMonthBy(db, yyyymm, "tag")
 }

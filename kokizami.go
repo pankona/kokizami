@@ -232,6 +232,7 @@ func (k *Kokizami) SummaryByDesc(yyyymm string) ([]Elapsed, error) {
 	})
 }
 
+// AddTag adds a new tag
 func (k *Kokizami) AddTag(tag string) (*Tag, error) {
 	var t *Tag
 	return t, k.execWithDB(func(db database) error {
@@ -251,6 +252,7 @@ func (k *Kokizami) AddTag(tag string) (*Tag, error) {
 	})
 }
 
+// DeleteTag deletes a specified tag
 func (k *Kokizami) DeleteTag(id int) error {
 	return k.execWithDB(func(db database) error {
 		m, err := models.TagByID(db, id)
@@ -261,6 +263,7 @@ func (k *Kokizami) DeleteTag(id int) error {
 	})
 }
 
+// Tags returns list of tags
 func (k *Kokizami) Tags() ([]Tag, error) {
 	var ts []Tag
 	return ts, k.execWithDB(func(db database) error {
@@ -279,6 +282,7 @@ func (k *Kokizami) Tags() ([]Tag, error) {
 	})
 }
 
+// Tagging makes relation between specified kizami and tag
 func (k *Kokizami) Tagging(kizamiID int, tagID int) error {
 	return k.execWithDB(func(db database) error {
 		_, err := models.TagByID(db, tagID)

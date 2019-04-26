@@ -422,6 +422,7 @@ func (s tagSummaries) String() string {
 	return buf.String()
 }
 
+// CmdSummary shows summary of elapsed time of specified month
 func CmdSummary(c *cli.Context) error {
 	yyyymm := c.String("month")
 	tags, err := kkzm(c).SummaryByTag(yyyymm)
@@ -429,9 +430,9 @@ func CmdSummary(c *cli.Context) error {
 		return err
 	}
 
-	tagSummaries := tagSummaries{}
+	summaries := tagSummaries{}
 	for _, v := range tags {
-		tagSummaries[v.Tag] = &tagSummary{
+		summaries[v.Tag] = &tagSummary{
 			tagElapsed: v.Elapsed,
 		}
 	}
@@ -442,36 +443,17 @@ func CmdSummary(c *cli.Context) error {
 	}
 
 	for _, v := range descs {
-		tagSummaries[v.Tag].descSummaries = append(tagSummaries[v.Tag].descSummaries, &descSummary{
+		summaries[v.Tag].descSummaries = append(summaries[v.Tag].descSummaries, &descSummary{
 			desc:        v.Desc,
 			descElapsed: v.Elapsed,
 		})
 	}
 
-	fmt.Printf("%s\n", tagSummaries)
+	fmt.Printf("%s\n", summaries)
 	return nil
 }
 
-// CmdSummary shows summary of kizami in specified month
-/*
-func CmdSummary(c *cli.Context) error {
-	yyyymm := c.String("month")
-	tagSummary, err := kkzm(c).SummaryByTag(yyyymm)
-	if err != nil {
-		return err
-	}
-
-	buf := bytes.NewBuffer([]byte{})
-	fmt.Fprintf(buf, "Summary of %s\n", yyyymm)
-	fmt.Fprintln(buf, "Tag\tDesc\tElapsed time")
-	for _, v := range tagSummary {
-		fmt.Fprintln(buf, (*summary)(&v))
-	}
-	fmt.Printf("%s", buf)
-	return nil
-}
-*/
-
+// CmdTags shows list of tags
 func CmdTags(c *cli.Context) error {
 	ts, err := kkzm(c).Tags()
 	if err != nil {
