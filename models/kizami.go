@@ -83,7 +83,7 @@ func elapsedOfMonthBy(db XODB, yyyymm string, groupBy string) ([]*Elapsed, error
 		`FROM kizami `+
 		`LEFT JOIN relation ON kizami.id = relation.kizami_id `+
 		`LEFT JOIN tag      ON tag.id    = relation.tag_id `+
-		`WHERE started_at LIKE '%s-%%' `+
+		`WHERE started_at LIKE '%s-%%' AND stopped_at NOT LIKE '1970-%%' `+
 		`GROUP BY %s`, yyyymm, groupBy) // #nosec
 	XOLog(sqlstr)
 	q, err := db.Query(sqlstr)
