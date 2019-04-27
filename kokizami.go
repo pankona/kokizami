@@ -34,6 +34,10 @@ func sqTime(t time.Time) xoutil.SqTime {
 }
 
 func (k *Kokizami) execWithDB(f func(db database) error) error {
+	//models.XOLog = func(s string, p ...interface{}) {
+	//	fmt.Printf("-------------------------------------\nQUERY: %s\n  VAL: %v\n", s, p)
+	//}
+
 	conn, err := sql.Open("sqlite3", k.DBPath)
 	if err != nil {
 		return err
