@@ -130,6 +130,7 @@ func kkzm(c *cli.Context) *kokizami.Kokizami {
 func CmdStart(c *cli.Context) error {
 	args := c.Args()
 
+	var desc string
 	if len(args) == 0 {
 		filepath, err := editTextWithEditor("")
 		if err != nil {
@@ -145,24 +146,35 @@ func CmdStart(c *cli.Context) error {
 		if len(ss) < 1 {
 			return fmt.Errorf("invalid arguments. needs (desc, started_at, stopped_at)")
 		}
-
-		k, err := kkzm(c).Start(ss[0])
-		if err != nil {
-			return err
-		}
-		fmt.Println(toString(k))
-		return nil
+		desc = ss[0]
 	} else if len(args) == 1 {
-		desc := args[0]
-		k, err := kkzm(c).Start(desc)
-		if err != nil {
-			return err
-		}
-		fmt.Println(toString(k))
-		return nil
+		desc = args[0]
+	} else {
+		return fmt.Errorf("start needs one arguments [desc]")
 	}
 
-	return fmt.Errorf("start needs one arguments [desc]")
+	kkzm := kkzm(c)
+
+	k, err := kkzm.Start(desc)
+	if err != nil {
+		return err
+	}
+	fmt.Println(toString(k))
+
+	tags := extractTagsFromString(desc)
+	for _, v := range tags {
+		t, err := kkzm.AddTag(v)
+		if err != nil {
+			return err
+		}
+
+		err = kkzm.Tagging(k.ID, t.ID)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 // CmdRestart starts a task from old task list
@@ -178,16 +190,32 @@ func CmdRestart(c *cli.Context) error {
 		return err
 	}
 
-	k, err := kkzm(c).Get(id)
+	kkzm := kkzm(c)
+
+	k, err := kkzm.Get(id)
 	if err != nil {
 		return err
 	}
 
-	k, err = kkzm(c).Start(k.Desc)
+	k, err = kkzm.Start(k.Desc)
 	if err != nil {
 		return err
 	}
 	fmt.Println(toString(k))
+
+	tags := extractTagsFromString(k.Desc)
+	for _, v := range tags {
+		t, err := kkzm.AddTag(v)
+		if err != nil {
+			return err
+		}
+
+		err = kkzm.Tagging(k.ID, t.ID)
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
