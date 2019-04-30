@@ -477,7 +477,7 @@ func CmdSummary(c *cli.Context) error {
 		})
 	}
 
-	fmt.Printf("%s\n", summaries)
+	fmt.Printf("Summary of %s\n%s\n", yyyymm, summaries)
 	return nil
 }
 
