@@ -302,6 +302,13 @@ func (k *Kokizami) Tagging(kizamiID int, tagID int) error {
 	})
 }
 
+// Untagging removes all tags from specified kizami
+func (k *Kokizami) Untagging(kizamiID int) error {
+	return k.execWithDB(func(db database) error {
+		return models.DeleteRelationsByKizamiID(db, kizamiID)
+	})
+}
+
 // TagsByKizami returns tags of specified kizami
 func (k *Kokizami) TagsByKizamiID(kizamiID int) ([]Tag, error) {
 	var ts []Tag
