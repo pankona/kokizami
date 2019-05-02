@@ -301,3 +301,22 @@ func (k *Kokizami) Tagging(kizamiID int, tagID int) error {
 		return m.Insert(db)
 	})
 }
+
+// TagsByKizami returns tags of specified kizami
+func (k *Kokizami) TagsByKizamiID(kizamiID int) ([]Tag, error) {
+	var ts []Tag
+	return ts, k.execWithDB(func(db database) error {
+		ms, err := models.TagsByKizami(db, kizamiID)
+		if err != nil {
+			return err
+		}
+
+		ts = make([]Tag, len(ms))
+		for i := range ms {
+			ts[i].ID = ms[i].ID
+			ts[i].Tag = ms[i].Tag
+		}
+
+		return nil
+	})
+}

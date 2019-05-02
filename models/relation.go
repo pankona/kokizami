@@ -1,5 +1,7 @@
 package models
 
+import "fmt"
+
 // CreateRelationTable creates table for relation model
 func CreateRelationTable(db XODB) error {
 	var err error
@@ -14,4 +16,45 @@ func CreateRelationTable(db XODB) error {
 	XOLog(sqlstr)
 	_, err = db.Exec(sqlstr)
 	return err
+}
+
+func TagsByKizami(db XODB, kizamiID int) ([]*Tag, error) {
+	var err error
+
+	// sql query
+	const sqlstr = `SELECT tag.id, tag.tag` +
+		` FROM relation` +
+		` INNER JOIN tag` +
+		` ON relation.tag_id = tag.id` +
+		` WHERE kizami_id = ?`
+	// run query
+	XOLog(sqlstr, kizamiID)
+	q, err := db.Query(sqlstr, kizamiID)
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		e := q.Close()
+		if e != nil {
+			XOLog(fmt.Sprintf("failed close query: %v", e))
+		}
+	}()
+
+	// load results
+	res := []*Tag{}
+	for q.Next() {
+		t := Tag{
+			_exists: true,
+		}
+
+		// scan
+		err = q.Scan(&t.ID, &t.Tag)
+		if err != nil {
+			return nil, err
+		}
+
+		res = append(res, &t)
+	}
+
+	return res, nil
 }

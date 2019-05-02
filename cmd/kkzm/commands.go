@@ -76,7 +76,12 @@ var Commands = []cli.Command{
 		Name:   "tags",
 		Usage:  "show list of tags",
 		Action: CmdTags,
-		Flags:  []cli.Flag{},
+		Flags: []cli.Flag{
+			cli.IntFlag{
+				Name:  "id",
+				Usage: "show tags of specified task",
+			},
+		},
 	},
 }
 
@@ -483,9 +488,24 @@ func CmdSummary(c *cli.Context) error {
 
 // CmdTags shows list of tags
 func CmdTags(c *cli.Context) error {
-	ts, err := kkzm(c).Tags()
-	if err != nil {
-		return err
+	var (
+		ts  []kokizami.Tag
+		err error
+	)
+
+	kkzm := kkzm(c)
+	id := c.Int("id")
+
+	if id == 0 {
+		ts, err = kkzm.Tags()
+		if err != nil {
+			return err
+		}
+	} else {
+		ts, err = kkzm.TagsByKizamiID(id)
+		if err != nil {
+			return err
+		}
 	}
 
 	buf := bytes.NewBuffer([]byte{})
