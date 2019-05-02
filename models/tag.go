@@ -4,8 +4,6 @@ import "fmt"
 
 // CreateTagTable creates table for tag model
 func CreateTagTable(db XODB) error {
-	var err error
-
 	// sql query
 	const sqlstr = "CREATE TABLE IF NOT EXISTS tag (" +
 		" id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL" +
@@ -13,14 +11,12 @@ func CreateTagTable(db XODB) error {
 		", UNIQUE(tag) on CONFLICT IGNORE" +
 		")"
 	XOLog(sqlstr)
-	_, err = db.Exec(sqlstr)
+	_, err := db.Exec(sqlstr)
 	return err
 }
 
 // AllTags returns all tags from tag table
 func AllTags(db XODB) ([]*Tag, error) {
-	var err error
-
 	// sql query
 	const sqlstr = `SELECT ` +
 		`id, tag ` +

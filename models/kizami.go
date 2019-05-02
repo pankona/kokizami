@@ -7,8 +7,6 @@ import (
 
 // CreateKizamiTable creates table and index for Kizami model
 func CreateKizamiTable(db XODB) error {
-	var err error
-
 	// sql query
 	sqlstr := "CREATE TABLE IF NOT EXISTS kizami (" +
 		" id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL" +
@@ -17,7 +15,7 @@ func CreateKizamiTable(db XODB) error {
 		", stopped_at TIMESTAMP DEFAULT (DATETIME('1970-01-01'))" +
 		")"
 	XOLog(sqlstr)
-	_, err = db.Exec(sqlstr)
+	_, err := db.Exec(sqlstr)
 	if err != nil {
 		return err
 	}
@@ -29,8 +27,6 @@ func CreateKizamiTable(db XODB) error {
 
 // AllKizami returns all Kizami from kizami table
 func AllKizami(db XODB) ([]*Kizami, error) {
-	var err error
-
 	// sql query
 	const sqlstr = `SELECT ` +
 		`id, desc, started_at, stopped_at ` +
