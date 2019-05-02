@@ -171,7 +171,10 @@ func CmdStart(c *cli.Context) error {
 
 func tagging(kkzm *kokizami.Kokizami, kizamiID int, desc string) error {
 	// remove all tags from specified kizami first
-	kkzm.Untagging(kizamiID)
+	err := kkzm.Untagging(kizamiID)
+	if err != nil {
+		return err
+	}
 
 	tags := extractTagsFromString(desc)
 	for _, v := range tags {
