@@ -166,8 +166,12 @@ func CmdStart(c *cli.Context) error {
 	}
 	fmt.Println(toString(k))
 
+	return tagging(kkzm, k.ID, desc)
+}
+
+func tagging(kkzm *kokizami.Kokizami, kizamiID int, desc string) error {
 	// remove all tags from specified kizami first
-	kkzm.Untagging(k.ID)
+	kkzm.Untagging(kizamiID)
 
 	tags := extractTagsFromString(desc)
 	for _, v := range tags {
@@ -176,12 +180,11 @@ func CmdStart(c *cli.Context) error {
 			return err
 		}
 
-		err = kkzm.Tagging(k.ID, t.ID)
+		err = kkzm.Tagging(kizamiID, t.ID)
 		if err != nil {
 			return err
 		}
 	}
-
 	return nil
 }
 
@@ -211,23 +214,7 @@ func CmdRestart(c *cli.Context) error {
 	}
 	fmt.Println(toString(k))
 
-	// remove all tags from specified kizami first
-	kkzm.Untagging(k.ID)
-
-	tags := extractTagsFromString(k.Desc)
-	for _, v := range tags {
-		t, err := kkzm.AddTag(v)
-		if err != nil {
-			return err
-		}
-
-		err = kkzm.Tagging(k.ID, t.ID)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
+	return tagging(kkzm, k.ID, k.Desc)
 }
 
 // CmdEdit edits a specified task
@@ -376,23 +363,7 @@ func edit(kkzm *kokizami.Kokizami, k *kokizami.Kizami, id int, desc, start, stop
 		return nil, err
 	}
 
-	// remove all tags from specified kizami first
-	kkzm.Untagging(k.ID)
-
-	tags := extractTagsFromString(desc)
-	for _, v := range tags {
-		t, err := kkzm.AddTag(v)
-		if err != nil {
-			return nil, err
-		}
-
-		err = kkzm.Tagging(k.ID, t.ID)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return ret, nil
+	return ret, tagging(kkzm, k.ID, desc)
 }
 
 func editTextWithEditor(prewrite string) (string, error) {
