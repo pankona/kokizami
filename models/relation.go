@@ -16,9 +16,8 @@ func CreateRelationTable(db XODB) error {
 	return err
 }
 
-func TagsByKizami(db XODB, kizamiID int) ([]*Tag, error) {
-	var err error
-
+// TagsByKizamiID returns tags related to specified kizami
+func TagsByKizamiID(db XODB, kizamiID int) ([]*Tag, error) {
 	// sql query
 	const sqlstr = `SELECT tag.id, tag.tag` +
 		` FROM relation` +
@@ -57,6 +56,7 @@ func TagsByKizami(db XODB, kizamiID int) ([]*Tag, error) {
 	return res, nil
 }
 
+// DeleteRelationsByKizamiID removes all tags from specified kizami
 func DeleteRelationsByKizamiID(db XODB, kizamiID int) error {
 	const sqlstr = `DELETE FROM` +
 		` relation` +

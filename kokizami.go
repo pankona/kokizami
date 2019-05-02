@@ -309,11 +309,11 @@ func (k *Kokizami) Untagging(kizamiID int) error {
 	})
 }
 
-// TagsByKizami returns tags of specified kizami
+// TagsByKizamiID returns tags of specified kizami
 func (k *Kokizami) TagsByKizamiID(kizamiID int) ([]Tag, error) {
 	var ts []Tag
 	return ts, k.execWithDB(func(db database) error {
-		ms, err := models.TagsByKizami(db, kizamiID)
+		ms, err := models.TagsByKizamiID(db, kizamiID)
 		if err != nil {
 			return err
 		}
