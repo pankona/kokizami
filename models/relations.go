@@ -2,6 +2,7 @@ package models
 
 import "bytes"
 
+// Relations represents a list of relation
 type Relations []Relation
 
 // BulkInsert inserts multiple relations at once

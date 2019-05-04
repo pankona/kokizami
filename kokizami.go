@@ -48,7 +48,7 @@ func (k *Kokizami) execWithDB(f func(db database) error) error {
 	return f(conn)
 }
 
-// SetDebug toggles debug logging by argument
+// EnableVerboseQuery toggles debug logging by argument
 func (k *Kokizami) EnableVerboseQuery(enable bool) {
 	models.XOLog = func(s string, p ...interface{}) {
 		if enable {
@@ -341,18 +341,7 @@ func (k *Kokizami) TagsByKizamiID(kizamiID int) ([]Tag, error) {
 	})
 }
 
-func (k *Kokizami) TagByTag(tag string) (Tag, error) {
-	var t Tag
-	return t, k.execWithDB(func(db database) error {
-		m, err := models.TagByTag(db, tag)
-		if err != nil {
-			return err
-		}
-		t = toTag(m)
-		return nil
-	})
-}
-
+// TagsByTags returns tags by specified tags
 func (k *Kokizami) TagsByTags(tags []string) ([]Tag, error) {
 	var ts []Tag
 	return ts, k.execWithDB(func(db database) error {

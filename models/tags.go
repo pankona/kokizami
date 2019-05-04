@@ -1,7 +1,11 @@
 package models
 
-import "bytes"
+import (
+	"bytes"
+	"fmt"
+)
 
+// Tags represents a list of tags
 type Tags []Tag
 
 // BulkInsert inserts multiple tags at once
@@ -73,7 +77,12 @@ func TagsByTags(db XODB, tags []string) ([]Tag, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer q.Close()
+	defer func() {
+		e := q.Close()
+		if e != nil {
+			XOLog(fmt.Sprintf("failed close query: %v", e))
+		}
+	}()
 
 	res := []Tag{}
 	for q.Next() {
