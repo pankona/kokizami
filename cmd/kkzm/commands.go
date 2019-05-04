@@ -16,11 +16,12 @@ import (
 )
 
 // GlobalFlags can be used globally
-var GlobalFlags = []cli.Flag{}
-
-var thisMonth = func() string {
-	return time.Now().Format("2006-01")
-}()
+var GlobalFlags = []cli.Flag{
+	cli.BoolFlag{
+		Name:  "verbose",
+		Usage: "specify to enable verbose mode",
+	},
+}
 
 // Commands represents list of subcommands
 var Commands = []cli.Command{
@@ -92,6 +93,10 @@ func CommandNotFound(c *cli.Context, command string) {
 	os.Exit(2)
 }
 
+var thisMonth = func() string {
+	return time.Now().Format("2006-01")
+}()
+
 func round(d, r time.Duration) time.Duration {
 	if r <= 0 {
 		return d
@@ -127,7 +132,9 @@ func toString(k *kokizami.Kizami) string {
 }
 
 func kkzm(c *cli.Context) *kokizami.Kokizami {
-	return c.App.Metadata["kkzm"].(*kokizami.Kokizami)
+	k := c.App.Metadata["kkzm"].(*kokizami.Kokizami)
+	k.EnableVerboseQuery(c.GlobalBool("verbose"))
+	return k
 }
 
 // CmdStart starts a new task
