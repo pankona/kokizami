@@ -297,19 +297,16 @@ func (k *Kokizami) Tags() ([]Tag, error) {
 	})
 }
 
-// Tagging makes relation between specified kizami and tag
-func (k *Kokizami) Tagging(kizamiID int, tagID int) error {
+// Tagging makes relation between specified kizami and tags
+func (k *Kokizami) Tagging(kizamiID int, tagIDs []int) error {
 	return k.execWithDB(func(db database) error {
-		_, err := models.TagByID(db, tagID)
-		if err != nil {
-			return fmt.Errorf("warning. [%d] is invalid tag id: %v", tagID, err)
-		}
+		rs := models.Relations(make([]models.Relation, len(tagIDs)))
+		for i := range rs {
+			rs[i].KizamiID = kizamiID
+			rs[i].TagID = tagIDs[i]
 
-		m := &models.Relation{
-			KizamiID: kizamiID,
-			TagID:    tagID,
 		}
-		return m.Insert(db)
+		return rs.BulkInsert(db)
 	})
 }
 

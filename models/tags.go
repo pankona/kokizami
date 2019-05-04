@@ -8,16 +8,16 @@ type Tags []Tag
 func (ts Tags) BulkInsert(db XODB) error {
 	buf := bytes.NewBuffer([]byte{})
 
-	q1 := []byte("INSERT INTO tag")
+	q1 := []byte("INSERT INTO tag(tag)")
 	_, err := buf.Write(q1)
 	if err != nil {
 		return err
 	}
 
-	q2 := []byte(" SELECT ?, ?")
-	q3 := []byte(" UNION SELECT ?, ?")
+	q2 := []byte(" SELECT ? AS tag")
+	q3 := []byte(" UNION SELECT ?")
 
-	args := make([]interface{}, len(ts)*2)
+	args := make([]interface{}, len(ts))
 	for i, v := range ts {
 		if i == 0 {
 			_, err = buf.Write(q2)
@@ -28,8 +28,7 @@ func (ts Tags) BulkInsert(db XODB) error {
 			return err
 		}
 
-		args[i*2] = v.ID
-		args[i*2+1] = v.Tag
+		args[i] = v.Tag
 	}
 
 	// run query

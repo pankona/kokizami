@@ -183,17 +183,16 @@ func tagging(kkzm *kokizami.Kokizami, kizamiID int, desc string) error {
 		return err
 	}
 
-	for _, v := range tags {
+	tagIDs := make([]int, len(tags))
+	for i, v := range tags {
 		t, err := kkzm.TagByTag(v)
 		if err != nil {
 			return err
 		}
-		err = kkzm.Tagging(kizamiID, t.ID)
-		if err != nil {
-			return err
-		}
+		tagIDs[i] = t.ID
 	}
-	return nil
+
+	return kkzm.Tagging(kizamiID, tagIDs)
 }
 
 // CmdRestart starts a task from old task list
