@@ -184,12 +184,12 @@ func tagging(kkzm *kokizami.Kokizami, kizamiID int, desc string) error {
 	}
 
 	tagIDs := make([]int, len(tags))
-	for i, v := range tags {
-		t, err := kkzm.TagByTag(v)
-		if err != nil {
-			return err
-		}
-		tagIDs[i] = t.ID
+	ts, err := kkzm.TagsByTags(tags)
+	if err != nil {
+		return err
+	}
+	for i, v := range ts {
+		tagIDs[i] = v.ID
 	}
 
 	return kkzm.Tagging(kizamiID, tagIDs)

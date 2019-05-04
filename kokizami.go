@@ -347,3 +347,21 @@ func (k *Kokizami) TagByTag(tag string) (*Tag, error) {
 		return nil
 	})
 }
+
+func (k *Kokizami) TagsByTags(tags []string) ([]Tag, error) {
+	var ts []Tag
+	return ts, k.execWithDB(func(db database) error {
+		ms, err := models.TagsByTags(db, tags)
+		if err != nil {
+			return err
+		}
+
+		ts = make([]Tag, len(ms))
+		for i := range ms {
+			ts[i].ID = ms[i].ID
+			ts[i].Tag = ms[i].Tag
+		}
+
+		return nil
+	})
+}
