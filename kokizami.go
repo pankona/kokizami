@@ -256,6 +256,17 @@ func (k *Kokizami) AddTag(tag string) (*Tag, error) {
 	})
 }
 
+// AddTags adds a new tags
+func (k *Kokizami) AddTags(tags []string) error {
+	return k.execWithDB(func(db database) error {
+		ts := models.Tags(make([]models.Tag, len(tags)))
+		for i := range ts {
+			ts[i].Tag = tags[i]
+		}
+		return ts.BulkInsert(db)
+	})
+}
+
 // DeleteTag deletes a specified tag
 func (k *Kokizami) DeleteTag(id int) error {
 	return k.execWithDB(func(db database) error {
@@ -324,6 +335,18 @@ func (k *Kokizami) TagsByKizamiID(kizamiID int) ([]Tag, error) {
 			ts[i].Tag = ms[i].Tag
 		}
 
+		return nil
+	})
+}
+
+func (k *Kokizami) TagByTag(tag string) (*Tag, error) {
+	var t *Tag
+	return t, k.execWithDB(func(db database) error {
+		m, err := models.TagByTag(db, tag)
+		if err != nil {
+			return err
+		}
+		t = toTag(m)
 		return nil
 	})
 }

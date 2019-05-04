@@ -177,12 +177,17 @@ func tagging(kkzm *kokizami.Kokizami, kizamiID int, desc string) error {
 	}
 
 	tags := extractTagsFromString(desc)
+
+	err = kkzm.AddTags(tags)
+	if err != nil {
+		return err
+	}
+
 	for _, v := range tags {
-		t, err := kkzm.AddTag(v)
+		t, err := kkzm.TagByTag(v)
 		if err != nil {
 			return err
 		}
-
 		err = kkzm.Tagging(kizamiID, t.ID)
 		if err != nil {
 			return err
