@@ -8,8 +8,8 @@ type Tag struct {
 	Tag string
 }
 
-func toTag(m *models.Tag) *Tag {
-	return &Tag{
+func toTag(m *models.Tag) Tag {
+	return Tag{
 		ID:  m.ID,
 		Tag: m.Tag,
 	}

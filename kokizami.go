@@ -242,10 +242,10 @@ func (k *Kokizami) SummaryByDesc(yyyymm string) ([]Elapsed, error) {
 }
 
 // AddTag adds a new tag
-func (k *Kokizami) AddTag(tag string) (*Tag, error) {
-	var t *Tag
+func (k *Kokizami) AddTag(tag string) (Tag, error) {
+	var t Tag
 	return t, k.execWithDB(func(db database) error {
-		entry := &models.Tag{Tag: tag}
+		entry := models.Tag{Tag: tag}
 		err := entry.Insert(db)
 		if err != nil {
 			return err
@@ -341,8 +341,8 @@ func (k *Kokizami) TagsByKizamiID(kizamiID int) ([]Tag, error) {
 	})
 }
 
-func (k *Kokizami) TagByTag(tag string) (*Tag, error) {
-	var t *Tag
+func (k *Kokizami) TagByTag(tag string) (Tag, error) {
+	var t Tag
 	return t, k.execWithDB(func(db database) error {
 		m, err := models.TagByTag(db, tag)
 		if err != nil {
@@ -363,8 +363,7 @@ func (k *Kokizami) TagsByTags(tags []string) ([]Tag, error) {
 
 		ts = make([]Tag, len(ms))
 		for i := range ms {
-			ts[i].ID = ms[i].ID
-			ts[i].Tag = ms[i].Tag
+			ts[i] = toTag(&ms[i])
 		}
 
 		return nil
