@@ -522,7 +522,7 @@ func extractTagsFromString(s string) []string {
 	ss := strings.Split(s, " ")
 	var tags []string
 	for _, v := range ss {
-		if strings.HasPrefix(v, "#") {
+		if strings.HasPrefix(v, "#") && len(v) >= 2 {
 			tags = append(tags, v)
 		}
 	}

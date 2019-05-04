@@ -10,6 +10,10 @@ type Tags []Tag
 
 // BulkInsert inserts multiple tags at once
 func (ts Tags) BulkInsert(db XODB) error {
+	if len(ts) == 0 {
+		return nil
+	}
+
 	buf := bytes.NewBuffer([]byte{})
 
 	q1 := []byte("INSERT INTO tag(tag)")
@@ -45,6 +49,10 @@ func (ts Tags) BulkInsert(db XODB) error {
 
 // TagsByTags retrieves tags by tags at once
 func TagsByTags(db XODB, tags []string) ([]Tag, error) {
+	if len(tags) == 0 {
+		return []Tag{}, nil
+	}
+
 	buf := bytes.NewBuffer([]byte{})
 
 	q1 := []byte("SELECT * FROM tag")
