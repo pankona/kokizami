@@ -1,6 +1,7 @@
 package models
 
 import (
+	"database/sql"
 	"fmt"
 	"time"
 )
@@ -94,14 +95,21 @@ func elapsedOfMonthBy(db XODB, yyyymm string, groupBy string) ([]*Elapsed, error
 	}()
 
 	res := []*Elapsed{}
-	var sec int64
+	var (
+		sec int64
+		tag sql.NullString
+	)
 	for q.Next() {
 		e := Elapsed{}
 
-		// scan
-		err = q.Scan(&e.Tag, &e.Desc, &e.Count, &sec)
+		err = q.Scan(&tag, &e.Desc, &e.Count, &sec)
 		if err != nil {
 			return nil, err
+		}
+
+		e.Tag = ""
+		if v, _ := tag.Value(); v != nil {
+			e.Tag = v.(string)
 		}
 		e.Elapsed = time.Duration(sec) * time.Second
 

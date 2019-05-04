@@ -184,6 +184,9 @@ func tagging(kkzm *kokizami.Kokizami, kizamiID int, desc string) error {
 	}
 
 	tags := extractTagsFromString(desc)
+	if len(tags) == 0 {
+		return nil
+	}
 
 	err = kkzm.AddTags(tags)
 	if err != nil {
@@ -440,7 +443,12 @@ func (s tagSummaries) String() string {
 
 	buf := bytes.NewBuffer([]byte{})
 	for _, v := range keys {
-		fmt.Fprintf(buf, "%s\t%s\n", v, s[v].tagElapsed)
+		tag := "-- No tag --"
+		if v != "" {
+			tag = v
+		}
+		fmt.Fprintf(buf, "%s\t%s\n", tag, s[v].tagElapsed)
+
 		for _, d := range s[v].descSummaries {
 			fmt.Fprintf(buf, "  %s\t%s\n", d.desc, d.descElapsed)
 		}
