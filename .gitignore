@@ -3,5 +3,5 @@
 cmd/kkzm/kkzm
 cmd/kkzm2/kkzm2
 *.swp
-coverage.out
+.coverage.out
 .idea
