@@ -108,6 +108,7 @@ func elapsedOfMonthBy(db XODB, yyyymm string, groupBy string) ([]*Elapsed, error
 		}
 
 		e.Tag = ""
+		// #nosec
 		if v, _ := tag.Value(); v != nil {
 			e.Tag = v.(string)
 		}
