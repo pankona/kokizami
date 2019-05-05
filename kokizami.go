@@ -26,9 +26,7 @@ var initialTime = func() time.Time {
 	return t
 }()
 
-type database models.XODB
-
-func (k *Kokizami) execWithDB(f func(db database) error) error {
+func (k *Kokizami) execWithDB(f func(db *sql.DB) error) error {
 	conn, err := sql.Open("sqlite3", k.DBPath)
 	if err != nil {
 		return err
@@ -55,7 +53,7 @@ func (k *Kokizami) EnableVerboseQuery(enable bool) {
 // Initialize initializes Kokizami
 // Kokizami's member field must be fulfilled in advance of calling this function
 func (k *Kokizami) Initialize() error {
-	return k.execWithDB(func(db database) error {
+	return k.execWithDB(func(db *sql.DB) error {
 		if err := models.CreateKizamiTable(db); err != nil {
 			return fmt.Errorf("failed to create kizami table: %v", err)
 		}
@@ -72,7 +70,7 @@ func (k *Kokizami) Initialize() error {
 // Start starts a new kizami with specified desc
 func (k *Kokizami) Start(desc string) (*Kizami, error) {
 	var ki *Kizami
-	return ki, k.execWithDB(func(db database) error {
+	return ki, k.execWithDB(func(db *sql.DB) error {
 		entry := &models.Kizami{
 			Desc:      desc,
 			StartedAt: models.SqTime(time.Now()),
@@ -92,7 +90,7 @@ func (k *Kokizami) Start(desc string) (*Kizami, error) {
 // Get returns a Kizami by specified ID
 func (k *Kokizami) Get(id int) (*Kizami, error) {
 	var ki *Kizami
-	return ki, k.execWithDB(func(db database) error {
+	return ki, k.execWithDB(func(db *sql.DB) error {
 		m, err := models.KizamiByID(db, id)
 		ki = toKizami(m)
 		return err
@@ -101,7 +99,7 @@ func (k *Kokizami) Get(id int) (*Kizami, error) {
 
 // Edit edits a specified kizami and update its model
 func (k *Kokizami) Edit(ki *Kizami) (*Kizami, error) {
-	return ki, k.execWithDB(func(db database) error {
+	return ki, k.execWithDB(func(db *sql.DB) error {
 		m, err := models.KizamiByID(db, ki.ID)
 		if err != nil {
 			return err
@@ -123,7 +121,7 @@ func (k *Kokizami) Edit(ki *Kizami) (*Kizami, error) {
 
 // Stop stops a on-going kizami by specified ID
 func (k *Kokizami) Stop(id int) error {
-	return k.execWithDB(func(db database) error {
+	return k.execWithDB(func(db *sql.DB) error {
 		ki, err := models.KizamiByID(db, id)
 		if err != nil {
 			return err
@@ -135,7 +133,7 @@ func (k *Kokizami) Stop(id int) error {
 
 // StopAll stops all on-going kizamis
 func (k *Kokizami) StopAll() error {
-	return k.execWithDB(func(db database) error {
+	return k.execWithDB(func(db *sql.DB) error {
 		ks, err := models.KizamisByStoppedAt(db, models.SqTime(initialTime))
 		if err != nil {
 			return err
@@ -153,7 +151,7 @@ func (k *Kokizami) StopAll() error {
 
 // Delete deletes a kizami by specified ID
 func (k *Kokizami) Delete(id int) error {
-	return k.execWithDB(func(db database) error {
+	return k.execWithDB(func(db *sql.DB) error {
 		ki, err := models.KizamiByID(db, id)
 		if err != nil {
 			return err
@@ -165,7 +163,7 @@ func (k *Kokizami) Delete(id int) error {
 // List returns all Kizamis
 func (k *Kokizami) List() ([]Kizami, error) {
 	var ks []Kizami
-	return ks, k.execWithDB(func(db database) error {
+	return ks, k.execWithDB(func(db *sql.DB) error {
 		ms, err := models.AllKizami(db)
 		if err != nil {
 			return err
@@ -192,7 +190,7 @@ func (k *Kokizami) SummaryByTag(yyyymm string) ([]Elapsed, error) {
 		return nil, fmt.Errorf("invalid argument format. should be yyyy-mm: %v", err)
 	}
 
-	return s, k.execWithDB(func(db database) error {
+	return s, k.execWithDB(func(db *sql.DB) error {
 		ms, err := models.ElapsedOfMonthByTag(db, yyyymm)
 		if err != nil {
 			return err
@@ -219,7 +217,7 @@ func (k *Kokizami) SummaryByDesc(yyyymm string) ([]Elapsed, error) {
 		return nil, fmt.Errorf("invalid argument format. should be yyyy-mm: %v", err)
 	}
 
-	return s, k.execWithDB(func(db database) error {
+	return s, k.execWithDB(func(db *sql.DB) error {
 		ms, err := models.ElapsedOfMonthByDesc(db, yyyymm)
 		if err != nil {
 			return err
@@ -243,7 +241,7 @@ func (k *Kokizami) AddTag(tag string) (Tag, error) {
 	}
 
 	var t Tag
-	return t, k.execWithDB(func(db database) error {
+	return t, k.execWithDB(func(db *sql.DB) error {
 		entry := models.Tag{Tag: tag}
 		err := entry.Insert(db)
 		if err != nil {
@@ -262,7 +260,7 @@ func (k *Kokizami) AddTag(tag string) (Tag, error) {
 
 // AddTags adds a new tags
 func (k *Kokizami) AddTags(tags []string) error {
-	return k.execWithDB(func(db database) error {
+	return k.execWithDB(func(db *sql.DB) error {
 		ts := models.Tags(make([]models.Tag, len(tags)))
 		for i := range ts {
 			// skip empty string
@@ -278,7 +276,7 @@ func (k *Kokizami) AddTags(tags []string) error {
 
 // DeleteTag deletes a specified tag
 func (k *Kokizami) DeleteTag(id int) error {
-	return k.execWithDB(func(db database) error {
+	return k.execWithDB(func(db *sql.DB) error {
 		m, err := models.TagByID(db, id)
 		if err != nil {
 			return err
@@ -290,7 +288,7 @@ func (k *Kokizami) DeleteTag(id int) error {
 // Tags returns list of tags
 func (k *Kokizami) Tags() ([]Tag, error) {
 	var ts []Tag
-	return ts, k.execWithDB(func(db database) error {
+	return ts, k.execWithDB(func(db *sql.DB) error {
 		ms, err := models.AllTags(db)
 		if err != nil {
 			return err
@@ -308,7 +306,7 @@ func (k *Kokizami) Tags() ([]Tag, error) {
 
 // Tagging makes relation between specified kizami and tags
 func (k *Kokizami) Tagging(kizamiID int, tagIDs []int) error {
-	return k.execWithDB(func(db database) error {
+	return k.execWithDB(func(db *sql.DB) error {
 		rs := models.Relations(make([]models.Relation, len(tagIDs)))
 		for i := range rs {
 			rs[i].KizamiID = kizamiID
@@ -321,7 +319,7 @@ func (k *Kokizami) Tagging(kizamiID int, tagIDs []int) error {
 
 // Untagging removes all tags from specified kizami
 func (k *Kokizami) Untagging(kizamiID int) error {
-	return k.execWithDB(func(db database) error {
+	return k.execWithDB(func(db *sql.DB) error {
 		return models.DeleteRelationsByKizamiID(db, kizamiID)
 	})
 }
@@ -329,7 +327,7 @@ func (k *Kokizami) Untagging(kizamiID int) error {
 // TagsByKizamiID returns tags of specified kizami
 func (k *Kokizami) TagsByKizamiID(kizamiID int) ([]Tag, error) {
 	var ts []Tag
-	return ts, k.execWithDB(func(db database) error {
+	return ts, k.execWithDB(func(db *sql.DB) error {
 		ms, err := models.TagsByKizamiID(db, kizamiID)
 		if err != nil {
 			return err
@@ -348,7 +346,7 @@ func (k *Kokizami) TagsByKizamiID(kizamiID int) ([]Tag, error) {
 // TagsByTags returns tags by specified tags
 func (k *Kokizami) TagsByTags(tags []string) ([]Tag, error) {
 	var ts []Tag
-	return ts, k.execWithDB(func(db database) error {
+	return ts, k.execWithDB(func(db *sql.DB) error {
 		ms, err := models.TagsByTags(db, tags)
 		if err != nil {
 			return err
