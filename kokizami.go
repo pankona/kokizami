@@ -27,6 +27,7 @@ var initialTime = func() time.Time {
 	return t
 }()
 
+// Deprecated: DB connection should be established in Initialize function
 func (k *Kokizami) execWithDB(f func(db *sql.DB) error) error {
 	if k.conn == nil {
 		conn, err := sql.Open("sqlite3", k.DBPath)
@@ -50,6 +51,7 @@ func (k *Kokizami) EnableVerboseQuery(enable bool) {
 
 // Initialize initializes Kokizami
 // Kokizami's member field must be fulfilled in advance of calling this function
+// TODO: Establish DB connection here and retain it in receiver until Finalize
 func (k *Kokizami) Initialize() error {
 	if k.now == nil {
 		k.now = time.Now
