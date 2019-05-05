@@ -9,7 +9,6 @@ import (
 	// go-sqlite3 is imported only here
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/pankona/kokizami/models"
-	"github.com/xo/xoutil"
 )
 
 // Kokizami represents a instance of kokizami
@@ -28,10 +27,6 @@ var initialTime = func() time.Time {
 }()
 
 type database models.XODB
-
-func sqTime(t time.Time) xoutil.SqTime {
-	return xoutil.SqTime{Time: t}
-}
 
 func (k *Kokizami) execWithDB(f func(db database) error) error {
 	conn, err := sql.Open("sqlite3", k.DBPath)
@@ -80,8 +75,8 @@ func (k *Kokizami) Start(desc string) (*Kizami, error) {
 	return ki, k.execWithDB(func(db database) error {
 		entry := &models.Kizami{
 			Desc:      desc,
-			StartedAt: sqTime(time.Now()),
-			StoppedAt: sqTime(initialTime),
+			StartedAt: models.SqTime(time.Now()),
+			StoppedAt: models.SqTime(initialTime),
 		}
 		err := entry.Insert(db)
 		if err != nil {
@@ -113,8 +108,8 @@ func (k *Kokizami) Edit(ki *Kizami) (*Kizami, error) {
 		}
 
 		m.Desc = ki.Desc
-		m.StartedAt = sqTime(ki.StartedAt)
-		m.StoppedAt = sqTime(ki.StoppedAt)
+		m.StartedAt = models.SqTime(ki.StartedAt)
+		m.StoppedAt = models.SqTime(ki.StoppedAt)
 
 		err = m.Update(db)
 		if err != nil {
@@ -133,7 +128,7 @@ func (k *Kokizami) Stop(id int) error {
 		if err != nil {
 			return err
 		}
-		ki.StoppedAt = sqTime(time.Now())
+		ki.StoppedAt = models.SqTime(time.Now())
 		return ki.Update(db)
 	})
 }
@@ -141,13 +136,13 @@ func (k *Kokizami) Stop(id int) error {
 // StopAll stops all on-going kizamis
 func (k *Kokizami) StopAll() error {
 	return k.execWithDB(func(db database) error {
-		ks, err := models.KizamisByStoppedAt(db, sqTime(initialTime))
+		ks, err := models.KizamisByStoppedAt(db, models.SqTime(initialTime))
 		if err != nil {
 			return err
 		}
 		now := time.Now()
 		for i := range ks {
-			ks[i].StoppedAt = sqTime(now)
+			ks[i].StoppedAt = models.SqTime(now)
 			if err := ks[i].Update(db); err != nil {
 				return err
 			}
