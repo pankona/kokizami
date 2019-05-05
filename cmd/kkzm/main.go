@@ -22,6 +22,8 @@ func main() {
 	app.Commands = Commands
 	app.CommandNotFound = CommandNotFound
 
+	kkzm := &kokizami.Kokizami{}
+
 	app.Before = func(ctx *cli.Context) error {
 		u, err := user.Current()
 		if err != nil {
@@ -34,9 +36,7 @@ func main() {
 			return fmt.Errorf("failed to create directory on %v", configDir)
 		}
 
-		kkzm := &kokizami.Kokizami{
-			DBPath: filepath.Join(configDir, "db"),
-		}
+		kkzm.DBPath = filepath.Join(configDir, "db")
 
 		err = kkzm.Initialize()
 		if err != nil {
@@ -45,6 +45,10 @@ func main() {
 
 		app.Metadata["kkzm"] = kkzm
 		return nil
+	}
+
+	app.After = func(ctx *cli.Context) error {
+		return kkzm.Finalize()
 	}
 
 	err := app.Run(os.Args)
