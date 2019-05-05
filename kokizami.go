@@ -3,7 +3,6 @@ package kokizami
 import (
 	"database/sql"
 	"fmt"
-	"log"
 	"time"
 
 	// go-sqlite3 is imported only here
@@ -15,6 +14,8 @@ import (
 // Kokizami provides most APIs of kokizami library
 type Kokizami struct {
 	DBPath string
+	conn   *sql.DB
+	now    func() time.Time
 }
 
 // initialTime is used to insert a time value that indicates initial value of time.
@@ -27,18 +28,15 @@ var initialTime = func() time.Time {
 }()
 
 func (k *Kokizami) execWithDB(f func(db *sql.DB) error) error {
-	conn, err := sql.Open("sqlite3", k.DBPath)
-	if err != nil {
-		return err
-	}
-	defer func() {
-		e := conn.Close()
-		if e != nil {
-			log.Printf("failed to close DB connection: %v", e)
+	if k.conn == nil {
+		conn, err := sql.Open("sqlite3", k.DBPath)
+		if err != nil {
+			return err
 		}
-	}()
+		k.conn = conn
+	}
 
-	return f(conn)
+	return f(k.conn)
 }
 
 // EnableVerboseQuery toggles debug logging by argument
@@ -53,6 +51,10 @@ func (k *Kokizami) EnableVerboseQuery(enable bool) {
 // Initialize initializes Kokizami
 // Kokizami's member field must be fulfilled in advance of calling this function
 func (k *Kokizami) Initialize() error {
+	if k.now == nil {
+		k.now = time.Now
+	}
+
 	return k.execWithDB(func(db *sql.DB) error {
 		if err := models.CreateKizamiTable(db); err != nil {
 			return fmt.Errorf("failed to create kizami table: %v", err)
@@ -67,13 +69,26 @@ func (k *Kokizami) Initialize() error {
 	})
 }
 
+// Finalize finalizes kokizami
+func (k *Kokizami) Finalize() error {
+	if k.conn == nil {
+		return nil
+	}
+
+	return k.conn.Close()
+}
+
 // Start starts a new kizami with specified desc
 func (k *Kokizami) Start(desc string) (*Kizami, error) {
+	if len(desc) == 0 {
+		return nil, fmt.Errorf("desc must not be empty")
+	}
+
 	var ki *Kizami
 	return ki, k.execWithDB(func(db *sql.DB) error {
 		entry := &models.Kizami{
 			Desc:      desc,
-			StartedAt: models.SqTime(time.Now()),
+			StartedAt: models.SqTime(k.now()),
 			StoppedAt: models.SqTime(initialTime),
 		}
 		err := entry.Insert(db)
@@ -126,7 +141,7 @@ func (k *Kokizami) Stop(id int) error {
 		if err != nil {
 			return err
 		}
-		ki.StoppedAt = models.SqTime(time.Now())
+		ki.StoppedAt = models.SqTime(k.now())
 		return ki.Update(db)
 	})
 }
@@ -138,7 +153,7 @@ func (k *Kokizami) StopAll() error {
 		if err != nil {
 			return err
 		}
-		now := time.Now()
+		now := k.now()
 		for i := range ks {
 			ks[i].StoppedAt = models.SqTime(now)
 			if err := ks[i].Update(db); err != nil {
