@@ -73,7 +73,7 @@ func TestStart(t *testing.T) {
 		}
 
 		if diff := cmp.Diff(ret, tc.wantKizami); diff != "" {
-			t.Fatalf("unexpected result: (-got +want) %s", diff)
+			t.Fatalf("[No.%d] unexpected result: (-got +want) %s", i, diff)
 		}
 	}
 }
@@ -122,19 +122,76 @@ func TestGet(t *testing.T) {
 	for i, tc := range tcs {
 		ki, err := k.Start(tc.inDesc)
 		if err != nil {
-			t.Fatalf("unexpected result: [got] %v [want] nil", err)
+			t.Fatalf("[No.%d] unexpected result: [got] %v [want] nil", i, err)
 		}
 
 		ret, err := k.Get(ki.ID)
 		if err != nil {
-			t.Fatalf("unexpected result: [got] %v [want] nil", err)
+			t.Fatalf("[No.%d] unexpected result: [got] %v [want] nil", i, err)
 		}
 
 		if diff := cmp.Diff(ki, ret); diff != "" {
-			t.Fatalf("unexpected result: (-got +want) %s", diff)
+			t.Fatalf("[No.%d] unexpected result: (-got +want) %s", i, diff)
 		}
 		if diff := cmp.Diff(ret, tc.wantKizami); diff != "" {
-			t.Fatalf("unexpected result: (-got +want) %s", diff)
+			t.Fatalf("[No.%d] unexpected result: (-got +want) %s", i, diff)
+		}
+	}
+}
+
+func TestEdit(t *testing.T) {
+	k, teardown := setup(t)
+	defer teardown()
+
+	tcs := []struct {
+		inDesc     string
+		wantKizami *Kizami
+	}{
+		{
+			inDesc: "hoge",
+			wantKizami: &Kizami{
+				Desc:      "edited hoge",
+				StartedAt: mockedNow(),
+				StoppedAt: initialTime,
+			},
+		},
+		{
+			inDesc: "fuga",
+			wantKizami: &Kizami{
+				Desc:      "edited fuga",
+				StartedAt: mockedNow(),
+				StoppedAt: initialTime,
+			},
+		},
+		{
+			inDesc: "piyo",
+			wantKizami: &Kizami{
+				Desc:      "edited piyo",
+				StartedAt: mockedNow(),
+				StoppedAt: initialTime,
+			},
+		},
+	}
+
+	for i, tc := range tcs {
+		ki, err := k.Start(tc.inDesc)
+		if err != nil {
+			t.Fatalf("[No.%d] unexpected result: [got] %v [want] nil", i, err)
+		}
+
+		tc.wantKizami.ID = ki.ID
+		ret, err := k.Edit(tc.wantKizami)
+		if err != nil {
+			t.Fatalf("[No.%d] unexpected result: [got] %v [want] nil", i, err)
+		}
+
+		edited, err := k.Get(ki.ID)
+		if err != nil {
+			t.Fatalf("[No.%d] unexpected result: [got] %v [want] nil", i, err)
+		}
+
+		if diff := cmp.Diff(ret, edited); diff != "" {
+			t.Fatalf("[No.%d] unexpected result: (-got +want) %s", i, diff)
 		}
 	}
 }
