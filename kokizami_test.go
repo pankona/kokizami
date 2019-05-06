@@ -306,3 +306,24 @@ func TestStopAll(t *testing.T) {
 		}
 	}
 }
+
+func TestDelete(t *testing.T) {
+	k, teardown := setup(t)
+	defer teardown()
+
+	ret, err := k.Start("hoge")
+	if err != nil {
+		t.Fatalf("unexpected result: [got] %v [want] nil", err)
+	}
+
+	err = k.Delete(ret.ID)
+	if err != nil {
+		t.Fatalf("unexpected result: [got] %v [want] nil", err)
+	}
+
+	ret, err = k.Get(ret.ID)
+	if err == nil {
+		t.Fatalf("unexpected result: [got] nil [want] some error")
+	}
+
+}

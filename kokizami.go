@@ -109,8 +109,11 @@ func (k *Kokizami) Get(id int) (*Kizami, error) {
 	var ki *Kizami
 	return ki, k.execWithDB(func(db *sql.DB) error {
 		m, err := models.KizamiByID(db, id)
+		if err != nil {
+			return err
+		}
 		ki = toKizami(m)
-		return err
+		return nil
 	})
 }
 
