@@ -195,3 +195,60 @@ func TestEdit(t *testing.T) {
 		}
 	}
 }
+
+func TestStop(t *testing.T) {
+	k, teardown := setup(t)
+	defer teardown()
+
+	tcs := []struct {
+		inDesc     string
+		wantKizami *Kizami
+	}{
+		{
+			inDesc: "hoge",
+			wantKizami: &Kizami{
+				Desc:      "hoge",
+				StartedAt: mockedNow(),
+				StoppedAt: mockedNow(),
+			},
+		},
+		{
+			inDesc: "fuga",
+			wantKizami: &Kizami{
+				Desc:      "fuga",
+				StartedAt: mockedNow(),
+				StoppedAt: mockedNow(),
+			},
+		},
+		{
+			inDesc: "piyo",
+			wantKizami: &Kizami{
+				Desc:      "piyo",
+				StartedAt: mockedNow(),
+				StoppedAt: mockedNow(),
+			},
+		},
+	}
+
+	for i, tc := range tcs {
+		ki, err := k.Start(tc.inDesc)
+		if err != nil {
+			t.Fatalf("[No.%d] unexpected result: [got] %v [want] nil", i, err)
+		}
+
+		err = k.Stop(ki.ID)
+		if err != nil {
+			t.Fatalf("[No.%d] unexpected result: [got] %v [want] nil", i, err)
+		}
+
+		ret, err := k.Get(ki.ID)
+		if err != nil {
+			t.Fatalf("[No.%d] unexpected result: [got] %v [want] nil", i, err)
+		}
+
+		tc.wantKizami.ID = ki.ID
+		if diff := cmp.Diff(ret, tc.wantKizami); diff != "" {
+			t.Fatalf("[No.%d] unexpected result: (-got +want) %s", i, diff)
+		}
+	}
+}
