@@ -54,6 +54,7 @@ func TestStart(t *testing.T) {
 			inDesc:  "hoge",
 			wantErr: false,
 			wantKizami: &Kizami{
+				ID:        1,
 				Desc:      "hoge",
 				StartedAt: mockedNow(),
 				StoppedAt: initialTime,
@@ -71,14 +72,8 @@ func TestStart(t *testing.T) {
 			continue
 		}
 
-		if ret.Desc != tc.wantKizami.Desc {
-			t.Fatalf("[No.%d] unexpected result: [got] %v [want] %v", i, ret.Desc, tc.wantKizami.Desc)
-		}
-		if !ret.StartedAt.Equal(tc.wantKizami.StartedAt) {
-			t.Fatalf("[No.%d] unexpected result: [got] %v [want] %v", i, ret.StartedAt, tc.wantKizami.StartedAt)
-		}
-		if !ret.StoppedAt.Equal(tc.wantKizami.StoppedAt) {
-			t.Fatalf("[No.%d] unexpected result: [got] %v [want] %v", i, ret.StoppedAt, tc.wantKizami.StoppedAt)
+		if diff := cmp.Diff(ret, tc.wantKizami); diff != "" {
+			t.Fatalf("unexpected result: (-got +want) %s", diff)
 		}
 	}
 }
@@ -96,6 +91,7 @@ func TestGet(t *testing.T) {
 			inDesc:  "hoge",
 			wantErr: false,
 			wantKizami: &Kizami{
+				ID:        1,
 				Desc:      "hoge",
 				StartedAt: mockedNow(),
 				StoppedAt: initialTime,
@@ -105,6 +101,7 @@ func TestGet(t *testing.T) {
 			inDesc:  "fuga",
 			wantErr: false,
 			wantKizami: &Kizami{
+				ID:        2,
 				Desc:      "fuga",
 				StartedAt: mockedNow(),
 				StoppedAt: initialTime,
@@ -114,6 +111,7 @@ func TestGet(t *testing.T) {
 			inDesc:  "piyo",
 			wantErr: false,
 			wantKizami: &Kizami{
+				ID:        3,
 				Desc:      "piyo",
 				StartedAt: mockedNow(),
 				StoppedAt: initialTime,
@@ -135,17 +133,8 @@ func TestGet(t *testing.T) {
 		if diff := cmp.Diff(ki, ret); diff != "" {
 			t.Fatalf("unexpected result: (-got +want) %s", diff)
 		}
-		if ret.ID != i+1 {
-			t.Fatalf("unexpected result: [got] %v [want] %v", ret.ID, i+1)
-		}
-		if ret.Desc != tc.wantKizami.Desc {
-			t.Fatalf("unexpected result: [got] %v [want] %v", ret.Desc, tc.wantKizami.Desc)
-		}
-		if !ret.StartedAt.Equal(tc.wantKizami.StartedAt) {
-			t.Fatalf("[No.%d] unexpected result: [got] %v [want] %v", i, ret.StartedAt, tc.wantKizami.StartedAt)
-		}
-		if !ret.StoppedAt.Equal(tc.wantKizami.StoppedAt) {
-			t.Fatalf("[No.%d] unexpected result: [got] %v [want] %v", i, ret.StoppedAt, tc.wantKizami.StoppedAt)
+		if diff := cmp.Diff(ret, tc.wantKizami); diff != "" {
+			t.Fatalf("unexpected result: (-got +want) %s", diff)
 		}
 	}
 }
