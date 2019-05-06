@@ -321,9 +321,30 @@ func TestDelete(t *testing.T) {
 		t.Fatalf("unexpected result: [got] %v [want] nil", err)
 	}
 
-	ret, err = k.Get(ret.ID)
+	_, err = k.Get(ret.ID)
 	if err == nil {
 		t.Fatalf("unexpected result: [got] nil [want] some error")
 	}
+}
 
+func TestList(t *testing.T) {
+	k, teardown := setup(t)
+	defer teardown()
+
+	expectedLen := 3
+	for i := 0; i < expectedLen; i++ {
+		_, err := k.Start("hoge")
+		if err != nil {
+			t.Fatalf("unexpected result: [got] %v [want] nil", err)
+		}
+	}
+
+	ret, err := k.List()
+	if err != nil {
+		t.Fatalf("unexpected result: [got] %v [want] nil", err)
+	}
+
+	if len(ret) != expectedLen {
+		t.Fatalf("unexpected result: [got] %v [want] %v", len(ret), expectedLen)
+	}
 }
