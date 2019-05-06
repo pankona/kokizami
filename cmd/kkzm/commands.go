@@ -106,9 +106,9 @@ func round(d, r time.Duration) time.Duration {
 		d = -d
 	}
 	if m := d % r; m+m < r {
-		d = d - m
+		d -= m
 	} else {
-		d = d + r - m
+		d += r - m
 	}
 	if neg {
 		return -d
@@ -143,7 +143,8 @@ func CmdStart(c *cli.Context) error {
 	args := c.Args()
 
 	var desc string
-	if len(args) == 0 {
+	switch len(args) {
+	case 0:
 		filepath, err := editTextWithEditor("")
 		if err != nil {
 			return err
@@ -159,9 +160,9 @@ func CmdStart(c *cli.Context) error {
 			return fmt.Errorf("invalid arguments. needs (desc, started_at, stopped_at)")
 		}
 		desc = ss[0]
-	} else if len(args) == 1 {
+	case 1:
 		desc = args[0]
-	} else {
+	default:
 		return fmt.Errorf("start needs one arguments [desc]")
 	}
 
@@ -238,10 +239,9 @@ func CmdRestart(c *cli.Context) error {
 func CmdEdit(c *cli.Context) error {
 	args := c.Args()
 
-	switch len(args) {
 	// len(args) == 1 means that the whole of task will be edited with text editor
 	// e.g) kkzm edit [id]
-	case 1:
+	if len(args) == 1 {
 		id, err := strconv.Atoi(args[0])
 		if err != nil {
 			return err
@@ -274,6 +274,7 @@ func CmdList(c *cli.Context) error {
 
 	buf := bytes.NewBuffer([]byte{})
 	for _, v := range l {
+		v := v
 		fmt.Fprintln(buf, toString(&v))
 	}
 	fmt.Printf("%s", buf)
