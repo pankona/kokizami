@@ -19,13 +19,13 @@ type Kokizami struct {
 }
 
 // initialTime is used to insert a time value that indicates initial value of time.
-var initialTime = func() time.Time {
+func initialTime() time.Time {
 	t, err := time.Parse("2006-01-02 15:04:05", "1970-01-01 00:00:00")
 	if err != nil {
 		panic(fmt.Sprintf("failed to parse time for initial value for time: %v", err))
 	}
 	return t
-}()
+}
 
 // Deprecated: DB connection should be established in Initialize function
 func (k *Kokizami) execWithDB(f func(db *sql.DB) error) error {
@@ -91,7 +91,7 @@ func (k *Kokizami) Start(desc string) (*Kizami, error) {
 		entry := &models.Kizami{
 			Desc:      desc,
 			StartedAt: models.SqTime(k.now()),
-			StoppedAt: models.SqTime(initialTime),
+			StoppedAt: models.SqTime(initialTime()),
 		}
 		err := entry.Insert(db)
 		if err != nil {
@@ -151,7 +151,7 @@ func (k *Kokizami) Stop(id int) error {
 // StopAll stops all on-going kizamis
 func (k *Kokizami) StopAll() error {
 	return k.execWithDB(func(db *sql.DB) error {
-		ks, err := models.KizamisByStoppedAt(db, models.SqTime(initialTime))
+		ks, err := models.KizamisByStoppedAt(db, models.SqTime(initialTime()))
 		if err != nil {
 			return err
 		}

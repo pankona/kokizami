@@ -7,16 +7,12 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
-var mockNow = time.Now()
-
-func mockedNow() time.Time {
-	return mockNow
-}
-
 func setup(t *testing.T) (*Kokizami, func()) {
+	mockNow := time.Now()
+
 	k := &Kokizami{
 		DBPath: "file::testdb?mode=memory",
-		now:    mockedNow,
+		now:    func() time.Time { return mockNow },
 	}
 	err := k.Initialize()
 	if err != nil {
@@ -56,8 +52,8 @@ func TestStart(t *testing.T) {
 			wantKizami: &Kizami{
 				ID:        1,
 				Desc:      "hoge",
-				StartedAt: mockedNow(),
-				StoppedAt: initialTime,
+				StartedAt: k.now(),
+				StoppedAt: initialTime(),
 			},
 		},
 	}
@@ -93,8 +89,8 @@ func TestGet(t *testing.T) {
 			wantKizami: &Kizami{
 				ID:        1,
 				Desc:      "hoge",
-				StartedAt: mockedNow(),
-				StoppedAt: initialTime,
+				StartedAt: k.now(),
+				StoppedAt: initialTime(),
 			},
 		},
 		{
@@ -103,8 +99,8 @@ func TestGet(t *testing.T) {
 			wantKizami: &Kizami{
 				ID:        2,
 				Desc:      "fuga",
-				StartedAt: mockedNow(),
-				StoppedAt: initialTime,
+				StartedAt: k.now(),
+				StoppedAt: initialTime(),
 			},
 		},
 		{
@@ -113,8 +109,8 @@ func TestGet(t *testing.T) {
 			wantKizami: &Kizami{
 				ID:        3,
 				Desc:      "piyo",
-				StartedAt: mockedNow(),
-				StoppedAt: initialTime,
+				StartedAt: k.now(),
+				StoppedAt: initialTime(),
 			},
 		},
 	}
@@ -151,24 +147,24 @@ func TestEdit(t *testing.T) {
 			inDesc: "hoge",
 			wantKizami: &Kizami{
 				Desc:      "edited hoge",
-				StartedAt: mockedNow(),
-				StoppedAt: initialTime,
+				StartedAt: k.now(),
+				StoppedAt: initialTime(),
 			},
 		},
 		{
 			inDesc: "fuga",
 			wantKizami: &Kizami{
 				Desc:      "edited fuga",
-				StartedAt: mockedNow(),
-				StoppedAt: initialTime,
+				StartedAt: k.now(),
+				StoppedAt: initialTime(),
 			},
 		},
 		{
 			inDesc: "piyo",
 			wantKizami: &Kizami{
 				Desc:      "edited piyo",
-				StartedAt: mockedNow(),
-				StoppedAt: initialTime,
+				StartedAt: k.now(),
+				StoppedAt: initialTime(),
 			},
 		},
 	}
@@ -208,24 +204,24 @@ func TestStop(t *testing.T) {
 			inDesc: "hoge",
 			wantKizami: &Kizami{
 				Desc:      "hoge",
-				StartedAt: mockedNow(),
-				StoppedAt: mockedNow(),
+				StartedAt: k.now(),
+				StoppedAt: k.now(),
 			},
 		},
 		{
 			inDesc: "fuga",
 			wantKizami: &Kizami{
 				Desc:      "fuga",
-				StartedAt: mockedNow(),
-				StoppedAt: mockedNow(),
+				StartedAt: k.now(),
+				StoppedAt: k.now(),
 			},
 		},
 		{
 			inDesc: "piyo",
 			wantKizami: &Kizami{
 				Desc:      "piyo",
-				StartedAt: mockedNow(),
-				StoppedAt: mockedNow(),
+				StartedAt: k.now(),
+				StoppedAt: k.now(),
 			},
 		},
 	}
@@ -265,24 +261,24 @@ func TestStopAll(t *testing.T) {
 			inDesc: "hoge",
 			wantKizami: &Kizami{
 				Desc:      "hoge",
-				StartedAt: mockedNow(),
-				StoppedAt: mockedNow(),
+				StartedAt: k.now(),
+				StoppedAt: k.now(),
 			},
 		},
 		{
 			inDesc: "fuga",
 			wantKizami: &Kizami{
 				Desc:      "fuga",
-				StartedAt: mockedNow(),
-				StoppedAt: mockedNow(),
+				StartedAt: k.now(),
+				StoppedAt: k.now(),
 			},
 		},
 		{
 			inDesc: "piyo",
 			wantKizami: &Kizami{
 				Desc:      "piyo",
-				StartedAt: mockedNow(),
-				StoppedAt: mockedNow(),
+				StartedAt: k.now(),
+				StoppedAt: k.now(),
 			},
 		},
 	}

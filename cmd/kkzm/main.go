@@ -12,14 +12,16 @@ import (
 
 func main() {
 	app := cli.NewApp()
+
 	app.Name = Name
 	app.Version = Version
 	app.Author = "pankona"
 	app.Email = "yosuke.akatsuka@gmail.com"
 	app.Usage = "awesome task timer and tracker"
-	app.Flags = GlobalFlags
+
+	app.Flags = globalFlags()
+	app.Commands = commands()
 	app.Action = CmdList // show list if no argument
-	app.Commands = Commands
 	app.CommandNotFound = CommandNotFound
 
 	kkzm := &kokizami.Kokizami{}

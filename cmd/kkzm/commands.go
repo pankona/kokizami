@@ -15,75 +15,78 @@ import (
 	"github.com/urfave/cli"
 )
 
-// GlobalFlags can be used globally
-var GlobalFlags = []cli.Flag{
-	cli.BoolFlag{
-		Name:  "verbose",
-		Usage: "specify to enable verbose mode",
-	},
+func globalFlags() []cli.Flag {
+	return []cli.Flag{
+		cli.BoolFlag{
+			Name:  "verbose",
+			Usage: "specify to enable verbose mode",
+		},
+	}
 }
 
-// Commands represents list of subcommands
-var Commands = []cli.Command{
-	{
-		Name:   "start",
-		Usage:  "start new task",
-		Action: CmdStart,
-		Flags:  []cli.Flag{},
-	},
-	{
-		Name:   "restart",
-		Usage:  "restart old task",
-		Action: CmdRestart,
-		Flags:  []cli.Flag{},
-	},
-	{
-		Name:   "edit",
-		Usage:  "edit task",
-		Action: CmdEdit,
-		Flags:  []cli.Flag{},
-	},
-	{
-		Name:   "list",
-		Usage:  "show list of tasks",
-		Action: CmdList,
-		Flags:  []cli.Flag{},
-	},
-	{
-		Name:   "stop",
-		Usage:  "stop task",
-		Action: CmdStop,
-		Flags:  []cli.Flag{},
-	},
-	{
-		Name:   "delete",
-		Usage:  "delete task",
-		Action: CmdDelete,
-		Flags:  []cli.Flag{},
-	},
-	{
-		Name:   "summary",
-		Usage:  "show summary of specified month",
-		Action: CmdSummary,
-		Flags: []cli.Flag{
-			cli.StringFlag{
-				Name:  "m, month",
-				Value: thisMonth,
-				Usage: "specify year and month to show summary",
+func commands() []cli.Command {
+	return []cli.Command{
+		{
+			Name:   "start",
+			Usage:  "start new task",
+			Action: CmdStart,
+			Flags:  []cli.Flag{},
+		},
+		{
+			Name:   "restart",
+			Usage:  "restart old task",
+			Action: CmdRestart,
+			Flags:  []cli.Flag{},
+		},
+		{
+			Name:   "edit",
+			Usage:  "edit task",
+			Action: CmdEdit,
+			Flags:  []cli.Flag{},
+		},
+		{
+			Name:   "list",
+			Usage:  "show list of tasks",
+			Action: CmdList,
+			Flags:  []cli.Flag{},
+		},
+		{
+			Name:   "stop",
+			Usage:  "stop task",
+			Action: CmdStop,
+			Flags:  []cli.Flag{},
+		},
+		{
+			Name:   "delete",
+			Usage:  "delete task",
+			Action: CmdDelete,
+			Flags:  []cli.Flag{},
+		},
+		{
+			Name:   "summary",
+			Usage:  "show summary of specified month",
+			Action: CmdSummary,
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:  "m, month",
+					Value: thisMonth(),
+					Usage: "specify year and month to show summary",
+				},
 			},
 		},
-	},
-	{
-		Name:   "tags",
-		Usage:  "show list of tags",
-		Action: CmdTags,
-		Flags: []cli.Flag{
-			cli.IntFlag{
-				Name:  "id",
-				Usage: "show tags of specified task",
+		{
+			Name:   "tags",
+			Usage:  "show list of tags",
+			Action: CmdTags,
+			Flags: []cli.Flag{
+				cli.IntFlag{
+					Name:  "id",
+					Usage: "show tags of specified task",
+				},
 			},
 		},
-	},
+	}
+
 }
 
 // CommandNotFound is called when specified subcommand is not found
@@ -93,9 +96,9 @@ func CommandNotFound(c *cli.Context, command string) {
 	os.Exit(2)
 }
 
-var thisMonth = func() string {
+func thisMonth() string {
 	return time.Now().Format("2006-01")
-}()
+}
 
 func round(d, r time.Duration) time.Duration {
 	if r <= 0 {
