@@ -7,7 +7,7 @@ build:
 	@make -C $(CURDIR)/cmd/kkzm
 
 lint:
-	gometalinter --vendor --exclude="xo.go" ./...
+	golangci-lint run --new-from-rev= --deadline 300s
 
 test: install-goverage
 	@go test -cover ./...
