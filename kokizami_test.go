@@ -3,6 +3,8 @@ package kokizami
 import (
 	"testing"
 	"time"
+
+	"github.com/google/go-cmp/cmp"
 )
 
 var mockNow = time.Now()
@@ -130,6 +132,9 @@ func TestGet(t *testing.T) {
 			t.Fatalf("unexpected result: [got] %v [want] nil", err)
 		}
 
+		if diff := cmp.Diff(ki, ret); diff != "" {
+			t.Fatalf("unexpected result: (-got +want) %s", diff)
+		}
 		if ret.ID != i+1 {
 			t.Fatalf("unexpected result: [got] %v [want] %v", ret.ID, i+1)
 		}
