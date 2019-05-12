@@ -254,30 +254,6 @@ func (k *Kokizami) SummaryByDesc(yyyymm string) ([]Elapsed, error) {
 	})
 }
 
-// AddTag adds a new tag
-func (k *Kokizami) AddTag(tag string) (Tag, error) {
-	if len(tag) == 0 {
-		return Tag{}, fmt.Errorf("adding empty string as tag is not allowed")
-	}
-
-	var t Tag
-	return t, k.execWithDB(func(db *sql.DB) error {
-		entry := models.Tag{Tag: tag}
-		err := entry.Insert(db)
-		if err != nil {
-			return err
-		}
-
-		m, err := models.TagByTag(db, tag)
-		if err != nil {
-			return err
-		}
-
-		t = toTag(m)
-		return nil
-	})
-}
-
 // AddTags adds a new tags
 func (k *Kokizami) AddTags(tags []string) error {
 	return k.execWithDB(func(db *sql.DB) error {
