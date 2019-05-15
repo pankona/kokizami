@@ -412,3 +412,38 @@ func TestAddTagsWithEmptyArray(t *testing.T) {
 		}
 	}
 }
+
+func TestDeleteTag(t *testing.T) {
+	k, teardown := setup(t)
+	defer teardown()
+
+	inTags := []string{"hoge", "fuga", "piyo"}
+
+	err := k.AddTags(inTags)
+	if err != nil {
+		t.Fatalf("unexpected result: [got] %v [want] nil", err)
+	}
+
+	ret, err := k.TagsByTags([]string{"fuga"})
+	if err != nil {
+		t.Fatalf("unexpected result: [got] %v [want] nil", err)
+	}
+
+	if len(ret) != 1 {
+		t.Fatalf("unexpected result: [got] %v [want] %v", len(ret), 1)
+	}
+
+	err = k.DeleteTag(ret[0].ID)
+	if err != nil {
+		t.Fatalf("unexpected result: [got] %v [want] nil", err)
+	}
+
+	ret, err = k.Tags()
+	if err != nil {
+		t.Fatalf("unexpected result: [got] %v [want] nil", err)
+	}
+
+	if len(ret) != 2 {
+		t.Fatalf("unexpected result: [got] %v [want] %v", len(ret), 2)
+	}
+}
