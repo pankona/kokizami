@@ -350,66 +350,40 @@ func TestList(t *testing.T) {
 }
 
 func TestAddTags(t *testing.T) {
-	k, teardown := setup(t)
-	defer teardown()
-
-	inTags := []string{"hoge", "fuga", "piyo"}
-
-	err := k.AddTags(inTags)
-	if err != nil {
-		t.Fatalf("unexpected result: [got] %v [want] nil", err)
+	tcs := [][]string{
+		{"hoge", "fuga", "piyo"},
+		{},
 	}
 
-	ret, err := k.Tags()
-	if err != nil {
-		t.Fatalf("unexpected result: [got] %v [want] nil", err)
-	}
+	for i, tags := range tcs {
+		k, teardown := setup(t)
 
-	m := make(map[string]struct{})
-	for _, v := range ret {
-		m[v.Tag] = struct{}{}
-	}
-
-	if len(ret) != len(inTags) {
-		t.Fatalf("unexpected result: [got] %v [want] %v", len(ret), len(inTags))
-	}
-
-	for i := range inTags {
-		if _, ok := m[inTags[i]]; !ok {
-			t.Fatalf("unexpected result: %v is missing", inTags[i])
+		err := k.AddTags(tags)
+		if err != nil {
+			t.Fatalf("[No.%d] unexpected result: [got] %v [want] nil", i, err)
 		}
-	}
-}
 
-func TestAddTagsWithEmptyArray(t *testing.T) {
-	k, teardown := setup(t)
-	defer teardown()
-
-	inTags := []string{}
-
-	err := k.AddTags(inTags)
-	if err != nil {
-		t.Fatalf("unexpected result: [got] %v [want] nil", err)
-	}
-
-	ret, err := k.Tags()
-	if err != nil {
-		t.Fatalf("unexpected result: [got] %v [want] nil", err)
-	}
-
-	m := make(map[string]struct{})
-	for _, v := range ret {
-		m[v.Tag] = struct{}{}
-	}
-
-	if len(ret) != len(inTags) {
-		t.Fatalf("unexpected result: [got] %v [want] %v", len(ret), len(inTags))
-	}
-
-	for i := range inTags {
-		if _, ok := m[inTags[i]]; !ok {
-			t.Fatalf("unexpected result: %v is missing", inTags[i])
+		ret, err := k.Tags()
+		if err != nil {
+			t.Fatalf("[No.%d] unexpected result: [got] %v [want] nil", i, err)
 		}
+
+		m := make(map[string]struct{})
+		for _, v := range ret {
+			m[v.Tag] = struct{}{}
+		}
+
+		if len(ret) != len(tags) {
+			t.Fatalf("[No.%d] unexpected result: [got] %v [want] %v", i, len(ret), len(tags))
+		}
+
+		for j := range tags {
+			if _, ok := m[tags[j]]; !ok {
+				t.Fatalf("[No.%d] unexpected result: %v is missing", i, tags[j])
+			}
+		}
+
+		teardown()
 	}
 }
 
