@@ -421,3 +421,70 @@ func TestDeleteTag(t *testing.T) {
 		t.Fatalf("unexpected result: [got] %v [want] %v", len(ret), 2)
 	}
 }
+
+func TestTagging(t *testing.T) {
+	k, teardown := setup(t)
+	defer teardown()
+
+	// prepare tags
+	inTags := []string{"hoge", "fuga", "piyo"}
+	err := k.AddTags(inTags)
+	if err != nil {
+		t.Fatalf("unexpected result: [got] %v [want] nil", err)
+	}
+
+	tags, err := k.Tags()
+	if err != nil {
+		t.Fatalf("unexpected result: [got] %v [want] nil", err)
+	}
+
+	// prepare kizami
+	ki, err := k.Start("foo")
+	if err != nil {
+		t.Fatalf("unexpected result: [got] %v [want] nil", err)
+	}
+
+	tids := make([]int, len(tags))
+	for i := range tags {
+		tids[i] = tags[i].ID
+	}
+
+	err = k.Tagging(ki.ID, tids)
+	if err != nil {
+		t.Fatalf("unexpected result: [got] %v [want] nil", err)
+	}
+
+	tagged, err := k.TagsByKizamiID(ki.ID)
+	if err != nil {
+		t.Fatalf("unexpected result: [got] %v [want] nil", err)
+	}
+
+	m := make(map[string]struct{})
+	for _, v := range tagged {
+		m[v.Tag] = struct{}{}
+	}
+
+	for i := range tags {
+		if _, ok := m[tags[i].Tag]; !ok {
+			t.Fatalf("unexpected result: %v is missing", tags[i])
+		}
+	}
+
+	if len(tagged) != len(tags) {
+		t.Fatalf("unexpected result: [got] %v [want] %v", len(tagged), len(tags))
+	}
+
+	err = k.Untagging(ki.ID)
+	if err != nil {
+		t.Fatalf("unexpected result: [got] %v [want] nil", err)
+	}
+
+	tagged, err = k.TagsByKizamiID(ki.ID)
+	if err != nil {
+		t.Fatalf("unexpected result: [got] %v [want] nil", err)
+	}
+
+	if len(tagged) != 0 {
+		t.Fatalf("unexpected result: [got] %v [want] %v", len(tagged), 0)
+	}
+}
