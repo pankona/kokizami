@@ -488,3 +488,23 @@ func TestTagging(t *testing.T) {
 		t.Fatalf("unexpected result: [got] %v [want] %v", len(tagged), 0)
 	}
 }
+
+func TestSummaryByTag(t *testing.T) {
+	k, teardown := setup(t)
+	defer teardown()
+
+	_, err := k.SummaryByTag("2019-05")
+	if err != nil {
+		t.Fatalf("unexpected result: [got] %v [want] nil", err)
+	}
+}
+
+func TestSummaryByDesc(t *testing.T) {
+	k, teardown := setup(t)
+	defer teardown()
+
+	_, err := k.SummaryByDesc("2019-05")
+	if err != nil {
+		t.Fatalf("unexpected result: [got] %v [want] nil", err)
+	}
+}
