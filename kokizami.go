@@ -24,7 +24,7 @@ func initialTime() time.Time {
 	if err != nil {
 		panic(fmt.Sprintf("failed to parse time for initial value for time: %v", err))
 	}
-	return t.Local()
+	return t.UTC()
 }
 
 // Deprecated: DB connection should be established in Initialize function
@@ -90,7 +90,7 @@ func (k *Kokizami) Start(desc string) (*Kizami, error) {
 	return ki, k.execWithDB(func(db *sql.DB) error {
 		entry := &models.Kizami{
 			Desc:      desc,
-			StartedAt: models.SqTime(k.now()),
+			StartedAt: models.SqTime(k.now().UTC()),
 			StoppedAt: models.SqTime(initialTime()),
 		}
 		err := entry.Insert(db)
@@ -126,8 +126,8 @@ func (k *Kokizami) Edit(ki *Kizami) (*Kizami, error) {
 		}
 
 		m.Desc = ki.Desc
-		m.StartedAt = models.SqTime(ki.StartedAt)
-		m.StoppedAt = models.SqTime(ki.StoppedAt)
+		m.StartedAt = models.SqTime(ki.StartedAt.UTC())
+		m.StoppedAt = models.SqTime(ki.StoppedAt.UTC())
 
 		err = m.Update(db)
 		if err != nil {
@@ -146,7 +146,7 @@ func (k *Kokizami) Stop(id int) error {
 		if err != nil {
 			return err
 		}
-		ki.StoppedAt = models.SqTime(k.now())
+		ki.StoppedAt = models.SqTime(k.now().UTC())
 		return ki.Update(db)
 	})
 }
@@ -158,7 +158,7 @@ func (k *Kokizami) StopAll() error {
 		if err != nil {
 			return err
 		}
-		now := k.now()
+		now := k.now().UTC()
 		for i := range ks {
 			ks[i].StoppedAt = models.SqTime(now)
 			if err := ks[i].Update(db); err != nil {
