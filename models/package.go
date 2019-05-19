@@ -1,3 +1,3 @@
 package models
 
-//go:generate xo file:/home/pankona/.config/kokizami/db?loc=auto -o .
+//go:generate xo file:$HOME/.config/kokizami/db?loc=auto -o .
