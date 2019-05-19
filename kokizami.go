@@ -24,7 +24,7 @@ func initialTime() time.Time {
 	if err != nil {
 		panic(fmt.Sprintf("failed to parse time for initial value for time: %v", err))
 	}
-	return t
+	return t.Local()
 }
 
 // Deprecated: DB connection should be established in Initialize function
