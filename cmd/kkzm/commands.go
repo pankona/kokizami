@@ -30,37 +30,43 @@ func commands() []cli.Command {
 			Name:   "start",
 			Usage:  "start new task",
 			Action: CmdStart,
-			Flags:  []cli.Flag{},
+			Flags: []cli.Flag{
+				cli.BoolFlag{
+					Name:  "s, stop",
+					Usage: "stop all on-going kizami in advance",
+				},
+			},
 		},
 		{
 			Name:   "restart",
 			Usage:  "restart old task",
 			Action: CmdRestart,
-			Flags:  []cli.Flag{},
+			Flags: []cli.Flag{
+				cli.BoolFlag{
+					Name:  "s, stop",
+					Usage: "stop all on-going kizami in advance",
+				},
+			},
 		},
 		{
 			Name:   "edit",
 			Usage:  "edit task",
 			Action: CmdEdit,
-			Flags:  []cli.Flag{},
 		},
 		{
 			Name:   "list",
 			Usage:  "show list of tasks",
 			Action: CmdList,
-			Flags:  []cli.Flag{},
 		},
 		{
 			Name:   "stop",
 			Usage:  "stop task",
 			Action: CmdStop,
-			Flags:  []cli.Flag{},
 		},
 		{
 			Name:   "delete",
 			Usage:  "delete task",
 			Action: CmdDelete,
-			Flags:  []cli.Flag{},
 		},
 		{
 			Name:   "summary",
@@ -171,6 +177,13 @@ func CmdStart(c *cli.Context) error {
 
 	kkzm := kkzm(c)
 
+	if c.GlobalBool("stop") {
+		err := kkzm.StopAll()
+		if err != nil {
+			return err
+		}
+	}
+
 	k, err := kkzm.Start(desc)
 	if err != nil {
 		return err
@@ -223,6 +236,13 @@ func CmdRestart(c *cli.Context) error {
 	}
 
 	kkzm := kkzm(c)
+
+	if c.GlobalBool("stop") {
+		err := kkzm.StopAll()
+		if err != nil {
+			return err
+		}
+	}
 
 	k, err := kkzm.Get(id)
 	if err != nil {
