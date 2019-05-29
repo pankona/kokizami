@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/olekukonko/tablewriter"
 	"github.com/pankona/kokizami"
 	"github.com/urfave/cli"
 )
@@ -138,6 +139,23 @@ func toString(k *kokizami.Kizami) string {
 		k.StartedAt.In(time.Local).Format("2006-01-02 15:04:05") + "\t" +
 		stoppedAt + "\t" +
 		round(k.Elapsed(), time.Second).String()
+}
+
+func toStringArray(k *kokizami.Kizami) []string {
+	var stoppedAt string
+	if k.StoppedAt.Unix() == 0 {
+		stoppedAt = "*" + time.Now().In(time.Local).Format("2006-01-02 15:04:05")
+	} else {
+		stoppedAt = k.StoppedAt.In(time.Local).Format("2006-01-02 15:04:05")
+	}
+
+	return []string{
+		strconv.Itoa(k.ID),
+		k.Desc,
+		k.StartedAt.In(time.Local).Format("2006-01-02 15:04:05"),
+		stoppedAt,
+		round(k.Elapsed(), time.Second).String(),
+	}
 }
 
 func kkzm(c *cli.Context) *kokizami.Kokizami {
@@ -295,12 +313,22 @@ func CmdList(c *cli.Context) error {
 		return nil
 	}
 
-	buf := bytes.NewBuffer([]byte{})
+	table := tablewriter.NewWriter(os.Stdout)
+	table.SetBorders(tablewriter.Border{
+		Left:   true,
+		Top:    false,
+		Right:  true,
+		Bottom: false,
+	})
+	table.SetCenterSeparator("|")
+	table.SetAutoWrapText(false)
+
 	for _, v := range l {
 		v := v
-		fmt.Fprintln(buf, toString(&v))
+		table.Append(toStringArray(&v))
 	}
-	fmt.Printf("%s", buf)
+	table.Render()
+
 	return nil
 }
 
