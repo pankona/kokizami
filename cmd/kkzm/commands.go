@@ -377,7 +377,7 @@ func CmdDelete(c *cli.Context) error {
 func editTaskWithEditor(kkzm *kokizami.Kokizami, id int) (*kokizami.Kizami, error) {
 	k, err := kkzm.Get(id)
 	if err != nil {
-		return nil, fmt.Errorf("failed to task by ID: %v", err)
+		return nil, fmt.Errorf("failed to retrieve task by ID: %v", err)
 	}
 
 	filename, err := editTextWithEditor(fmt.Sprintf("%s\n%s\n%s",
