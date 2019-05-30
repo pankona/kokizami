@@ -380,10 +380,17 @@ func editTaskWithEditor(kkzm *kokizami.Kokizami, id int) (*kokizami.Kizami, erro
 		return nil, fmt.Errorf("failed to retrieve task by ID: %v", err)
 	}
 
+	stoppedAt := func() string {
+		if k.StoppedAt.Unix() == 0 {
+			return "-"
+		}
+		return k.StoppedAt.In(time.Local).Format("2006-01-02 15:04:05")
+	}()
+
 	filename, err := editTextWithEditor(fmt.Sprintf("%s\n%s\n%s",
 		k.Desc,
 		k.StartedAt.In(time.Local).Format("2006-01-02 15:04:05"),
-		k.StoppedAt.In(time.Local).Format("2006-01-02 15:04:05")))
+		stoppedAt))
 	if err != nil {
 		return nil, fmt.Errorf("failed to edit text with editor: %v", err)
 	}
@@ -417,6 +424,13 @@ func edit(kkzm *kokizami.Kokizami, k *kokizami.Kizami, id int, desc, start, stop
 		return nil, err
 	}
 
+	if stop == "-" {
+		t, err := time.Parse("2006-01-02 15:04:05", "1970-01-01 00:00:00")
+		if err != nil {
+			return nil, err
+		}
+		stop = t.Local().Format("2006-01-02 15:04:05")
+	}
 	stoppedAt, err := time.ParseInLocation("2006-01-02 15:04:05", stop, time.Local)
 	if err != nil {
 		return nil, err
