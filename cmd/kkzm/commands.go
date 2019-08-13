@@ -229,7 +229,7 @@ func tagging(kkzm *kokizami.Kokizami, kizamiID int, desc string) error {
 	}
 
 	tagIDs := make([]int, len(tags))
-	ts, err := kkzm.TagsByTags(tags)
+	ts, err := kkzm.TagsByLabels(tags)
 	if err != nil {
 		return err
 	}

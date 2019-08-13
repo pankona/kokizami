@@ -398,7 +398,7 @@ func TestDeleteTag(t *testing.T) {
 		t.Fatalf("unexpected result: [got] %v [want] nil", err)
 	}
 
-	ret, err := k.TagsByTags([]string{"fuga"})
+	ret, err := k.TagsByLabels([]string{"fuga"})
 	if err != nil {
 		t.Fatalf("unexpected result: [got] %v [want] nil", err)
 	}

@@ -48,9 +48,9 @@ func (ts Tags) BulkInsert(db XODB) error {
 }
 
 // TagsByTags retrieves tags by tags at once
-func TagsByTags(db XODB, tags []string) ([]Tag, error) {
+func TagsByLabels(db XODB, tags []string) ([]*Tag, error) {
 	if len(tags) == 0 {
-		return []Tag{}, nil
+		return []*Tag{}, nil
 	}
 
 	buf := bytes.NewBuffer([]byte{})
@@ -92,13 +92,13 @@ func TagsByTags(db XODB, tags []string) ([]Tag, error) {
 		}
 	}()
 
-	res := []Tag{}
+	res := []*Tag{}
 	for q.Next() {
-		t := Tag{
+		t := &Tag{
 			_exists: true,
 		}
 
-		err = q.Scan(&t.ID, &t.Tag)
+		err = q.Scan(t.ID, t.Tag)
 		if err != nil {
 			return nil, err
 		}

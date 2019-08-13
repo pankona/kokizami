@@ -16,6 +16,8 @@ type Kokizami struct {
 	DBPath string
 	db     *sql.DB
 	now    func() time.Time
+
+	TagRepo TagRepository
 }
 
 // initialTime is used to insert a time value that indicates initial value of time.
@@ -62,6 +64,11 @@ func (k *Kokizami) Initialize() error {
 	}
 
 	return nil
+}
+
+// DB returns db. this function is temporary use for refactoring.
+func (k *Kokizami) DB() *sql.DB {
+	return k.db
 }
 
 // Finalize finalizes kokizami
@@ -235,12 +242,12 @@ func (k *Kokizami) AddTags(tags []string) error {
 		ts[i].Tag = tags[i]
 	}
 
-	return ts.BulkInsert(k.db)
+	return k.TagRepo.InsertTags(ts)
 }
 
 // DeleteTag deletes a specified tag
 func (k *Kokizami) DeleteTag(id int) error {
-	m, err := models.TagByID(k.db, id)
+	m, err := k.TagRepo.FindTagByID(id)
 	if err != nil {
 		return err
 	}
@@ -249,7 +256,7 @@ func (k *Kokizami) DeleteTag(id int) error {
 
 // Tags returns list of tags
 func (k *Kokizami) Tags() ([]Tag, error) {
-	ms, err := models.AllTags(k.db)
+	ms, err := k.TagRepo.FindAllTags()
 	if err != nil {
 		return nil, err
 	}
@@ -281,7 +288,7 @@ func (k *Kokizami) Untagging(kizamiID int) error {
 
 // TagsByKizamiID returns tags of specified kizami
 func (k *Kokizami) TagsByKizamiID(kizamiID int) ([]Tag, error) {
-	ms, err := models.TagsByKizamiID(k.db, kizamiID)
+	ms, err := k.TagRepo.FindTagsByKizamiID(kizamiID)
 	if err != nil {
 		return nil, err
 	}
@@ -295,16 +302,16 @@ func (k *Kokizami) TagsByKizamiID(kizamiID int) ([]Tag, error) {
 	return ts, nil
 }
 
-// TagsByTags returns tags by specified tags
-func (k *Kokizami) TagsByTags(tags []string) ([]Tag, error) {
-	ms, err := models.TagsByTags(k.db, tags)
+// TagsByLabels returns tags by specified tags
+func (k *Kokizami) TagsByLabels(labels []string) ([]Tag, error) {
+	ms, err := k.TagRepo.FindTagsByLabels(labels)
 	if err != nil {
 		return nil, err
 	}
 
 	ts := make([]Tag, len(ms))
 	for i := range ms {
-		ts[i] = toTag(&ms[i])
+		ts[i] = toTag(ms[i])
 	}
 
 	return ts, nil

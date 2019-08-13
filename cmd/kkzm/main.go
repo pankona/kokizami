@@ -44,6 +44,9 @@ func main() {
 		if err != nil {
 			return fmt.Errorf("failed to initialize kokizami: %v", err)
 		}
+		kkzm.TagRepo = &tagRepo{
+			db: kkzm.DB(),
+		}
 
 		app.Metadata["kkzm"] = kkzm
 		return nil
