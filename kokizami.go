@@ -230,28 +230,13 @@ func (k *Kokizami) SummaryByDesc(yyyymm string) ([]Elapsed, error) {
 }
 
 // AddTags adds a new tags
-func (k *Kokizami) AddTags(tags []string) error {
-	ts := models.Tags(make([]models.Tag, len(tags)))
-
-	for i := range ts {
-		// skip empty string
-		if len(tags[i]) == 0 {
-			ts = ts[:len(ts)-1]
-			continue
-		}
-		ts[i].Tag = tags[i]
-	}
-
-	return k.TagRepo.InsertTags(ts)
+func (k *Kokizami) AddTags(labels []string) error {
+	return k.TagRepo.InsertTags(labels)
 }
 
 // DeleteTag deletes a specified tag
 func (k *Kokizami) DeleteTag(id int) error {
-	m, err := k.TagRepo.FindTagByID(id)
-	if err != nil {
-		return err
-	}
-	return m.Delete(k.db)
+	return k.TagRepo.Delete(id)
 }
 
 // Tags returns list of tags
@@ -303,16 +288,6 @@ func (k *Kokizami) TagsByKizamiID(kizamiID int) ([]Tag, error) {
 }
 
 // TagsByLabels returns tags by specified tags
-func (k *Kokizami) TagsByLabels(labels []string) ([]Tag, error) {
-	ms, err := k.TagRepo.FindTagsByLabels(labels)
-	if err != nil {
-		return nil, err
-	}
-
-	ts := make([]Tag, len(ms))
-	for i := range ms {
-		ts[i] = toTag(ms[i])
-	}
-
-	return ts, nil
+func (k *Kokizami) TagsByLabels(labels []string) ([]*Tag, error) {
+	return k.TagRepo.FindTagsByLabels(labels)
 }

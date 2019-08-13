@@ -8,6 +8,8 @@ type Tag struct {
 	Tag string // TODO: change var name to label
 }
 
+type Tags []Tag
+
 func toTag(m *models.Tag) Tag {
 	return Tag{
 		ID:  m.ID,
@@ -16,9 +18,10 @@ func toTag(m *models.Tag) Tag {
 }
 
 type TagRepository interface {
-	FindTagByID(id int) (*models.Tag, error)
-	FindAllTags() ([]*models.Tag, error)
-	FindTagsByKizamiID(kizamiID int) ([]*models.Tag, error)
-	FindTagsByLabels(labels []string) ([]*models.Tag, error)
-	InsertTags(models.Tags) error
+	FindTagByID(id int) (*Tag, error)
+	FindAllTags() ([]*Tag, error)
+	FindTagsByKizamiID(kizamiID int) ([]*Tag, error)
+	FindTagsByLabels(labels []string) ([]*Tag, error)
+	InsertTags(labels []string) error
+	Delete(id int) error
 }
