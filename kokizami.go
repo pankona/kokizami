@@ -240,13 +240,13 @@ func (k *Kokizami) DeleteTag(id int) error {
 }
 
 // Tags returns list of tags
-func (k *Kokizami) Tags() ([]Tag, error) {
+func (k *Kokizami) Tags() ([]*Tag, error) {
 	ms, err := k.TagRepo.FindAllTags()
 	if err != nil {
 		return nil, err
 	}
 
-	ts := make([]Tag, len(ms))
+	ts := make([]*Tag, len(ms))
 	for i := range ms {
 		ts[i].ID = ms[i].ID
 		ts[i].Tag = ms[i].Tag
@@ -272,13 +272,13 @@ func (k *Kokizami) Untagging(kizamiID int) error {
 }
 
 // TagsByKizamiID returns tags of specified kizami
-func (k *Kokizami) TagsByKizamiID(kizamiID int) ([]Tag, error) {
+func (k *Kokizami) TagsByKizamiID(kizamiID int) ([]*Tag, error) {
 	ms, err := k.TagRepo.FindTagsByKizamiID(kizamiID)
 	if err != nil {
 		return nil, err
 	}
 
-	ts := make([]Tag, len(ms))
+	ts := make([]*Tag, len(ms))
 	for i := range ms {
 		ts[i].ID = ms[i].ID
 		ts[i].Tag = ms[i].Tag

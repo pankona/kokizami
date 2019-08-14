@@ -556,7 +556,7 @@ func CmdSummary(c *cli.Context) error {
 // CmdTags shows list of tags
 func CmdTags(c *cli.Context) error {
 	var (
-		ts  []kokizami.Tag
+		ts  []*kokizami.Tag
 		err error
 	)
 
