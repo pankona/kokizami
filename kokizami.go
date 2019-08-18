@@ -17,7 +17,8 @@ type Kokizami struct {
 	db     *sql.DB
 	now    func() time.Time
 
-	TagRepo TagRepository
+	KizamiRepo KizamiRepository
+	TagRepo    TagRepository
 }
 
 // initialTime is used to insert a time value that indicates initial value of time.
@@ -96,58 +97,52 @@ func (k *Kokizami) Start(desc string) (*Kizami, error) {
 		return nil, err
 	}
 
-	m, err := models.KizamiByID(k.db, entry.ID)
-	return toKizami(m), err
+	return k.KizamiRepo.KizamiByID(entry.ID)
 }
 
 // Get returns a Kizami by specified ID
 func (k *Kokizami) Get(id int) (*Kizami, error) {
-	m, err := models.KizamiByID(k.db, id)
-	if err != nil {
-		return nil, err
-	}
-	return toKizami(m), nil
+	return k.KizamiRepo.KizamiByID(id)
 }
 
 // Edit edits a specified kizami and update its model
 func (k *Kokizami) Edit(ki *Kizami) (*Kizami, error) {
-	m, err := models.KizamiByID(k.db, ki.ID)
+	m, err := k.KizamiRepo.KizamiByID(ki.ID)
 	if err != nil {
 		return nil, err
 	}
 
 	m.Desc = ki.Desc
-	m.StartedAt = models.SqTime(ki.StartedAt.UTC())
-	m.StoppedAt = models.SqTime(ki.StoppedAt.UTC())
+	m.StartedAt = ki.StartedAt.UTC()
+	m.StoppedAt = ki.StoppedAt.UTC()
 
-	err = m.Update(k.db)
+	err = k.KizamiRepo.Update(m)
 	if err != nil {
 		return nil, err
 	}
-	m, err = models.KizamiByID(k.db, ki.ID)
-	return toKizami(m), err
+	return k.KizamiRepo.KizamiByID(ki.ID)
 }
 
 // Stop stops a on-going kizami by specified ID
 func (k *Kokizami) Stop(id int) error {
-	ki, err := models.KizamiByID(k.db, id)
+	ki, err := k.KizamiRepo.KizamiByID(id)
 	if err != nil {
 		return err
 	}
-	ki.StoppedAt = models.SqTime(k.now().UTC())
-	return ki.Update(k.db)
+	ki.StoppedAt = k.now().UTC()
+	return k.KizamiRepo.Update(ki)
 }
 
 // StopAll stops all on-going kizamis
 func (k *Kokizami) StopAll() error {
-	ks, err := models.KizamisByStoppedAt(k.db, models.SqTime(initialTime()))
+	ks, err := k.KizamiRepo.KizamisByStoppedAt(initialTime())
 	if err != nil {
 		return err
 	}
 	now := k.now().UTC()
 	for i := range ks {
-		ks[i].StoppedAt = models.SqTime(now)
-		if err := ks[i].Update(k.db); err != nil {
+		ks[i].StoppedAt = now
+		if err := k.KizamiRepo.Update(ks[i]); err != nil {
 			return err
 		}
 	}
@@ -156,29 +151,16 @@ func (k *Kokizami) StopAll() error {
 
 // Delete deletes a kizami by specified ID
 func (k *Kokizami) Delete(id int) error {
-	ki, err := models.KizamiByID(k.db, id)
+	ki, err := k.KizamiRepo.KizamiByID(id)
 	if err != nil {
 		return err
 	}
-	return ki.Delete(k.db)
+	return k.KizamiRepo.Delete(ki)
 }
 
 // List returns all Kizamis
-func (k *Kokizami) List() ([]Kizami, error) {
-	ms, err := models.AllKizami(k.db)
-	if err != nil {
-		return nil, err
-	}
-
-	ks := make([]Kizami, len(ms))
-	for i := range ms {
-		ks[i].ID = ms[i].ID
-		ks[i].Desc = ms[i].Desc
-		ks[i].StartedAt = ms[i].StartedAt.Time
-		ks[i].StoppedAt = ms[i].StoppedAt.Time
-	}
-
-	return ks, nil
+func (k *Kokizami) List() ([]*Kizami, error) {
+	return k.KizamiRepo.AllKizami()
 }
 
 // SummaryByTag returns total elapsed time of Kizamis in specified month grouped by tag
@@ -246,13 +228,18 @@ func (k *Kokizami) Tags() ([]*Tag, error) {
 		return nil, err
 	}
 
-	ts := make([]*Tag, len(ms))
+	ts := make([]Tag, len(ms))
 	for i := range ms {
 		ts[i].ID = ms[i].ID
 		ts[i].Tag = ms[i].Tag
 	}
 
-	return ts, nil
+	ret := make([]*Tag, len(ts))
+	for i := range ts {
+		ret[i] = &ts[i]
+	}
+
+	return ret, nil
 }
 
 // Tagging makes relation between specified kizami and tags
@@ -278,13 +265,18 @@ func (k *Kokizami) TagsByKizamiID(kizamiID int) ([]*Tag, error) {
 		return nil, err
 	}
 
-	ts := make([]*Tag, len(ms))
+	ts := make([]Tag, len(ms))
 	for i := range ms {
 		ts[i].ID = ms[i].ID
 		ts[i].Tag = ms[i].Tag
 	}
 
-	return ts, nil
+	ret := make([]*Tag, len(ts))
+	for i := range ts {
+		ret[i] = &ts[i]
+	}
+
+	return ret, nil
 }
 
 // TagsByLabels returns tags by specified tags

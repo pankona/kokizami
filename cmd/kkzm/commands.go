@@ -325,7 +325,7 @@ func CmdList(c *cli.Context) error {
 
 	for _, v := range l {
 		v := v
-		table.Append(toStringArray(&v))
+		table.Append(toStringArray(v))
 	}
 	table.Render()
 

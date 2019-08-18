@@ -2,8 +2,6 @@ package kokizami
 
 import (
 	"time"
-
-	"github.com/pankona/kokizami/models"
 )
 
 // Kizami represents a task
@@ -12,15 +10,6 @@ type Kizami struct {
 	Desc      string
 	StartedAt time.Time
 	StoppedAt time.Time
-}
-
-func toKizami(m *models.Kizami) *Kizami {
-	return &Kizami{
-		ID:        m.ID,
-		Desc:      m.Desc,
-		StartedAt: m.StartedAt.Time,
-		StoppedAt: m.StoppedAt.Time,
-	}
 }
 
 // Elapsed returns kizami's elapsed time
@@ -37,4 +26,12 @@ func (k *Kizami) Elapsed() time.Duration {
 		}
 	}
 	return elapsed
+}
+
+type KizamiRepository interface {
+	AllKizami() ([]*Kizami, error)
+	Update(k *Kizami) error
+	Delete(k *Kizami) error
+	KizamiByID(id int) (*Kizami, error)
+	KizamisByStoppedAt(t time.Time) ([]*Kizami, error)
 }

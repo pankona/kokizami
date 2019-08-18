@@ -23,30 +23,40 @@ func (t *tagRepo) FindTagByID(id int) (*kokizami.Tag, error) {
 }
 
 func (t *tagRepo) FindAllTags() ([]*kokizami.Tag, error) {
-	tags, err := models.AllTags(t.db)
+	ms, err := models.AllTags(t.db)
 	if err != nil {
 		return nil, err
 	}
 
+	tags := make([]kokizami.Tag, len(ms))
+	for i, v := range ms {
+		tags[i].ID = v.ID
+		tags[i].Tag = v.Tag
+	}
+
 	ret := make([]*kokizami.Tag, len(tags))
-	for i, v := range tags {
-		ret[i].ID = v.ID
-		ret[i].Tag = v.Tag
+	for i := range tags {
+		ret[i] = &tags[i]
 	}
 
 	return ret, nil
 }
 
 func (t *tagRepo) FindTagsByKizamiID(kizamiID int) ([]*kokizami.Tag, error) {
-	tags, err := models.TagsByKizamiID(t.db, kizamiID)
+	ms, err := models.TagsByKizamiID(t.db, kizamiID)
 	if err != nil {
 		return nil, err
 	}
 
+	tags := make([]kokizami.Tag, len(ms))
+	for i, v := range ms {
+		tags[i].ID = v.ID
+		tags[i].Tag = v.Tag
+	}
+
 	ret := make([]*kokizami.Tag, len(tags))
-	for i, v := range tags {
-		ret[i].ID = v.ID
-		ret[i].Tag = v.Tag
+	for i := range tags {
+		ret[i] = &tags[i]
 	}
 
 	return ret, nil
