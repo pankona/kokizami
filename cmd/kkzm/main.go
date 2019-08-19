@@ -1,12 +1,14 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"os"
 	"os/user"
 	"path/filepath"
 
 	"github.com/pankona/kokizami"
+	"github.com/pankona/kokizami/models"
 	"github.com/urfave/cli"
 )
 
@@ -38,14 +40,22 @@ func main() {
 			return fmt.Errorf("failed to create directory on %v", configDir)
 		}
 
-		kkzm.DBPath = filepath.Join(configDir, "db")
+		db, err := openDB(filepath.Join(configDir, "db"))
+		if err != nil {
+			return fmt.Errorf("failed to open DB: %v", err)
+		}
+		err = createTables(db)
+		if err != nil {
+			return fmt.Errorf("failed to create tables: %v", err)
+		}
 
 		err = kkzm.Initialize()
 		if err != nil {
-			return fmt.Errorf("failed to initialize kokizami: %v", err)
+			return fmt.Errorf("failed to initialize kkzm: %v", err)
 		}
-		kkzm.KizamiRepo = &kizamiRepo{db: kkzm.DB()}
-		kkzm.TagRepo = &tagRepo{db: kkzm.DB()}
+		kkzm.SetDB(db)
+		kkzm.KizamiRepo = &kizamiRepo{db: db}
+		kkzm.TagRepo = &tagRepo{db: db}
 
 		app.Metadata["kkzm"] = kkzm
 		return nil
@@ -61,4 +71,25 @@ func main() {
 		os.Exit(1)
 	}
 	os.Exit(0)
+}
+
+func openDB(dbPath string) (*sql.DB, error) {
+	db, err := sql.Open("sqlite3", dbPath)
+	if err != nil {
+		return nil, err
+	}
+	return db, nil
+}
+
+func createTables(db *sql.DB) error {
+	if err := models.CreateKizamiTable(db); err != nil {
+		return fmt.Errorf("failed to create kizami table: %v", err)
+	}
+	if err := models.CreateTagTable(db); err != nil {
+		return fmt.Errorf("failed to create tag table: %v", err)
+	}
+	if err := models.CreateRelationTable(db); err != nil {
+		return fmt.Errorf("failed to create relation table: %v", err)
+	}
+	return nil
 }

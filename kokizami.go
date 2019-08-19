@@ -21,6 +21,12 @@ type Kokizami struct {
 	TagRepo    TagRepository
 }
 
+// SetDB sets db conn to kokizami
+// this is temporary function. Will be removed soon
+func (k *Kokizami) SetDB(db *sql.DB) {
+	k.db = db
+}
+
 // initialTime is used to insert a time value that indicates initial value of time.
 func initialTime() time.Time {
 	t, err := time.Parse("2006-01-02 15:04:05", "1970-01-01 00:00:00")
@@ -45,25 +51,6 @@ func (k *Kokizami) Initialize() error {
 	if k.now == nil {
 		k.now = time.Now
 	}
-
-	if k.db == nil {
-		db, err := sql.Open("sqlite3", k.DBPath)
-		if err != nil {
-			return err
-		}
-		k.db = db
-	}
-
-	if err := models.CreateKizamiTable(k.db); err != nil {
-		return fmt.Errorf("failed to create kizami table: %v", err)
-	}
-	if err := models.CreateTagTable(k.db); err != nil {
-		return fmt.Errorf("failed to create tag table: %v", err)
-	}
-	if err := models.CreateRelationTable(k.db); err != nil {
-		return fmt.Errorf("failed to create relation table: %v", err)
-	}
-
 	return nil
 }
 
