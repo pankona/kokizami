@@ -74,17 +74,7 @@ func (k *Kokizami) Start(desc string) (*Kizami, error) {
 		return nil, fmt.Errorf("desc must not be empty")
 	}
 
-	entry := &models.Kizami{
-		Desc:      desc,
-		StartedAt: models.SqTime(k.now().UTC()),
-		StoppedAt: models.SqTime(initialTime()),
-	}
-	err := entry.Insert(k.db)
-	if err != nil {
-		return nil, err
-	}
-
-	return k.KizamiRepo.KizamiByID(entry.ID)
+	return k.KizamiRepo.Insert(desc)
 }
 
 // Get returns a Kizami by specified ID

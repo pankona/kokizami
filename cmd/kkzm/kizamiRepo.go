@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"time"
 
 	"github.com/pankona/kokizami"
@@ -10,7 +11,8 @@ import (
 )
 
 type kizamiRepo struct {
-	db *sql.DB
+	db  *sql.DB
+	now func() time.Time
 }
 
 // SqTime converts time.Time to xoutil.SqTime
@@ -25,6 +27,29 @@ func toKizami(m *models.Kizami) *kokizami.Kizami {
 		StartedAt: m.StartedAt.Time,
 		StoppedAt: m.StoppedAt.Time,
 	}
+}
+
+func initialTime() time.Time {
+	t, err := time.Parse("2006-01-02 15:04:05", "1970-01-01 00:00:00")
+	if err != nil {
+		panic(fmt.Sprintf("failed to parse time for initial value for time: %v", err))
+	}
+	return t.UTC()
+}
+
+func (r *kizamiRepo) Insert(desc string) (*kokizami.Kizami, error) {
+	m := &models.Kizami{
+		Desc:      desc,
+		StartedAt: SqTime(r.now().UTC()),
+		StoppedAt: SqTime(initialTime()),
+	}
+	err := m.Insert(r.db)
+	if err != nil {
+		return nil, err
+	}
+
+	return toKizami(m), nil
+
 }
 
 func (r *kizamiRepo) AllKizami() ([]*kokizami.Kizami, error) {
