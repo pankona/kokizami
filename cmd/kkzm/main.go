@@ -56,6 +56,7 @@ func main() {
 		kkzm.SetDB(db)
 		kkzm.KizamiRepo = &kizamiRepo{db: db}
 		kkzm.TagRepo = &tagRepo{db: db}
+		kkzm.SummaryRepo = &summaryRepo{db: db}
 
 		app.Metadata["kkzm"] = kkzm
 		return nil

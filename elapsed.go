@@ -11,3 +11,8 @@ type Elapsed struct {
 	Count   int
 	Elapsed time.Duration
 }
+
+type SummaryRepository interface {
+	ElapsedOfMonthByDesc(yyyymm string) ([]*Elapsed, error)
+	ElapsedOfMonthByTag(yyyymm string) ([]*Elapsed, error)
+}

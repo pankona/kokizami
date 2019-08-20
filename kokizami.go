@@ -17,8 +17,9 @@ type Kokizami struct {
 	db     *sql.DB
 	now    func() time.Time
 
-	KizamiRepo KizamiRepository
-	TagRepo    TagRepository
+	KizamiRepo  KizamiRepository
+	TagRepo     TagRepository
+	SummaryRepo SummaryRepository
 }
 
 // SetDB sets db conn to kokizami
@@ -141,51 +142,25 @@ func (k *Kokizami) List() ([]*Kizami, error) {
 }
 
 // SummaryByTag returns total elapsed time of Kizamis in specified month grouped by tag
-func (k *Kokizami) SummaryByTag(yyyymm string) ([]Elapsed, error) {
+func (k *Kokizami) SummaryByTag(yyyymm string) ([]*Elapsed, error) {
 	// validate input
 	_, err := time.Parse("2006-01", yyyymm)
 	if err != nil {
 		return nil, fmt.Errorf("invalid argument format. should be yyyy-mm: %v", err)
 	}
 
-	ms, err := models.ElapsedOfMonthByTag(k.db, yyyymm)
-	if err != nil {
-		return nil, err
-	}
-
-	s := make([]Elapsed, len(ms))
-	for i := range ms {
-		s[i].Tag = ms[i].Tag
-		s[i].Desc = ms[i].Desc
-		s[i].Count = ms[i].Count
-		s[i].Elapsed = ms[i].Elapsed
-	}
-
-	return s, nil
+	return k.SummaryRepo.ElapsedOfMonthByTag(yyyymm)
 }
 
 // SummaryByDesc returns total elapsed time of Kizamis in specified month grouped by desc
-func (k *Kokizami) SummaryByDesc(yyyymm string) ([]Elapsed, error) {
+func (k *Kokizami) SummaryByDesc(yyyymm string) ([]*Elapsed, error) {
 	// validate input
 	_, err := time.Parse("2006-01", yyyymm)
 	if err != nil {
 		return nil, fmt.Errorf("invalid argument format. should be yyyy-mm: %v", err)
 	}
 
-	ms, err := models.ElapsedOfMonthByDesc(k.db, yyyymm)
-	if err != nil {
-		return nil, err
-	}
-
-	s := make([]Elapsed, len(ms))
-	for i := range ms {
-		s[i].Tag = ms[i].Tag
-		s[i].Desc = ms[i].Desc
-		s[i].Count = ms[i].Count
-		s[i].Elapsed = ms[i].Elapsed
-	}
-
-	return s, nil
+	return k.SummaryRepo.ElapsedOfMonthByDesc(yyyymm)
 }
 
 // AddTags adds a new tags
