@@ -7,4 +7,5 @@ require (
 	github.com/olekukonko/tablewriter v0.0.1
 	github.com/urfave/cli v1.21.0
 	github.com/xo/xoutil v0.0.0-20171112033149-46189f4026a5
+	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 )
