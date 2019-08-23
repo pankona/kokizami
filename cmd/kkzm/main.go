@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/user"
 	"path/filepath"
+	"time"
 
 	"github.com/pankona/kokizami"
 	"github.com/pankona/kokizami/models"
@@ -54,7 +55,10 @@ func main() {
 			return fmt.Errorf("failed to initialize kkzm: %v", err)
 		}
 		kkzm.SetDB(db)
-		kkzm.KizamiRepo = &kizamiRepo{db: db}
+		kkzm.KizamiRepo = &kizamiRepo{
+			db:  db,
+			now: time.Now,
+		}
 		kkzm.TagRepo = &tagRepo{db: db}
 		kkzm.SummaryRepo = &summaryRepo{db: db}
 

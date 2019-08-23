@@ -35,4 +35,5 @@ type KizamiRepository interface {
 	Delete(k *Kizami) error
 	KizamiByID(id int) (*Kizami, error)
 	KizamisByStoppedAt(t time.Time) ([]*Kizami, error)
+	Tagging(kizamiID int, tagIDs []int) error
 }

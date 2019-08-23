@@ -123,3 +123,12 @@ func (r *kizamiRepo) KizamisByStoppedAt(t time.Time) ([]*kokizami.Kizami, error)
 
 	return ret, nil
 }
+
+func (r *kizamiRepo) Tagging(kizamiID int, tagIDs []int) error {
+	rs := models.Relations(make([]models.Relation, len(tagIDs)))
+	for i := range rs {
+		rs[i].KizamiID = kizamiID
+		rs[i].TagID = tagIDs[i]
+	}
+	return rs.BulkInsert(r.db)
+}

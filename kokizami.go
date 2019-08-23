@@ -196,13 +196,7 @@ func (k *Kokizami) Tags() ([]*Tag, error) {
 
 // Tagging makes relation between specified kizami and tags
 func (k *Kokizami) Tagging(kizamiID int, tagIDs []int) error {
-	rs := models.Relations(make([]models.Relation, len(tagIDs)))
-	for i := range rs {
-		rs[i].KizamiID = kizamiID
-		rs[i].TagID = tagIDs[i]
-
-	}
-	return rs.BulkInsert(k.db)
+	return k.KizamiRepo.Tagging(kizamiID, tagIDs)
 }
 
 // Untagging removes all tags from specified kizami
