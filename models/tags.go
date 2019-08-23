@@ -98,7 +98,7 @@ func TagsByLabels(db XODB, tags []string) ([]*Tag, error) {
 			_exists: true,
 		}
 
-		err = q.Scan(t.ID, t.Tag)
+		err = q.Scan(&t.ID, &t.Tag)
 		if err != nil {
 			return nil, err
 		}
