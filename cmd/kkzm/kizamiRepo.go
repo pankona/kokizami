@@ -132,3 +132,7 @@ func (r *kizamiRepo) Tagging(kizamiID int, tagIDs []int) error {
 	}
 	return rs.BulkInsert(r.db)
 }
+
+func (r *kizamiRepo) Untagging(kizamiID int) error {
+	return models.DeleteRelationsByKizamiID(r.db, kizamiID)
+}
