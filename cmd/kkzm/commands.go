@@ -159,9 +159,8 @@ func toStringArray(k *kokizami.Kizami) []string {
 }
 
 func kkzm(c *cli.Context) *kokizami.Kokizami {
-	k := c.App.Metadata["kkzm"].(*kokizami.Kokizami)
-	EnableVerboseQuery(c.GlobalBool("verbose"))
-	return k
+	enableVerboseQuery(c.GlobalBool("verbose"))
+	return c.App.Metadata["kkzm"].(*kokizami.Kokizami)
 }
 
 // CmdStart starts a new task
