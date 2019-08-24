@@ -1,7 +1,6 @@
 package kokizami
 
 import (
-	"database/sql"
 	"fmt"
 	"time"
 
@@ -13,18 +12,11 @@ import (
 // Kokizami provides most APIs of kokizami library
 type Kokizami struct {
 	DBPath string
-	db     *sql.DB
 	now    func() time.Time
 
 	KizamiRepo  KizamiRepository
 	TagRepo     TagRepository
 	SummaryRepo SummaryRepository
-}
-
-// SetDB sets db conn to kokizami
-// this is temporary function. Will be removed soon
-func (k *Kokizami) SetDB(db *sql.DB) {
-	k.db = db
 }
 
 // initialTime is used to insert a time value that indicates initial value of time.
@@ -43,20 +35,6 @@ func (k *Kokizami) Initialize() error {
 		k.now = time.Now
 	}
 	return nil
-}
-
-// DB returns db. this function is temporary use for refactoring.
-func (k *Kokizami) DB() *sql.DB {
-	return k.db
-}
-
-// Finalize finalizes kokizami
-func (k *Kokizami) Finalize() error {
-	if k.db == nil {
-		return nil
-	}
-
-	return k.db.Close()
 }
 
 // Start starts a new kizami with specified desc
