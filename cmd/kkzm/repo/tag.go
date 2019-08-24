@@ -1,4 +1,4 @@
-package main
+package repo
 
 import (
 	"database/sql"
@@ -7,11 +7,15 @@ import (
 	"github.com/pankona/kokizami/models"
 )
 
-type tagRepo struct {
+type TagRepo struct {
 	db *sql.DB
 }
 
-func (t *tagRepo) FindTagByID(id int) (*kokizami.Tag, error) {
+func NewTagRepo(db *sql.DB) *TagRepo {
+	return &TagRepo{db: db}
+}
+
+func (t *TagRepo) FindTagByID(id int) (*kokizami.Tag, error) {
 	tag, err := models.TagByID(t.db, id)
 	if err != nil {
 		return nil, err
@@ -25,7 +29,7 @@ func (t *tagRepo) FindTagByID(id int) (*kokizami.Tag, error) {
 	return ret, nil
 }
 
-func (t *tagRepo) FindAllTags() ([]*kokizami.Tag, error) {
+func (t *TagRepo) FindAllTags() ([]*kokizami.Tag, error) {
 	ms, err := models.AllTags(t.db)
 	if err != nil {
 		return nil, err
@@ -45,7 +49,7 @@ func (t *tagRepo) FindAllTags() ([]*kokizami.Tag, error) {
 	return ret, nil
 }
 
-func (t *tagRepo) FindTagsByKizamiID(kizamiID int) ([]*kokizami.Tag, error) {
+func (t *TagRepo) FindTagsByKizamiID(kizamiID int) ([]*kokizami.Tag, error) {
 	ms, err := models.TagsByKizamiID(t.db, kizamiID)
 	if err != nil {
 		return nil, err
@@ -72,7 +76,7 @@ func toTag(m *models.Tag) *kokizami.Tag {
 	}
 }
 
-func (t *tagRepo) FindTagsByLabels(labels []string) ([]*kokizami.Tag, error) {
+func (t *TagRepo) FindTagsByLabels(labels []string) ([]*kokizami.Tag, error) {
 	ms, err := models.TagsByLabels(t.db, labels)
 	if err != nil {
 		return nil, err
@@ -86,7 +90,7 @@ func (t *tagRepo) FindTagsByLabels(labels []string) ([]*kokizami.Tag, error) {
 	return ts, nil
 }
 
-func (t *tagRepo) InsertTags(labels []string) error {
+func (t *TagRepo) InsertTags(labels []string) error {
 	ts := models.Tags(make([]models.Tag, len(labels)))
 
 	for i := range ts {
@@ -101,7 +105,7 @@ func (t *tagRepo) InsertTags(labels []string) error {
 	return ts.BulkInsert(t.db)
 }
 
-func (t *tagRepo) Delete(id int) error {
+func (t *TagRepo) Delete(id int) error {
 	m, err := models.TagByID(t.db, id)
 	if err != nil {
 		return err

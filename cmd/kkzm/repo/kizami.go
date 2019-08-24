@@ -1,4 +1,4 @@
-package main
+package repo
 
 import (
 	"database/sql"
@@ -10,9 +10,16 @@ import (
 	"github.com/xo/xoutil"
 )
 
-type kizamiRepo struct {
+type KizamiRepo struct {
 	db  *sql.DB
 	now func() time.Time
+}
+
+func NewKizamiRepo(db *sql.DB) *KizamiRepo {
+	return &KizamiRepo{
+		db:  db,
+		now: time.Now,
+	}
 }
 
 // SqTime converts time.Time to xoutil.SqTime
@@ -37,7 +44,7 @@ func initialTime() time.Time {
 	return t.UTC()
 }
 
-func (r *kizamiRepo) Insert(desc string) (*kokizami.Kizami, error) {
+func (r *KizamiRepo) Insert(desc string) (*kokizami.Kizami, error) {
 	m := &models.Kizami{
 		Desc:      desc,
 		StartedAt: SqTime(r.now().UTC()),
@@ -52,7 +59,7 @@ func (r *kizamiRepo) Insert(desc string) (*kokizami.Kizami, error) {
 
 }
 
-func (r *kizamiRepo) AllKizami() ([]*kokizami.Kizami, error) {
+func (r *KizamiRepo) AllKizami() ([]*kokizami.Kizami, error) {
 	ms, err := models.AllKizami(r.db)
 	if err != nil {
 		return nil, err
@@ -74,7 +81,7 @@ func (r *kizamiRepo) AllKizami() ([]*kokizami.Kizami, error) {
 	return ret, nil
 }
 
-func (r *kizamiRepo) Update(k *kokizami.Kizami) error {
+func (r *KizamiRepo) Update(k *kokizami.Kizami) error {
 	m, err := models.KizamiByID(r.db, k.ID)
 	if err != nil {
 		return err
@@ -86,7 +93,7 @@ func (r *kizamiRepo) Update(k *kokizami.Kizami) error {
 	return m.Update(r.db)
 }
 
-func (r *kizamiRepo) Delete(k *kokizami.Kizami) error {
+func (r *KizamiRepo) Delete(k *kokizami.Kizami) error {
 	m, err := models.KizamiByID(r.db, k.ID)
 	if err != nil {
 		return err
@@ -94,7 +101,7 @@ func (r *kizamiRepo) Delete(k *kokizami.Kizami) error {
 	return m.Delete(r.db)
 }
 
-func (r *kizamiRepo) KizamiByID(id int) (*kokizami.Kizami, error) {
+func (r *KizamiRepo) KizamiByID(id int) (*kokizami.Kizami, error) {
 	m, err := models.KizamiByID(r.db, id)
 	if err != nil {
 		return nil, err
@@ -102,7 +109,7 @@ func (r *kizamiRepo) KizamiByID(id int) (*kokizami.Kizami, error) {
 	return toKizami(m), nil
 }
 
-func (r *kizamiRepo) KizamisByStoppedAt(t time.Time) ([]*kokizami.Kizami, error) {
+func (r *KizamiRepo) KizamisByStoppedAt(t time.Time) ([]*kokizami.Kizami, error) {
 	ms, err := models.KizamisByStoppedAt(r.db, SqTime(t))
 	if err != nil {
 		return nil, err
@@ -124,7 +131,7 @@ func (r *kizamiRepo) KizamisByStoppedAt(t time.Time) ([]*kokizami.Kizami, error)
 	return ret, nil
 }
 
-func (r *kizamiRepo) Tagging(kizamiID int, tagIDs []int) error {
+func (r *KizamiRepo) Tagging(kizamiID int, tagIDs []int) error {
 	rs := models.Relations(make([]models.Relation, len(tagIDs)))
 	for i := range rs {
 		rs[i].KizamiID = kizamiID
@@ -133,6 +140,6 @@ func (r *kizamiRepo) Tagging(kizamiID int, tagIDs []int) error {
 	return rs.BulkInsert(r.db)
 }
 
-func (r *kizamiRepo) Untagging(kizamiID int) error {
+func (r *KizamiRepo) Untagging(kizamiID int) error {
 	return models.DeleteRelationsByKizamiID(r.db, kizamiID)
 }

@@ -1,4 +1,4 @@
-package main
+package repo
 
 import (
 	"database/sql"
@@ -7,11 +7,15 @@ import (
 	"github.com/pankona/kokizami/models"
 )
 
-type summaryRepo struct {
+type SummaryRepo struct {
 	db *sql.DB
 }
 
-func (r *summaryRepo) ElapsedOfMonthByDesc(yyyymm string) ([]*kokizami.Elapsed, error) {
+func NewSummaryRepo(db *sql.DB) *SummaryRepo {
+	return &SummaryRepo{db: db}
+}
+
+func (r *SummaryRepo) ElapsedOfMonthByDesc(yyyymm string) ([]*kokizami.Elapsed, error) {
 	ms, err := models.ElapsedOfMonthByDesc(r.db, yyyymm)
 	if err != nil {
 		return nil, err
@@ -33,7 +37,7 @@ func (r *summaryRepo) ElapsedOfMonthByDesc(yyyymm string) ([]*kokizami.Elapsed, 
 	return ret, nil
 }
 
-func (r *summaryRepo) ElapsedOfMonthByTag(yyyymm string) ([]*kokizami.Elapsed, error) {
+func (r *SummaryRepo) ElapsedOfMonthByTag(yyyymm string) ([]*kokizami.Elapsed, error) {
 
 	ms, err := models.ElapsedOfMonthByTag(r.db, yyyymm)
 	if err != nil {
