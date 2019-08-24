@@ -16,13 +16,13 @@ func (ts Tags) BulkInsert(db XODB) error {
 
 	buf := bytes.NewBuffer([]byte{})
 
-	q1 := []byte("INSERT INTO tag(tag)")
+	q1 := []byte("INSERT INTO tag(label)")
 	_, err := buf.Write(q1)
 	if err != nil {
 		return err
 	}
 
-	q2 := []byte(" SELECT ? AS tag")
+	q2 := []byte(" SELECT ? AS label")
 	q3 := []byte(" UNION SELECT ?")
 
 	args := make([]interface{}, len(ts))
@@ -36,7 +36,7 @@ func (ts Tags) BulkInsert(db XODB) error {
 			return err
 		}
 
-		args[i] = v.Tag
+		args[i] = v.Label
 	}
 
 	// run query
@@ -61,8 +61,8 @@ func TagsByLabels(db XODB, tags []string) ([]*Tag, error) {
 		return nil, err
 	}
 
-	q2 := []byte(" WHERE tag = ?")
-	q3 := []byte(" OR tag = ?")
+	q2 := []byte(" WHERE label = ?")
+	q3 := []byte(" OR label = ?")
 
 	args := make([]interface{}, len(tags))
 	for i, v := range tags {
@@ -98,7 +98,7 @@ func TagsByLabels(db XODB, tags []string) ([]*Tag, error) {
 			_exists: true,
 		}
 
-		err = q.Scan(&t.ID, &t.Tag)
+		err = q.Scan(&t.ID, &t.Label)
 		if err != nil {
 			return nil, err
 		}

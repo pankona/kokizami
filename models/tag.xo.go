@@ -9,8 +9,8 @@ import (
 
 // Tag represents a row from 'tag'.
 type Tag struct {
-	ID  int    `json:"id"`  // id
-	Tag string `json:"tag"` // tag
+	ID    int    `json:"id"`    // id
+	Label string `json:"label"` // label
 
 	// xo fields
 	_exists, _deleted bool
@@ -37,14 +37,14 @@ func (t *Tag) Insert(db XODB) error {
 
 	// sql insert query, primary key provided by autoincrement
 	const sqlstr = `INSERT INTO tag (` +
-		`tag` +
+		`label` +
 		`) VALUES (` +
 		`?` +
 		`)`
 
 	// run query
-	XOLog(sqlstr, t.Tag)
-	res, err := db.Exec(sqlstr, t.Tag)
+	XOLog(sqlstr, t.Label)
+	res, err := db.Exec(sqlstr, t.Label)
 	if err != nil {
 		return err
 	}
@@ -78,12 +78,12 @@ func (t *Tag) Update(db XODB) error {
 
 	// sql query
 	const sqlstr = `UPDATE tag SET ` +
-		`tag = ?` +
+		`label = ?` +
 		` WHERE id = ?`
 
 	// run query
-	XOLog(sqlstr, t.Tag, t.ID)
-	_, err = db.Exec(sqlstr, t.Tag, t.ID)
+	XOLog(sqlstr, t.Label, t.ID)
+	_, err = db.Exec(sqlstr, t.Label, t.ID)
 	return err
 }
 
@@ -126,25 +126,25 @@ func (t *Tag) Delete(db XODB) error {
 	return nil
 }
 
-// TagByTag retrieves a row from 'tag' as a Tag.
+// TagByLabel retrieves a row from 'tag' as a Tag.
 //
 // Generated from index 'sqlite_autoindex_tag_1'.
-func TagByTag(db XODB, tag string) (*Tag, error) {
+func TagByLabel(db XODB, label string) (*Tag, error) {
 	var err error
 
 	// sql query
 	const sqlstr = `SELECT ` +
-		`id, tag ` +
+		`id, label ` +
 		`FROM tag ` +
-		`WHERE tag = ?`
+		`WHERE label = ?`
 
 	// run query
-	XOLog(sqlstr, tag)
+	XOLog(sqlstr, label)
 	t := Tag{
 		_exists: true,
 	}
 
-	err = db.QueryRow(sqlstr, tag).Scan(&t.ID, &t.Tag)
+	err = db.QueryRow(sqlstr, label).Scan(&t.ID, &t.Label)
 	if err != nil {
 		return nil, err
 	}
@@ -160,7 +160,7 @@ func TagByID(db XODB, id int) (*Tag, error) {
 
 	// sql query
 	const sqlstr = `SELECT ` +
-		`id, tag ` +
+		`id, label ` +
 		`FROM tag ` +
 		`WHERE id = ?`
 
@@ -170,7 +170,7 @@ func TagByID(db XODB, id int) (*Tag, error) {
 		_exists: true,
 	}
 
-	err = db.QueryRow(sqlstr, id).Scan(&t.ID, &t.Tag)
+	err = db.QueryRow(sqlstr, id).Scan(&t.ID, &t.Label)
 	if err != nil {
 		return nil, err
 	}

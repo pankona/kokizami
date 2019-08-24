@@ -7,8 +7,8 @@ func CreateTagTable(db XODB) error {
 	// sql query
 	const sqlstr = "CREATE TABLE IF NOT EXISTS tag (" +
 		" id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL" +
-		", tag VARCHAR(255) NOT NULL" +
-		", UNIQUE(tag) ON CONFLICT IGNORE" +
+		", label VARCHAR(255) NOT NULL" +
+		", UNIQUE(label) ON CONFLICT IGNORE" +
 		")"
 	XOLog(sqlstr)
 	_, err := db.Exec(sqlstr)
@@ -19,7 +19,7 @@ func CreateTagTable(db XODB) error {
 func AllTags(db XODB) ([]*Tag, error) {
 	// sql query
 	const sqlstr = `SELECT ` +
-		`id, tag ` +
+		`id, label ` +
 		`FROM tag`
 
 	// run query
@@ -43,7 +43,7 @@ func AllTags(db XODB) ([]*Tag, error) {
 		}
 
 		// scan
-		err = q.Scan(&t.ID, &t.Tag)
+		err = q.Scan(&t.ID, &t.Label)
 		if err != nil {
 			return nil, err
 		}

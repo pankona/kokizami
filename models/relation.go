@@ -45,7 +45,7 @@ func TagsByKizamiID(db XODB, kizamiID int) ([]*Tag, error) {
 		}
 
 		// scan
-		err = q.Scan(&t.ID, &t.Tag)
+		err = q.Scan(&t.ID, &t.Label)
 		if err != nil {
 			return nil, err
 		}
