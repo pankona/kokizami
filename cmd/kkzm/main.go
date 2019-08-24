@@ -6,9 +6,9 @@ import (
 	"os"
 	"os/user"
 	"path/filepath"
-	"time"
 
 	"github.com/pankona/kokizami"
+	"github.com/pankona/kokizami/cmd/kkzm/repo"
 	"github.com/pankona/kokizami/models"
 	"github.com/urfave/cli"
 )
@@ -28,6 +28,7 @@ func main() {
 	app.CommandNotFound = CommandNotFound
 
 	kkzm := &kokizami.Kokizami{}
+	db := &sql.DB{}
 
 	app.Before = func(ctx *cli.Context) error {
 		u, err := user.Current()
@@ -41,10 +42,11 @@ func main() {
 			return fmt.Errorf("failed to create directory on %v", configDir)
 		}
 
-		db, err := openDB(filepath.Join(configDir, "db"))
+		db, err = openDB(filepath.Join(configDir, "db"))
 		if err != nil {
 			return fmt.Errorf("failed to open DB: %v", err)
 		}
+
 		err = createTables(db)
 		if err != nil {
 			return fmt.Errorf("failed to create tables: %v", err)
@@ -54,20 +56,17 @@ func main() {
 		if err != nil {
 			return fmt.Errorf("failed to initialize kkzm: %v", err)
 		}
-		kkzm.SetDB(db)
-		kkzm.KizamiRepo = &kizamiRepo{
-			db:  db,
-			now: time.Now,
-		}
-		kkzm.TagRepo = &tagRepo{db: db}
-		kkzm.SummaryRepo = &summaryRepo{db: db}
+
+		kkzm.KizamiRepo = repo.NewKizamiRepo(db)
+		kkzm.TagRepo = repo.NewTagRepo(db)
+		kkzm.SummaryRepo = repo.NewSummaryRepo(db)
 
 		app.Metadata["kkzm"] = kkzm
 		return nil
 	}
 
 	app.After = func(ctx *cli.Context) error {
-		return kkzm.Finalize()
+		return db.Close()
 	}
 
 	err := app.Run(os.Args)
