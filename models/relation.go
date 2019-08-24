@@ -19,7 +19,7 @@ func CreateRelationTable(db XODB) error {
 // TagsByKizamiID returns tags related to specified kizami
 func TagsByKizamiID(db XODB, kizamiID int) ([]*Tag, error) {
 	// sql query
-	const sqlstr = `SELECT tag.id, tag.tag` +
+	const sqlstr = `SELECT tag.id, tag.label` +
 		` FROM relation` +
 		` INNER JOIN tag` +
 		` ON relation.tag_id = tag.id` +
