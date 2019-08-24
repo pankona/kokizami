@@ -160,7 +160,7 @@ func toStringArray(k *kokizami.Kizami) []string {
 
 func kkzm(c *cli.Context) *kokizami.Kokizami {
 	k := c.App.Metadata["kkzm"].(*kokizami.Kokizami)
-	k.EnableVerboseQuery(c.GlobalBool("verbose"))
+	EnableVerboseQuery(c.GlobalBool("verbose"))
 	return k
 }
 

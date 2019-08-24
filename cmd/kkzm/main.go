@@ -98,3 +98,12 @@ func createTables(db *sql.DB) error {
 	}
 	return nil
 }
+
+// EnableVerboseQuery toggles debug logging by argument
+func EnableVerboseQuery(enable bool) {
+	models.XOLog = func(s string, p ...interface{}) {
+		if enable {
+			fmt.Printf("-------------------------------------\nQUERY: %s\n  VAL: %v\n", s, p)
+		}
+	}
+}

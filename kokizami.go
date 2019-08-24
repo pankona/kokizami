@@ -7,7 +7,6 @@ import (
 
 	// go-sqlite3 is imported only here
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/pankona/kokizami/models"
 )
 
 // Kokizami represents a instance of kokizami
@@ -35,15 +34,6 @@ func initialTime() time.Time {
 		panic(fmt.Sprintf("failed to parse time for initial value for time: %v", err))
 	}
 	return t.UTC()
-}
-
-// EnableVerboseQuery toggles debug logging by argument
-func (k *Kokizami) EnableVerboseQuery(enable bool) {
-	models.XOLog = func(s string, p ...interface{}) {
-		if enable {
-			fmt.Printf("-------------------------------------\nQUERY: %s\n  VAL: %v\n", s, p)
-		}
-	}
 }
 
 // Initialize initializes Kokizami
