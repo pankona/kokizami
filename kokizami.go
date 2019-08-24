@@ -173,7 +173,7 @@ func (k *Kokizami) Tags() ([]*Tag, error) {
 	ts := make([]Tag, len(ms))
 	for i := range ms {
 		ts[i].ID = ms[i].ID
-		ts[i].Tag = ms[i].Tag
+		ts[i].Label = ms[i].Label
 	}
 
 	ret := make([]*Tag, len(ts))
@@ -204,7 +204,7 @@ func (k *Kokizami) TagsByKizamiID(kizamiID int) ([]*Tag, error) {
 	ts := make([]Tag, len(ms))
 	for i := range ms {
 		ts[i].ID = ms[i].ID
-		ts[i].Tag = ms[i].Tag
+		ts[i].Label = ms[i].Label
 	}
 
 	ret := make([]*Tag, len(ts))

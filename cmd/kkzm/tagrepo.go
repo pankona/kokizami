@@ -17,7 +17,10 @@ func (t *tagRepo) FindTagByID(id int) (*kokizami.Tag, error) {
 		return nil, err
 	}
 
-	ret := &kokizami.Tag{ID: tag.ID, Tag: tag.Tag}
+	ret := &kokizami.Tag{
+		ID:    tag.ID,
+		Label: tag.Label,
+	}
 
 	return ret, nil
 }
@@ -31,7 +34,7 @@ func (t *tagRepo) FindAllTags() ([]*kokizami.Tag, error) {
 	tags := make([]kokizami.Tag, len(ms))
 	for i, v := range ms {
 		tags[i].ID = v.ID
-		tags[i].Tag = v.Tag
+		tags[i].Label = v.Label
 	}
 
 	ret := make([]*kokizami.Tag, len(tags))
@@ -51,7 +54,7 @@ func (t *tagRepo) FindTagsByKizamiID(kizamiID int) ([]*kokizami.Tag, error) {
 	tags := make([]kokizami.Tag, len(ms))
 	for i, v := range ms {
 		tags[i].ID = v.ID
-		tags[i].Tag = v.Tag
+		tags[i].Label = v.Label
 	}
 
 	ret := make([]*kokizami.Tag, len(tags))
@@ -64,8 +67,8 @@ func (t *tagRepo) FindTagsByKizamiID(kizamiID int) ([]*kokizami.Tag, error) {
 
 func toTag(m *models.Tag) *kokizami.Tag {
 	return &kokizami.Tag{
-		ID:  m.ID,
-		Tag: m.Tag,
+		ID:    m.ID,
+		Label: m.Label,
 	}
 }
 
@@ -92,7 +95,7 @@ func (t *tagRepo) InsertTags(labels []string) error {
 			ts = ts[:len(ts)-1]
 			continue
 		}
-		ts[i].Tag = labels[i]
+		ts[i].Label = labels[i]
 	}
 
 	return ts.BulkInsert(t.db)

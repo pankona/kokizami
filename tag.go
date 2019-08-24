@@ -2,8 +2,8 @@ package kokizami
 
 // Tag represents a tag
 type Tag struct {
-	ID  int
-	Tag string // TODO: change var name to label
+	ID    int
+	Label string // TODO: change var name to label
 }
 
 type Tags []Tag

@@ -577,7 +577,7 @@ func CmdTags(c *cli.Context) error {
 
 	buf := bytes.NewBuffer([]byte{})
 	for _, v := range ts {
-		fmt.Fprintln(buf, v.Tag)
+		fmt.Fprintln(buf, v.Label)
 	}
 
 	fmt.Printf("%s", buf)
