@@ -3,4 +3,6 @@ linters:
 
 issues:
   exclude-use-default: false
-  new-from-rev: master
+
+output:
+  print-issued-lines: false
