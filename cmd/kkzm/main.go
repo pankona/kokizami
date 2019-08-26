@@ -47,7 +47,7 @@ func main() {
 			return fmt.Errorf("failed to open DB: %v", err)
 		}
 
-		err = createTables(db)
+		err = repo.CreateTables(db)
 		if err != nil {
 			return fmt.Errorf("failed to create tables: %v", err)
 		}
@@ -84,19 +84,6 @@ func openDB(dbPath string) (*sql.DB, error) {
 		return nil, err
 	}
 	return db, nil
-}
-
-func createTables(db *sql.DB) error {
-	if err := models.CreateKizamiTable(db); err != nil {
-		return fmt.Errorf("failed to create kizami table: %v", err)
-	}
-	if err := models.CreateTagTable(db); err != nil {
-		return fmt.Errorf("failed to create tag table: %v", err)
-	}
-	if err := models.CreateRelationTable(db); err != nil {
-		return fmt.Errorf("failed to create relation table: %v", err)
-	}
-	return nil
 }
 
 func enableVerboseQuery(enable bool) {
