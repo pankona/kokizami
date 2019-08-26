@@ -47,7 +47,7 @@ func (ts Tags) BulkInsert(db XODB) error {
 	return err
 }
 
-// TagsByTags retrieves tags by tags at once
+// TagsByLabels retrieves tags by labels at once
 func TagsByLabels(db XODB, tags []string) ([]*Tag, error) {
 	if len(tags) == 0 {
 		return []*Tag{}, nil
