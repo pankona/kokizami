@@ -11,8 +11,7 @@ import (
 // Kokizami represents a instance of kokizami
 // Kokizami provides most APIs of kokizami library
 type Kokizami struct {
-	DBPath string
-	now    func() time.Time
+	now func() time.Time
 
 	KizamiRepo  KizamiRepository
 	TagRepo     TagRepository
@@ -30,6 +29,7 @@ func initialTime() time.Time {
 
 // Initialize initializes Kokizami
 // Kokizami's member field must be fulfilled in advance of calling this function
+// TODO: remove
 func (k *Kokizami) Initialize() error {
 	if k.now == nil {
 		k.now = time.Now

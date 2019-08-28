@@ -1,40 +1,106 @@
 package kokizami
 
 import (
+	"fmt"
+	"strconv"
 	"testing"
 	"time"
 
 	"github.com/google/go-cmp/cmp"
 )
 
-func setup(t *testing.T) (*Kokizami, func()) {
-	mockNow := time.Now()
-
-	k := &Kokizami{
-		DBPath: "file::testdb?mode=memory",
-		now:    func() time.Time { return mockNow },
-	}
-	err := k.Initialize()
-	if err != nil {
-		t.Fatalf("unexpected result: %v", err)
-	}
-
-	return k, func() {
-		err = k.Finalize()
-		if err != nil {
-			t.Fatalf("unexpected result. [got] %v [want] nil", err)
-		}
-	}
+type mockKizamiRepo struct {
+	now     func() time.Time
+	kizamis map[string]*Kizami
 }
 
-func TestInitialize(t *testing.T) {
-	_, teardown := setup(t)
-	defer teardown()
+func (m *mockKizamiRepo) AllKizami() ([]*Kizami, error) {
+	ks := make([]Kizami, len(m.kizamis))
+	c := 0
+	for k := range m.kizamis {
+		ks[c] = *m.kizamis[k]
+		c++
+	}
+
+	ret := make([]*Kizami, len(ks))
+	for i := range ks {
+		ret[i] = &ks[i]
+	}
+
+	return ret, nil
+}
+
+func (m *mockKizamiRepo) Insert(desc string) (*Kizami, error) {
+	id := len(m.kizamis) + 1
+	k := &Kizami{
+		ID:        id,
+		Desc:      desc,
+		StartedAt: m.now(),
+		StoppedAt: initialTime(),
+	}
+	m.kizamis[strconv.Itoa(id)] = k
+	return k, nil
+}
+
+func (m *mockKizamiRepo) Update(k *Kizami) error {
+	m.kizamis[strconv.Itoa(k.ID)] = k
+	return nil
+}
+
+func (m *mockKizamiRepo) Delete(k *Kizami) error {
+	delete(m.kizamis, strconv.Itoa(k.ID))
+	return nil
+}
+
+func (m *mockKizamiRepo) KizamiByID(id int) (*Kizami, error) {
+	if k, ok := m.kizamis[strconv.Itoa(id)]; ok {
+		return k, nil
+	}
+	return nil, fmt.Errorf("Kizami that has id [%d] is not found", id)
+}
+
+func (m *mockKizamiRepo) KizamisByStoppedAt(t time.Time) ([]*Kizami, error) {
+	ret := []*Kizami{}
+	for k, v := range m.kizamis {
+		if v.StoppedAt == t {
+			ret = append(ret, m.kizamis[k])
+		}
+	}
+	return ret, nil
+}
+
+func (m *mockKizamiRepo) Tagging(kizamiID int, tagIDs []int) error {
+	panic("not implemented")
+}
+
+func (m *mockKizamiRepo) Untagging(kizamiID int) error {
+	panic("not implemented")
+}
+
+type mockTagRepo struct {
+	TagRepository
+}
+
+type mockSummaryRepo struct {
+	SummaryRepository
+}
+
+func setup() *Kokizami {
+	mockNow := time.Now()
+	return &Kokizami{
+		now: func() time.Time { return mockNow },
+
+		KizamiRepo: &mockKizamiRepo{
+			now:     func() time.Time { return mockNow },
+			kizamis: map[string]*Kizami{},
+		},
+		TagRepo:     &mockTagRepo{},
+		SummaryRepo: &mockSummaryRepo{},
+	}
 }
 
 func TestStart(t *testing.T) {
-	k, teardown := setup(t)
-	defer teardown()
+	k := setup()
 
 	tcs := []struct {
 		inDesc     string
@@ -75,8 +141,7 @@ func TestStart(t *testing.T) {
 }
 
 func TestGet(t *testing.T) {
-	k, teardown := setup(t)
-	defer teardown()
+	k := setup()
 
 	tcs := []struct {
 		inDesc     string
@@ -136,8 +201,7 @@ func TestGet(t *testing.T) {
 }
 
 func TestEdit(t *testing.T) {
-	k, teardown := setup(t)
-	defer teardown()
+	k := setup()
 
 	tcs := []struct {
 		inDesc     string
@@ -193,8 +257,7 @@ func TestEdit(t *testing.T) {
 }
 
 func TestStop(t *testing.T) {
-	k, teardown := setup(t)
-	defer teardown()
+	k := setup()
 
 	tcs := []struct {
 		inDesc     string
@@ -250,8 +313,7 @@ func TestStop(t *testing.T) {
 }
 
 func TestStopAll(t *testing.T) {
-	k, teardown := setup(t)
-	defer teardown()
+	k := setup()
 
 	tcs := []struct {
 		inDesc     string
@@ -308,8 +370,7 @@ func TestStopAll(t *testing.T) {
 }
 
 func TestDelete(t *testing.T) {
-	k, teardown := setup(t)
-	defer teardown()
+	k := setup()
 
 	ret, err := k.Start("hoge")
 	if err != nil {
@@ -328,8 +389,7 @@ func TestDelete(t *testing.T) {
 }
 
 func TestList(t *testing.T) {
-	k, teardown := setup(t)
-	defer teardown()
+	k := setup()
 
 	expectedLen := 3
 	for i := 0; i < expectedLen; i++ {
@@ -356,7 +416,7 @@ func TestAddTags(t *testing.T) {
 	}
 
 	for i, tags := range tcs {
-		k, teardown := setup(t)
+		k := setup()
 
 		err := k.AddTags(tags)
 		if err != nil {
@@ -370,7 +430,7 @@ func TestAddTags(t *testing.T) {
 
 		m := make(map[string]struct{})
 		for _, v := range ret {
-			m[v.Tag] = struct{}{}
+			m[v.Label] = struct{}{}
 		}
 
 		if len(ret) != len(tags) {
@@ -382,14 +442,11 @@ func TestAddTags(t *testing.T) {
 				t.Fatalf("[No.%d] unexpected result: %v is missing", i, tags[j])
 			}
 		}
-
-		teardown()
 	}
 }
 
 func TestDeleteTag(t *testing.T) {
-	k, teardown := setup(t)
-	defer teardown()
+	k := setup()
 
 	inTags := []string{"hoge", "fuga", "piyo"}
 
@@ -423,8 +480,7 @@ func TestDeleteTag(t *testing.T) {
 }
 
 func TestTagging(t *testing.T) {
-	k, teardown := setup(t)
-	defer teardown()
+	k := setup()
 
 	// prepare tags
 	inTags := []string{"hoge", "fuga", "piyo"}
@@ -461,11 +517,11 @@ func TestTagging(t *testing.T) {
 
 	m := make(map[string]struct{})
 	for _, v := range tagged {
-		m[v.Tag] = struct{}{}
+		m[v.Label] = struct{}{}
 	}
 
 	for i := range tags {
-		if _, ok := m[tags[i].Tag]; !ok {
+		if _, ok := m[tags[i].Label]; !ok {
 			t.Fatalf("unexpected result: %v is missing", tags[i])
 		}
 	}
@@ -490,8 +546,7 @@ func TestTagging(t *testing.T) {
 }
 
 func TestSummaryByTag(t *testing.T) {
-	k, teardown := setup(t)
-	defer teardown()
+	k := setup()
 
 	_, err := k.SummaryByTag("2019-05")
 	if err != nil {
@@ -500,8 +555,7 @@ func TestSummaryByTag(t *testing.T) {
 }
 
 func TestSummaryByDesc(t *testing.T) {
-	k, teardown := setup(t)
-	defer teardown()
+	k := setup()
 
 	_, err := k.SummaryByDesc("2019-05")
 	if err != nil {
