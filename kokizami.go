@@ -169,7 +169,7 @@ func (k *Kokizami) Tagging(kizamiID int, tagIDs []int) error {
 
 // Untagging removes all tags from specified kizami
 func (k *Kokizami) Untagging(kizamiID int) error {
-	return k.Untagging(kizamiID)
+	return k.KizamiRepo.Untagging(kizamiID)
 }
 
 // TagsByKizamiID returns tags of specified kizami
