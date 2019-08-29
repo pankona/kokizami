@@ -1,7 +1,7 @@
 
 COVFILE=.coverage.out
 
-all: build lint
+all: build test lint
 
 build:
 	@make -C $(CURDIR)/cmd/kkzm
