@@ -24,9 +24,7 @@ type mockTagRepo struct {
 	repo *mockRepo
 }
 
-type mockSummaryRepo struct {
-	repo *mockRepo
-}
+type mockSummaryRepo struct{}
 
 func (m *mockKizamiRepo) AllKizami() ([]*Kizami, error) {
 	ks := make([]Kizami, len(m.repo.kizamis))
