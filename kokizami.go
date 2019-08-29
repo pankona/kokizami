@@ -27,16 +27,6 @@ func initialTime() time.Time {
 	return t.UTC()
 }
 
-// Initialize initializes Kokizami
-// Kokizami's member field must be fulfilled in advance of calling this function
-// TODO: remove
-func (k *Kokizami) Initialize() error {
-	if k.now == nil {
-		k.now = time.Now
-	}
-	return nil
-}
-
 // Start starts a new kizami with specified desc
 func (k *Kokizami) Start(desc string) (*Kizami, error) {
 	if len(desc) == 0 {

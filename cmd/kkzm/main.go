@@ -52,11 +52,6 @@ func main() {
 			return fmt.Errorf("failed to create tables: %v", err)
 		}
 
-		err = kkzm.Initialize()
-		if err != nil {
-			return fmt.Errorf("failed to initialize kkzm: %v", err)
-		}
-
 		kkzm.KizamiRepo = repo.NewKizamiRepo(db)
 		kkzm.TagRepo = repo.NewTagRepo(db)
 		kkzm.SummaryRepo = repo.NewSummaryRepo(db)
