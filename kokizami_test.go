@@ -24,6 +24,10 @@ type mockTagRepo struct {
 	repo *mockRepo
 }
 
+type mockSummaryRepo struct {
+	repo *mockRepo
+}
+
 func (m *mockKizamiRepo) AllKizami() ([]*Kizami, error) {
 	ks := make([]Kizami, len(m.repo.kizamis))
 	c := 0
@@ -152,8 +156,12 @@ func (m *mockTagRepo) Delete(id int) error {
 	return nil
 }
 
-type mockSummaryRepo struct {
-	SummaryRepository
+func (m *mockSummaryRepo) ElapsedOfMonthByDesc(yyyymm string) ([]*Elapsed, error) {
+	return nil, nil
+}
+
+func (m *mockSummaryRepo) ElapsedOfMonthByTag(yyyymm string) ([]*Elapsed, error) {
+	return nil, nil
 }
 
 func setup() *Kokizami {
