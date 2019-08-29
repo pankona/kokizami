@@ -9,16 +9,26 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
+type mockRepo struct {
+	kizamis  map[string]*Kizami
+	relation map[int][]int
+	tags     map[string]*Tag
+}
+
 type mockKizamiRepo struct {
-	now     func() time.Time
-	kizamis map[string]*Kizami
+	now  func() time.Time
+	repo *mockRepo
+}
+
+type mockTagRepo struct {
+	repo *mockRepo
 }
 
 func (m *mockKizamiRepo) AllKizami() ([]*Kizami, error) {
-	ks := make([]Kizami, len(m.kizamis))
+	ks := make([]Kizami, len(m.repo.kizamis))
 	c := 0
-	for k := range m.kizamis {
-		ks[c] = *m.kizamis[k]
+	for k := range m.repo.kizamis {
+		ks[c] = *m.repo.kizamis[k]
 		c++
 	}
 
@@ -31,29 +41,29 @@ func (m *mockKizamiRepo) AllKizami() ([]*Kizami, error) {
 }
 
 func (m *mockKizamiRepo) Insert(desc string) (*Kizami, error) {
-	id := len(m.kizamis) + 1
+	id := len(m.repo.kizamis) + 1
 	k := &Kizami{
 		ID:        id,
 		Desc:      desc,
 		StartedAt: m.now(),
 		StoppedAt: initialTime(),
 	}
-	m.kizamis[strconv.Itoa(id)] = k
+	m.repo.kizamis[strconv.Itoa(id)] = k
 	return k, nil
 }
 
 func (m *mockKizamiRepo) Update(k *Kizami) error {
-	m.kizamis[strconv.Itoa(k.ID)] = k
+	m.repo.kizamis[strconv.Itoa(k.ID)] = k
 	return nil
 }
 
 func (m *mockKizamiRepo) Delete(k *Kizami) error {
-	delete(m.kizamis, strconv.Itoa(k.ID))
+	delete(m.repo.kizamis, strconv.Itoa(k.ID))
 	return nil
 }
 
 func (m *mockKizamiRepo) KizamiByID(id int) (*Kizami, error) {
-	if k, ok := m.kizamis[strconv.Itoa(id)]; ok {
+	if k, ok := m.repo.kizamis[strconv.Itoa(id)]; ok {
 		return k, nil
 	}
 	return nil, fmt.Errorf("Kizami that has id [%d] is not found", id)
@@ -61,24 +71,85 @@ func (m *mockKizamiRepo) KizamiByID(id int) (*Kizami, error) {
 
 func (m *mockKizamiRepo) KizamisByStoppedAt(t time.Time) ([]*Kizami, error) {
 	ret := []*Kizami{}
-	for k, v := range m.kizamis {
+	for k, v := range m.repo.kizamis {
 		if v.StoppedAt == t {
-			ret = append(ret, m.kizamis[k])
+			ret = append(ret, m.repo.kizamis[k])
 		}
 	}
 	return ret, nil
 }
 
 func (m *mockKizamiRepo) Tagging(kizamiID int, tagIDs []int) error {
-	panic("not implemented")
+	m.repo.relation[kizamiID] = tagIDs
+	return nil
 }
 
 func (m *mockKizamiRepo) Untagging(kizamiID int) error {
+	delete(m.repo.relation, kizamiID)
+	return nil
+}
+
+func (m *mockTagRepo) FindTagByID(id int) (*Tag, error) {
 	panic("not implemented")
 }
 
-type mockTagRepo struct {
-	TagRepository
+func (m *mockTagRepo) FindAllTags() ([]*Tag, error) {
+	tags := make([]Tag, len(m.repo.tags))
+	c := 0
+	for k := range m.repo.tags {
+		tags[c] = *m.repo.tags[k]
+		c++
+	}
+
+	ret := make([]*Tag, len(tags))
+	for i := range tags {
+		ret[i] = &tags[i]
+	}
+
+	return ret, nil
+}
+
+func (m *mockTagRepo) FindTagsByKizamiID(kizamiID int) ([]*Tag, error) {
+	ret := []*Tag{}
+	tids := m.repo.relation[kizamiID]
+	for _, v := range tids {
+		if t, ok := m.repo.tags[strconv.Itoa(v)]; ok {
+			ret = append(ret, t)
+		}
+	}
+
+	return ret, nil
+}
+
+func (m *mockTagRepo) FindTagsByLabels(labels []string) ([]*Tag, error) {
+	ret := []*Tag{}
+	for _, label := range labels {
+		for k, v := range m.repo.tags {
+			if v.Label == label {
+				ret = append(ret, m.repo.tags[k])
+			}
+		}
+	}
+
+	return ret, nil
+}
+
+func (m *mockTagRepo) InsertTags(labels []string) error {
+	for i := range labels {
+		id := len(m.repo.tags) + 1
+		t := &Tag{
+			ID:    id,
+			Label: labels[i],
+		}
+		m.repo.tags[strconv.Itoa(id)] = t
+	}
+
+	return nil
+}
+
+func (m *mockTagRepo) Delete(id int) error {
+	delete(m.repo.tags, strconv.Itoa(id))
+	return nil
 }
 
 type mockSummaryRepo struct {
@@ -87,14 +158,21 @@ type mockSummaryRepo struct {
 
 func setup() *Kokizami {
 	mockNow := time.Now()
+	repo := &mockRepo{
+		kizamis:  map[string]*Kizami{},
+		relation: map[int][]int{},
+		tags:     map[string]*Tag{},
+	}
 	return &Kokizami{
 		now: func() time.Time { return mockNow },
 
 		KizamiRepo: &mockKizamiRepo{
-			now:     func() time.Time { return mockNow },
-			kizamis: map[string]*Kizami{},
+			now:  func() time.Time { return mockNow },
+			repo: repo,
 		},
-		TagRepo:     &mockTagRepo{},
+		TagRepo: &mockTagRepo{
+			repo: repo,
+		},
 		SummaryRepo: &mockSummaryRepo{},
 	}
 }
