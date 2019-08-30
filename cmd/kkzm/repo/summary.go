@@ -38,11 +38,11 @@ func (r *SummaryRepo) ElapsedOfMonthByDesc(yyyymm string) ([]*kokizami.Elapsed, 
 }
 
 func (r *SummaryRepo) ElapsedOfMonthByTag(yyyymm string) ([]*kokizami.Elapsed, error) {
-
 	ms, err := models.ElapsedOfMonthByTag(r.db, yyyymm)
 	if err != nil {
 		return nil, err
 	}
+
 	es := make([]kokizami.Elapsed, len(ms))
 	for i := range ms {
 		es[i].Tag = ms[i].Tag

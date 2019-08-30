@@ -15,6 +15,13 @@ func NewTagRepo(db *sql.DB) *TagRepo {
 	return &TagRepo{db: db}
 }
 
+func toTag(m *models.Tag) *kokizami.Tag {
+	return &kokizami.Tag{
+		ID:    m.ID,
+		Label: m.Label,
+	}
+}
+
 func (t *TagRepo) FindTagByID(id int) (*kokizami.Tag, error) {
 	tag, err := models.TagByID(t.db, id)
 	if err != nil {
@@ -69,13 +76,6 @@ func (t *TagRepo) FindTagsByKizamiID(kizamiID int) ([]*kokizami.Tag, error) {
 	return ret, nil
 }
 
-func toTag(m *models.Tag) *kokizami.Tag {
-	return &kokizami.Tag{
-		ID:    m.ID,
-		Label: m.Label,
-	}
-}
-
 func (t *TagRepo) FindTagsByLabels(labels []string) ([]*kokizami.Tag, error) {
 	ms, err := models.TagsByLabels(t.db, labels)
 	if err != nil {
@@ -110,5 +110,6 @@ func (t *TagRepo) Delete(id int) error {
 	if err != nil {
 		return err
 	}
+
 	return m.Delete(t.db)
 }

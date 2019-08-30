@@ -50,13 +50,13 @@ func (r *KizamiRepo) Insert(desc string) (*kokizami.Kizami, error) {
 		StartedAt: SqTime(r.now().UTC()),
 		StoppedAt: SqTime(initialTime()),
 	}
+
 	err := m.Insert(r.db)
 	if err != nil {
 		return nil, err
 	}
 
 	return toKizami(m), nil
-
 }
 
 func (r *KizamiRepo) AllKizami() ([]*kokizami.Kizami, error) {
@@ -86,6 +86,7 @@ func (r *KizamiRepo) Update(k *kokizami.Kizami) error {
 	if err != nil {
 		return err
 	}
+
 	m.Desc = k.Desc
 	m.StartedAt = SqTime(k.StartedAt)
 	m.StoppedAt = SqTime(k.StoppedAt)
@@ -98,6 +99,7 @@ func (r *KizamiRepo) Delete(k *kokizami.Kizami) error {
 	if err != nil {
 		return err
 	}
+
 	return m.Delete(r.db)
 }
 
@@ -106,6 +108,7 @@ func (r *KizamiRepo) KizamiByID(id int) (*kokizami.Kizami, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return toKizami(m), nil
 }
 
@@ -137,6 +140,7 @@ func (r *KizamiRepo) Tagging(kizamiID int, tagIDs []int) error {
 		rs[i].KizamiID = kizamiID
 		rs[i].TagID = tagIDs[i]
 	}
+
 	return rs.BulkInsert(r.db)
 }
 
