@@ -27,7 +27,6 @@ func main() {
 	app.Action = CmdList // show list if no argument
 	app.CommandNotFound = CommandNotFound
 
-	kkzm := &kokizami.Kokizami{}
 	db := &sql.DB{}
 
 	app.Before = func(ctx *cli.Context) error {
@@ -52,9 +51,11 @@ func main() {
 			return fmt.Errorf("failed to create tables: %v", err)
 		}
 
-		kkzm.KizamiRepo = repo.NewKizamiRepo(db)
-		kkzm.TagRepo = repo.NewTagRepo(db)
-		kkzm.SummaryRepo = repo.NewSummaryRepo(db)
+		kkzm := &kokizami.Kokizami{
+			KizamiRepo:  repo.NewKizamiRepo(db),
+			TagRepo:     repo.NewTagRepo(db),
+			SummaryRepo: repo.NewSummaryRepo(db),
+		}
 
 		app.Metadata["kkzm"] = kkzm
 
