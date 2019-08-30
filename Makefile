@@ -9,7 +9,6 @@ build:
 lint:
 	golangci-lint run --new-from-rev= --deadline 300s
 
-# Currently unit testing is not available since it's on the way to refactor
 test: install-goverage
 	@go test -cover ./...
 	@goverage -coverprofile=$(COVFILE) ./...
