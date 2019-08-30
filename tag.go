@@ -3,7 +3,7 @@ package kokizami
 // Tag represents a tag
 type Tag struct {
 	ID    int
-	Label string // TODO: change var name to label
+	Label string
 }
 
 // Tags represents array of Tag
