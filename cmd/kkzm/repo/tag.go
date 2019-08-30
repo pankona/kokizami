@@ -7,10 +7,12 @@ import (
 	"github.com/pankona/kokizami/models"
 )
 
+// TagRepo is an implementation of TagRepository
 type TagRepo struct {
 	db *sql.DB
 }
 
+// NewTagRepo returns an implementation of TagRepository with sqlite3
 func NewTagRepo(db *sql.DB) *TagRepo {
 	return &TagRepo{db: db}
 }
@@ -22,6 +24,7 @@ func toTag(m *models.Tag) *kokizami.Tag {
 	}
 }
 
+// FindByID finds a tag with specified ID
 func (t *TagRepo) FindByID(id int) (*kokizami.Tag, error) {
 	tag, err := models.TagByID(t.db, id)
 	if err != nil {
@@ -36,6 +39,7 @@ func (t *TagRepo) FindByID(id int) (*kokizami.Tag, error) {
 	return ret, nil
 }
 
+// FindAll returns all tags
 func (t *TagRepo) FindAll() ([]*kokizami.Tag, error) {
 	ms, err := models.AllTags(t.db)
 	if err != nil {
@@ -56,6 +60,7 @@ func (t *TagRepo) FindAll() ([]*kokizami.Tag, error) {
 	return ret, nil
 }
 
+// FindByKizamiID returns tags they are held by specified kizami
 func (t *TagRepo) FindByKizamiID(kizamiID int) ([]*kokizami.Tag, error) {
 	ms, err := models.TagsByKizamiID(t.db, kizamiID)
 	if err != nil {
@@ -76,6 +81,7 @@ func (t *TagRepo) FindByKizamiID(kizamiID int) ([]*kokizami.Tag, error) {
 	return ret, nil
 }
 
+// FindByLabels finds tags by specified labels
 func (t *TagRepo) FindByLabels(labels []string) ([]*kokizami.Tag, error) {
 	ms, err := models.TagsByLabels(t.db, labels)
 	if err != nil {
@@ -90,6 +96,7 @@ func (t *TagRepo) FindByLabels(labels []string) ([]*kokizami.Tag, error) {
 	return ts, nil
 }
 
+// Insert inserts tags with specified labels
 func (t *TagRepo) Insert(labels []string) error {
 	ts := models.Tags(make([]models.Tag, len(labels)))
 
@@ -105,6 +112,7 @@ func (t *TagRepo) Insert(labels []string) error {
 	return ts.BulkInsert(t.db)
 }
 
+// Delete deletes a tag by specified ID
 func (t *TagRepo) Delete(id int) error {
 	m, err := models.TagByID(t.db, id)
 	if err != nil {

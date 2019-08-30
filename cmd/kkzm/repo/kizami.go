@@ -10,11 +10,14 @@ import (
 	"github.com/xo/xoutil"
 )
 
+// KizamiRepo is an implementation of KizamiRepository using sqlite3
 type KizamiRepo struct {
 	db  *sql.DB
 	now func() time.Time
 }
 
+// NewKizamiRepo returns an KizamiRepo
+// as an implementation of KizamiRepository
 func NewKizamiRepo(db *sql.DB) *KizamiRepo {
 	return &KizamiRepo{
 		db:  db,
@@ -44,6 +47,7 @@ func initialTime() time.Time {
 	return t.UTC()
 }
 
+// Insert inserts a kizami with specified desc
 func (r *KizamiRepo) Insert(desc string) (*kokizami.Kizami, error) {
 	m := &models.Kizami{
 		Desc:      desc,
@@ -59,6 +63,7 @@ func (r *KizamiRepo) Insert(desc string) (*kokizami.Kizami, error) {
 	return toKizami(m), nil
 }
 
+// FindAll returns all inserted kizami
 func (r *KizamiRepo) FindAll() ([]*kokizami.Kizami, error) {
 	ms, err := models.AllKizami(r.db)
 	if err != nil {
@@ -81,6 +86,7 @@ func (r *KizamiRepo) FindAll() ([]*kokizami.Kizami, error) {
 	return ret, nil
 }
 
+// Update updates a kizami with specified kizami
 func (r *KizamiRepo) Update(k *kokizami.Kizami) error {
 	m, err := models.KizamiByID(r.db, k.ID)
 	if err != nil {
@@ -94,6 +100,7 @@ func (r *KizamiRepo) Update(k *kokizami.Kizami) error {
 	return m.Update(r.db)
 }
 
+// Delete deletes specified kizami
 func (r *KizamiRepo) Delete(k *kokizami.Kizami) error {
 	m, err := models.KizamiByID(r.db, k.ID)
 	if err != nil {
@@ -103,6 +110,7 @@ func (r *KizamiRepo) Delete(k *kokizami.Kizami) error {
 	return m.Delete(r.db)
 }
 
+// FindByID finds a kizami by specified ID
 func (r *KizamiRepo) FindByID(id int) (*kokizami.Kizami, error) {
 	m, err := models.KizamiByID(r.db, id)
 	if err != nil {
@@ -112,6 +120,7 @@ func (r *KizamiRepo) FindByID(id int) (*kokizami.Kizami, error) {
 	return toKizami(m), nil
 }
 
+// FindByStoppedAt finds kizamis that has specified stopped at
 func (r *KizamiRepo) FindByStoppedAt(t time.Time) ([]*kokizami.Kizami, error) {
 	ms, err := models.KizamisByStoppedAt(r.db, SqTime(t))
 	if err != nil {
@@ -134,6 +143,7 @@ func (r *KizamiRepo) FindByStoppedAt(t time.Time) ([]*kokizami.Kizami, error) {
 	return ret, nil
 }
 
+// Tagging make relation between kizami and tags
 func (r *KizamiRepo) Tagging(kizamiID int, tagIDs []int) error {
 	rs := models.Relations(make([]models.Relation, len(tagIDs)))
 	for i := range rs {
@@ -144,6 +154,7 @@ func (r *KizamiRepo) Tagging(kizamiID int, tagIDs []int) error {
 	return rs.BulkInsert(r.db)
 }
 
+// Untagging removes all tags that are held by a kizami
 func (r *KizamiRepo) Untagging(kizamiID int) error {
 	return models.DeleteRelationsByKizamiID(r.db, kizamiID)
 }

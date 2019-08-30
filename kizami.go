@@ -28,6 +28,7 @@ func (k *Kizami) Elapsed() time.Duration {
 	return elapsed
 }
 
+// KizamiRepository is an interface to fetch Kizami from repository
 type KizamiRepository interface {
 	FindAll() ([]*Kizami, error)
 	Insert(desc string) (*Kizami, error)

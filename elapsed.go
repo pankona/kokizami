@@ -12,6 +12,7 @@ type Elapsed struct {
 	Elapsed time.Duration
 }
 
+// SummaryRepository is an interface to fetch summaries from repository
 type SummaryRepository interface {
 	ElapsedOfMonthByDesc(yyyymm string) ([]*Elapsed, error)
 	ElapsedOfMonthByTag(yyyymm string) ([]*Elapsed, error)

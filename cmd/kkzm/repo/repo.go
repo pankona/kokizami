@@ -6,6 +6,8 @@ import (
 	"github.com/pankona/kokizami/models"
 )
 
+// CreateTables creates tables that are needed to implement
+// each repositories
 func CreateTables(db models.XODB) error {
 	if err := models.CreateKizamiTable(db); err != nil {
 		return fmt.Errorf("failed to create kizami table: %v", err)

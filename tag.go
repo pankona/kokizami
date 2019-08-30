@@ -6,8 +6,10 @@ type Tag struct {
 	Label string // TODO: change var name to label
 }
 
+// Tags represents array of Tag
 type Tags []Tag
 
+// TagRepository is an interface to fetch tags from repository
 type TagRepository interface {
 	FindByID(id int) (*Tag, error)
 	FindAll() ([]*Tag, error)

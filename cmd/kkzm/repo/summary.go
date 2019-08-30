@@ -7,14 +7,17 @@ import (
 	"github.com/pankona/kokizami/models"
 )
 
+// SummaryRepo is an implementation of SummaryRepository
 type SummaryRepo struct {
 	db *sql.DB
 }
 
+// NewSummaryRepo returns a struct that implements SummaryRepository with sqlite3
 func NewSummaryRepo(db *sql.DB) *SummaryRepo {
 	return &SummaryRepo{db: db}
 }
 
+// ElapsedOfMonthByDesc returns an array of Elapsed time to summarize them by desc
 func (r *SummaryRepo) ElapsedOfMonthByDesc(yyyymm string) ([]*kokizami.Elapsed, error) {
 	ms, err := models.ElapsedOfMonthByDesc(r.db, yyyymm)
 	if err != nil {
@@ -37,6 +40,7 @@ func (r *SummaryRepo) ElapsedOfMonthByDesc(yyyymm string) ([]*kokizami.Elapsed, 
 	return ret, nil
 }
 
+// ElapsedOfMonthByTag returns an array of Elapsed time to summarize them by tag
 func (r *SummaryRepo) ElapsedOfMonthByTag(yyyymm string) ([]*kokizami.Elapsed, error) {
 	ms, err := models.ElapsedOfMonthByTag(r.db, yyyymm)
 	if err != nil {
