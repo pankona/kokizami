@@ -59,7 +59,7 @@ func (r *KizamiRepo) Insert(desc string) (*kokizami.Kizami, error) {
 	return toKizami(m), nil
 }
 
-func (r *KizamiRepo) AllKizami() ([]*kokizami.Kizami, error) {
+func (r *KizamiRepo) FindAll() ([]*kokizami.Kizami, error) {
 	ms, err := models.AllKizami(r.db)
 	if err != nil {
 		return nil, err
@@ -103,7 +103,7 @@ func (r *KizamiRepo) Delete(k *kokizami.Kizami) error {
 	return m.Delete(r.db)
 }
 
-func (r *KizamiRepo) KizamiByID(id int) (*kokizami.Kizami, error) {
+func (r *KizamiRepo) FindByID(id int) (*kokizami.Kizami, error) {
 	m, err := models.KizamiByID(r.db, id)
 	if err != nil {
 		return nil, err
@@ -112,7 +112,7 @@ func (r *KizamiRepo) KizamiByID(id int) (*kokizami.Kizami, error) {
 	return toKizami(m), nil
 }
 
-func (r *KizamiRepo) KizamisByStoppedAt(t time.Time) ([]*kokizami.Kizami, error) {
+func (r *KizamiRepo) FindByStoppedAt(t time.Time) ([]*kokizami.Kizami, error) {
 	ms, err := models.KizamisByStoppedAt(r.db, SqTime(t))
 	if err != nil {
 		return nil, err

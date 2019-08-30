@@ -38,12 +38,12 @@ func (k *Kokizami) Start(desc string) (*Kizami, error) {
 
 // Get returns a Kizami by specified ID
 func (k *Kokizami) Get(id int) (*Kizami, error) {
-	return k.KizamiRepo.KizamiByID(id)
+	return k.KizamiRepo.FindByID(id)
 }
 
 // Edit edits a specified kizami and update its model
 func (k *Kokizami) Edit(ki *Kizami) (*Kizami, error) {
-	m, err := k.KizamiRepo.KizamiByID(ki.ID)
+	m, err := k.KizamiRepo.FindByID(ki.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -56,12 +56,13 @@ func (k *Kokizami) Edit(ki *Kizami) (*Kizami, error) {
 	if err != nil {
 		return nil, err
 	}
-	return k.KizamiRepo.KizamiByID(ki.ID)
+
+	return k.KizamiRepo.FindByID(ki.ID)
 }
 
 // Stop stops a on-going kizami by specified ID
 func (k *Kokizami) Stop(id int) error {
-	ki, err := k.KizamiRepo.KizamiByID(id)
+	ki, err := k.KizamiRepo.FindByID(id)
 	if err != nil {
 		return err
 	}
@@ -71,7 +72,7 @@ func (k *Kokizami) Stop(id int) error {
 
 // StopAll stops all on-going kizamis
 func (k *Kokizami) StopAll() error {
-	ks, err := k.KizamiRepo.KizamisByStoppedAt(initialTime())
+	ks, err := k.KizamiRepo.FindByStoppedAt(initialTime())
 	if err != nil {
 		return err
 	}
@@ -87,7 +88,7 @@ func (k *Kokizami) StopAll() error {
 
 // Delete deletes a kizami by specified ID
 func (k *Kokizami) Delete(id int) error {
-	ki, err := k.KizamiRepo.KizamiByID(id)
+	ki, err := k.KizamiRepo.FindByID(id)
 	if err != nil {
 		return err
 	}
@@ -96,7 +97,7 @@ func (k *Kokizami) Delete(id int) error {
 
 // List returns all Kizamis
 func (k *Kokizami) List() ([]*Kizami, error) {
-	return k.KizamiRepo.AllKizami()
+	return k.KizamiRepo.FindAll()
 }
 
 // SummaryByTag returns total elapsed time of Kizamis in specified month grouped by tag
@@ -123,7 +124,7 @@ func (k *Kokizami) SummaryByDesc(yyyymm string) ([]*Elapsed, error) {
 
 // AddTags adds a new tags
 func (k *Kokizami) AddTags(labels []string) error {
-	return k.TagRepo.InsertTags(labels)
+	return k.TagRepo.Insert(labels)
 }
 
 // DeleteTag deletes a specified tag
@@ -133,7 +134,7 @@ func (k *Kokizami) DeleteTag(id int) error {
 
 // Tags returns list of tags
 func (k *Kokizami) Tags() ([]*Tag, error) {
-	ms, err := k.TagRepo.FindAllTags()
+	ms, err := k.TagRepo.FindAll()
 	if err != nil {
 		return nil, err
 	}
@@ -164,7 +165,7 @@ func (k *Kokizami) Untagging(kizamiID int) error {
 
 // TagsByKizamiID returns tags of specified kizami
 func (k *Kokizami) TagsByKizamiID(kizamiID int) ([]*Tag, error) {
-	ms, err := k.TagRepo.FindTagsByKizamiID(kizamiID)
+	ms, err := k.TagRepo.FindByKizamiID(kizamiID)
 	if err != nil {
 		return nil, err
 	}
@@ -185,5 +186,5 @@ func (k *Kokizami) TagsByKizamiID(kizamiID int) ([]*Tag, error) {
 
 // TagsByLabels returns tags by specified tags
 func (k *Kokizami) TagsByLabels(labels []string) ([]*Tag, error) {
-	return k.TagRepo.FindTagsByLabels(labels)
+	return k.TagRepo.FindByLabels(labels)
 }

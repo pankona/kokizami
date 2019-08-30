@@ -22,7 +22,7 @@ func toTag(m *models.Tag) *kokizami.Tag {
 	}
 }
 
-func (t *TagRepo) FindTagByID(id int) (*kokizami.Tag, error) {
+func (t *TagRepo) FindByID(id int) (*kokizami.Tag, error) {
 	tag, err := models.TagByID(t.db, id)
 	if err != nil {
 		return nil, err
@@ -36,7 +36,7 @@ func (t *TagRepo) FindTagByID(id int) (*kokizami.Tag, error) {
 	return ret, nil
 }
 
-func (t *TagRepo) FindAllTags() ([]*kokizami.Tag, error) {
+func (t *TagRepo) FindAll() ([]*kokizami.Tag, error) {
 	ms, err := models.AllTags(t.db)
 	if err != nil {
 		return nil, err
@@ -56,7 +56,7 @@ func (t *TagRepo) FindAllTags() ([]*kokizami.Tag, error) {
 	return ret, nil
 }
 
-func (t *TagRepo) FindTagsByKizamiID(kizamiID int) ([]*kokizami.Tag, error) {
+func (t *TagRepo) FindByKizamiID(kizamiID int) ([]*kokizami.Tag, error) {
 	ms, err := models.TagsByKizamiID(t.db, kizamiID)
 	if err != nil {
 		return nil, err
@@ -76,7 +76,7 @@ func (t *TagRepo) FindTagsByKizamiID(kizamiID int) ([]*kokizami.Tag, error) {
 	return ret, nil
 }
 
-func (t *TagRepo) FindTagsByLabels(labels []string) ([]*kokizami.Tag, error) {
+func (t *TagRepo) FindByLabels(labels []string) ([]*kokizami.Tag, error) {
 	ms, err := models.TagsByLabels(t.db, labels)
 	if err != nil {
 		return nil, err
@@ -90,7 +90,7 @@ func (t *TagRepo) FindTagsByLabels(labels []string) ([]*kokizami.Tag, error) {
 	return ts, nil
 }
 
-func (t *TagRepo) InsertTags(labels []string) error {
+func (t *TagRepo) Insert(labels []string) error {
 	ts := models.Tags(make([]models.Tag, len(labels)))
 
 	for i := range ts {

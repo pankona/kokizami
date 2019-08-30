@@ -9,10 +9,10 @@ type Tag struct {
 type Tags []Tag
 
 type TagRepository interface {
-	FindTagByID(id int) (*Tag, error)
-	FindAllTags() ([]*Tag, error)
-	FindTagsByKizamiID(kizamiID int) ([]*Tag, error)
-	FindTagsByLabels(labels []string) ([]*Tag, error)
-	InsertTags(labels []string) error
+	FindByID(id int) (*Tag, error)
+	FindAll() ([]*Tag, error)
+	FindByKizamiID(kizamiID int) ([]*Tag, error)
+	FindByLabels(labels []string) ([]*Tag, error)
+	Insert(labels []string) error
 	Delete(id int) error
 }

@@ -29,12 +29,12 @@ func (k *Kizami) Elapsed() time.Duration {
 }
 
 type KizamiRepository interface {
-	AllKizami() ([]*Kizami, error)
+	FindAll() ([]*Kizami, error)
 	Insert(desc string) (*Kizami, error)
 	Update(k *Kizami) error
 	Delete(k *Kizami) error
-	KizamiByID(id int) (*Kizami, error)
-	KizamisByStoppedAt(t time.Time) ([]*Kizami, error)
+	FindByID(id int) (*Kizami, error)
+	FindByStoppedAt(t time.Time) ([]*Kizami, error)
 	Tagging(kizamiID int, tagIDs []int) error
 	Untagging(kizamiID int) error
 }
