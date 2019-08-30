@@ -26,7 +26,7 @@ type mockTagRepo struct {
 
 type mockSummaryRepo struct{}
 
-func (m *mockKizamiRepo) AllKizami() ([]*Kizami, error) {
+func (m *mockKizamiRepo) FindAll() ([]*Kizami, error) {
 	ks := make([]Kizami, len(m.repo.kizamis))
 	c := 0
 	for k := range m.repo.kizamis {
@@ -64,14 +64,14 @@ func (m *mockKizamiRepo) Delete(k *Kizami) error {
 	return nil
 }
 
-func (m *mockKizamiRepo) KizamiByID(id int) (*Kizami, error) {
+func (m *mockKizamiRepo) FindByID(id int) (*Kizami, error) {
 	if k, ok := m.repo.kizamis[strconv.Itoa(id)]; ok {
 		return k, nil
 	}
 	return nil, fmt.Errorf("Kizami that has id [%d] is not found", id)
 }
 
-func (m *mockKizamiRepo) KizamisByStoppedAt(t time.Time) ([]*Kizami, error) {
+func (m *mockKizamiRepo) FindByStoppedAt(t time.Time) ([]*Kizami, error) {
 	ret := []*Kizami{}
 	for k, v := range m.repo.kizamis {
 		if v.StoppedAt == t {
@@ -91,11 +91,11 @@ func (m *mockKizamiRepo) Untagging(kizamiID int) error {
 	return nil
 }
 
-func (m *mockTagRepo) FindTagByID(id int) (*Tag, error) {
+func (m *mockTagRepo) FindByID(id int) (*Tag, error) {
 	panic("not implemented")
 }
 
-func (m *mockTagRepo) FindAllTags() ([]*Tag, error) {
+func (m *mockTagRepo) FindAll() ([]*Tag, error) {
 	tags := make([]Tag, len(m.repo.tags))
 	c := 0
 	for k := range m.repo.tags {
@@ -111,7 +111,7 @@ func (m *mockTagRepo) FindAllTags() ([]*Tag, error) {
 	return ret, nil
 }
 
-func (m *mockTagRepo) FindTagsByKizamiID(kizamiID int) ([]*Tag, error) {
+func (m *mockTagRepo) FindByKizamiID(kizamiID int) ([]*Tag, error) {
 	ret := []*Tag{}
 	tids := m.repo.relation[kizamiID]
 	for _, v := range tids {
@@ -123,7 +123,7 @@ func (m *mockTagRepo) FindTagsByKizamiID(kizamiID int) ([]*Tag, error) {
 	return ret, nil
 }
 
-func (m *mockTagRepo) FindTagsByLabels(labels []string) ([]*Tag, error) {
+func (m *mockTagRepo) FindByLabels(labels []string) ([]*Tag, error) {
 	ret := []*Tag{}
 	for _, label := range labels {
 		for k, v := range m.repo.tags {
@@ -136,7 +136,7 @@ func (m *mockTagRepo) FindTagsByLabels(labels []string) ([]*Tag, error) {
 	return ret, nil
 }
 
-func (m *mockTagRepo) InsertTags(labels []string) error {
+func (m *mockTagRepo) Insert(labels []string) error {
 	for i := range labels {
 		id := len(m.repo.tags) + 1
 		t := &Tag{
