@@ -1,5 +1,5 @@
 
-COVFILE=.coverage.out
+COVFILE=$(CURDIR)/.coverage.out
 
 all: build test lint
 
@@ -16,10 +16,16 @@ test: install-goverage
 install:
 	@make install -C $(CURDIR)/cmd/kkzm
 
-show-coverage:
+show-coverage: $(COVFILE)
 	@go tool cover -html=$(COVFILE)
+
+$(COVFILE):
+	make test
 
 install-goverage:
 ifeq ($(shell command -v goverage 2> /dev/null),)
 	go get -u github.com/haya14busa/goverage
 endif
+
+clean:
+	rm -f $(COVFILE)
