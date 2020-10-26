@@ -9,4 +9,4 @@ require (
 	github.com/xo/xoutil v0.0.0-20171112033149-46189f4026a5
 )
 
-go 1.13
+go 1.15
