@@ -1,0 +1,14 @@
+version: 2
+updates:
+- package-ecosystem: gomod
+  directory: "/"
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: github.com/google/go-cmp
+    versions:
+    - 0.5.4
+  - dependency-name: github.com/olekukonko/tablewriter
+    versions:
+    - 0.0.4
